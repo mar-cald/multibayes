@@ -183,9 +183,9 @@ $$
 pd = \max(\Pr(\theta < \theta_{null} \mid y),\ \Pr(\theta > \theta_{null} \mid y)).
 $$
 
-As proposed and popularized in applied Bayesian workflows, *pd* offers an intuitive summary of directional evidence by quantifying the proportion of posterior mass that lies on the dominant side [@Makowski2019]; it ranges from 0.50 (no directional preference) to 1 (all mass on one side). Because *pd* is a functional of the posterior, it inherits dependence on the full model specification (likelihood and prior), so its long-run error behavior is not a property of *pd* “in isolation” but of the overall Bayesian procedure that generates the posterior. Consequently, when *pd* is used with a fixed cutoff as a decision rule across many parameters, it induces a many-decision setting in which null operating characteristics (e.g., the rate of false directional claims) should be examined explicitly.
+As proposed and popularized in applied Bayesian workflows, *pd* offers an intuitive summary of directional evidence by quantifying the proportion of posterior that lies on the dominant side [@Makowski2019]; it ranges from 0.50 (no directional preference) to 1 (all on one side). Because *pd* is a functional of the posterior, it inherits dependence on the full model specification (likelihood and prior), so its long-run error behavior is not a property of *pd* “in isolation” but of the overall Bayesian procedure that generates the posterior. Consequently, when *pd* is used with a fixed cutoff as a decision rule across many parameters, it induces a many-decision setting in which null operating characteristics (e.g., the rate of false directional claims) should be examined explicitly.
 
-A convenient reference point for calibration is the mapping between *pd* and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), *pd* is simply the posterior mass on the dominant side of $\theta_{null}$, which corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987]: 
+A convenient reference point for calibration is the mapping between *pd* and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), *pd* is simply the posterior on the dominant side of $\theta_{null}$, which corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987]: 
 $$
 pd = \max(Pr(\theta < \theta_{null} \mid y), Pr(\theta > \theta_{null} \mid y)) = 1 - p,
 $$ with the two-sided correspondence being $p_{two-sided} = 2p = 2(1 - pd)$.
@@ -193,7 +193,7 @@ $$ with the two-sided correspondence being $p_{two-sided} = 2p = 2(1 - pd)$.
 ```{r}
 #| label: fig-posterior-pd
 #| dev: cairo_pdf
-#| fig-cap: "Posterior distribution with shaded directional mass. In this example,the probability of direction (pd) is the larger posterior mass on either side of 0; the two-sided correspondence is p = 2(1 - pd)."
+#| fig-cap: "Posterior distribution with shaded directional posterior area. In this example, the probability of direction (pd) is the greater posterior probability on either side of 0; the two-sided correspondence is p = 2(1 − pd)."
 #| fig-width: 5
 #| fig-height: 3.2
 #| echo: false
@@ -260,13 +260,13 @@ To motivate calibration, this section first characterizes how the *pd* behaves w
 
 ### Simulation setup
 
-We ran a Monte Carlo simulation in which, for each condition, we generated families of size $m \in \{1,2,5,10,15\}$, with $n \in \{30,50,100\}$ observations per dataset, and repeated the procedure $10{,}000$ times. In every replication, data were generated under the global null: each dataset had true mean $0$ and unit variance, $y \sim \mathcal{N}(0,1)$. Each dataset was analyzed using a conjugate normal model with known observation variance $\sigma^2=1$ and prior $\theta \sim \mathcal{N}(0,\tau^2)$, where $\tau \in \{0.2,0.5,1,1.5,2\}$ spans skeptical to flat priors. We drew posterior samples of $\theta$ from the resulting normal posterior and computed *pd* as $pd=\max(\Pr(\theta>0\mid y),\Pr(\theta<0\mid y))$ using these draws. For the frequentist comparison, we conducted two-sided one-sample $z$-tests.
+We ran a Monte Carlo simulation in which, for each condition, we generated families of size $m \in \{1,2,5,10,15\}$, with $n \in \{30,50,100\}$ observations per dataset, and repeated the procedure $10{,}000$ times. In every replication, data were generated under the global null: each dataset had true mean $0$ and unit variance, $y \sim \mathcal{N}(0,1)$. Each dataset was analyzed using a conjugate normal model with known variance $\sigma^2=1$ and prior $\theta \sim \mathcal{N}(0,\tau^2)$, where $\tau \in \{0.2,0.5,1,1.5,2\}$ spans skeptical to flat priors. We drew posterior samples of $\theta$ from the resulting normal posterior and computed *pd* as $pd=\max(\Pr(\theta>0\mid y),\Pr(\theta<0\mid y))$ using these draws. For the frequentist comparison, we conducted two-sided one-sample $z$-tests.
 
 
 ### Prior influence under the null 
 
 Under the null hypothesis, two-sided *p*-values are uniformly distributed on $[0,1]$, and because *pd* can be mapped to the *p*-value, this implies a corresponding null reference behavior for *pd* on $[0.5,1]$ in the continuous case.
-However, because the *pd* is a posterior probability about the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates mass near 0 (i.e., how readily the prior “expects” near-null effects). Showing this prior dependence at $m=1$ makes the target of later multiplicity analyses explicit: even before any multiplicity is introduced, a fixed cutoff such as $pd \ge 0.975$ does not have a universal “null meaning” across priors and sample sizes (see @fig-uniform-pd). Put differently, the single-test simulation establishes the baseline calibration of “extreme $pd$” under the chosen model. With this baseline in hand, multiplicity can be introduced as a second, distinct mechanism: even if each individual test has only a small chance of producing an extreme *pd* under $H_0$, the probability that at least one of $pd_1,\ldots,pd_m$ is extreme increases with $m$. To make this separation explicit, the simulation extends from $m=1$ to $m=15$ under the global null and summarizes familywise behavior by computing the probability of at least one $pd \ge 0.975$ across the family of tests (@fig-fwer1-pd).
+However, because the *pd* is a posterior probability about the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates probability near 0 (i.e., how readily the prior “expects” near-null effects). Showing this prior dependence at $m=1$ makes the target of later multiplicity analyses explicit: even before any multiplicity is introduced, a fixed cutoff such as $pd \ge 0.975$ does not have a universal “null meaning” across priors and sample sizes (see @fig-uniform-pd). Put differently, the single-test simulation establishes the baseline calibration of “extreme $pd$” under the chosen model. With this baseline in hand, multiplicity can be introduced as a second, distinct mechanism: even if each individual test has only a small chance of producing an extreme *pd* under $H_0$, the probability that at least one of $pd_1,\ldots,pd_m$ is extreme increases with $m$. To make this separation explicit, the simulation extends from $m=1$ to $m=15$ under the global null and summarizes familywise behavior by computing the probability of at least one $pd \ge 0.975$ across the family of tests (@fig-fwer1-pd).
 
 \newpage
 
@@ -440,7 +440,37 @@ $$
 k = 1 - 0.5^{1/m}.
 $$
 
-As *m* increases, $k$ decreases, encoding increasing prior skepticism about any particular deviation from the null hypothesis. Although derived from a Bayesian prior-odds argument, the behavior of the resulting procedure under independence closely resembles frequentists multiplicity corrections. In this simulation, we compare Jeffreys’ method with the Šidák adjustment ($p_{adj} = 1 - (1 - p)^m$), which gives exact frequentist family-wise error rate control under independence (@fig-fwer2-pd).
+As *m* increases, $k$ decreases, encoding increasing prior skepticism about any particular deviation from the null hypothesis (@fig-prior-adj). 
+
+```{r}
+#| label: fig-prior-adj
+#| dev: cairo_pdf
+#| fig-cap: >
+#|   Per-hypothesis prior probability $k$ s a function of the total number of hypotheses $m$,  
+#|   with the overall prior probability of at least one effect fixed at $q = 0.5$. 
+#|   The per-hypothesis prior is given by $k = 1 - 0.5^{1/m}$.
+#| fig-pos: 'H'
+#| fig-width: 9
+#| fig-height: 3
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-align: left
+
+m = 1:50
+sim_k = data.frame(k = sapply(m, function(x) 1 - 0.5^(1/x)), m = m)
+ggplot(sim_k, aes(y = k, x = m) )+
+  geom_line(size = 0.8,color = "deepskyblue2")+
+  geom_point(size = 2, color = "black", alpha = .7)+
+  scale_y_continuous(breaks = seq(0,0.5,0.05))+
+  scale_x_continuous(breaks = round(seq(0,50,2)))+
+  theme_pubr(base_size = 12)
+
+```
+
+
+Although derived from a Bayesian prior-odds argument, the behavior of the resulting procedure under independence closely resembles frequentists multiplicity corrections. In this simulation, we compare Jeffreys’ method with the Šidák adjustment ($p_{adj} = 1 - (1 - p)^m$), which gives exact frequentist family-wise error rate control under independence (@fig-fwer2-pd).
+
 
 \newpage
 
