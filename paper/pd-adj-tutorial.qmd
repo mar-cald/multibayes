@@ -29,8 +29,8 @@ author:
         postal-code: 35131
   - name: Enrico Toffalini
     corresponding: true
-    orcid: 000-0002-1404-5133
-    email: erico.toffalinia@unipd.it
+    orcid: 0000-0002-1404-5133
+    email: enrico.toffalinia@unipd.it
     affiliations:
       - name: University of Padova
         department: Department of General Psychology
@@ -187,8 +187,8 @@ As proposed and popularized in applied Bayesian workflows, *pd* offers an intuit
 
 A convenient reference point for calibration is the mapping between *pd* and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), *pd* is simply the posterior mass on the dominant side of $\theta_{null}$, which corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987]: 
 $$
-pd = \max(Pr(\theta < \theta_{null} \mid y), Pr(\theta > \theta_{null} \mid y)) = 1 - P_1,
-$$ with the two-sided correspondence being $p_{two-sided} = 2P_1 = 2(1 - pd)$.
+pd = \max(Pr(\theta < \theta_{null} \mid y), Pr(\theta > \theta_{null} \mid y)) = 1 - p,
+$$ with the two-sided correspondence being $p_{two-sided} = 2p = 2(1 - pd)$.
 
 ```{r}
 #| label: fig-posterior-pd
@@ -260,7 +260,7 @@ To motivate calibration, this section first characterizes how the *pd* behaves w
 
 ### Simulation setup
 
-We ran a Monte Carlo simulation in which, for each condition, we generated families of size $m \in \{1,2,5,10,15\}$, with $n \in \{30,50,100\}$ observations per dataset, and repeated the procedure $10{,}000$ times. In every replication, data were generated under the global null: each dataset had true mean $0$ and unit variance, $y \sim \mathcal{N}(0,1)$. Each dataset was analyzed using a conjugate normal model with known observation variance $\sigma^2=1$ and prior $\theta \sim \mathcal{N}(0,\tau^2)$, where $\tau \in \{0.2,0.5,1,1.5,2\}$ spans skeptical to flat priors. We drew posterior samples of $\theta$ from the resulting normal posterior and computed *pd* as $pd=\max(\Pr(\theta>0\mid y),\Pr(\theta<0\mid y))$ using these draws. For the frequentist comparison, we conducted two-sided one-sample $t$-tests.
+We ran a Monte Carlo simulation in which, for each condition, we generated families of size $m \in \{1,2,5,10,15\}$, with $n \in \{30,50,100\}$ observations per dataset, and repeated the procedure $10{,}000$ times. In every replication, data were generated under the global null: each dataset had true mean $0$ and unit variance, $y \sim \mathcal{N}(0,1)$. Each dataset was analyzed using a conjugate normal model with known observation variance $\sigma^2=1$ and prior $\theta \sim \mathcal{N}(0,\tau^2)$, where $\tau \in \{0.2,0.5,1,1.5,2\}$ spans skeptical to flat priors. We drew posterior samples of $\theta$ from the resulting normal posterior and computed *pd* as $pd=\max(\Pr(\theta>0\mid y),\Pr(\theta<0\mid y))$ using these draws. For the frequentist comparison, we conducted two-sided one-sample $z$-tests.
 
 
 ### Prior influence under the null 
@@ -512,40 +512,39 @@ $$
 However, with small $m$ and low $q$ values, this formula can paradoxically inflate rather than reduce posterior probabilities. This occurs when the per-hypothesis prior probability of the null hypothesis ($\Pr(\text{one null}) = q^{1/m}$) falls below 0.5, effectively favoring the alternative hypothesis a priori. Because we conceive this adjustment as a safeguard against inflated false positives, it is crucial to ensure it never acts in the opposite direction. To this end, the procedure should include a safeguard: if $\Pr(\text{one null}) < 0.5$, the original posterior probabilities should remain unmodified.
 
 
-```{r, echo=TRUE}
-#' Adjust Posterior Probabilities Using Prior Information
-#'
-#' @description
-#' This function adjusts posterior probabilities based on 
-#' prior information about the global null hypothesis and 
-#' the number of tests performed.
-#'
-#' @param pd Numeric vector of posterior probabilities to be adjusted
-#' @param m Integer, the number of tests performed
-#' @param q Numeric, the prior probability that all effects are null
-#'
-#' @return A numeric vector of adjusted posterior probabilities
-#'
-#' @details
-#' The function uses the formula H0 = q^(1/m) to calculate 
-#' the per-hypothesis prior null probability. 
-#' If H0 >= 0.5, it applies this prior to adjust the 
-#' input posterior probabilities. 
-#' Otherwise, it returns the original probabilities
-#' with a warning.
+```{r}
+#| label: prior-adj-fun
+#| echo: true
 
-prior_adj = function(pd, m, q) {
-  
-  H0 = q^(1 / m)
-  H1 = 1 - H0
-  
+#' Prior-odds adjustment for Probability of Direction (pd)
+#'
+#' Adjusts a vector of Probability of Direction (*pd*) values using a global
+#' prior probability that all tested hypotheses are null, q. The adjustment
+#' converts q into a per-hypothesis prior probability H0 = q^(1/m),
+#' where m is the family size, and then reweights each *pd* accordingly.
+#'
+
+prior_adj <- function(pd, q) {
+  m <- length(pd)
+
+  stopifnot(
+    "`pd` must be numeric"        = is.numeric(pd),
+    "`pd` must be in [0.5, 1]"    = all(is.finite(pd)) && all(pd >= 0.5 & pd <= 1),
+    "`q` must be a single number" = length(q) == 1L && is.finite(q),
+    "`q` must be in (0, 1)"       = (q > 0) && (q < 1),
+    "`m` must be >= 1"            = length(m) == 1L && is.finite(m) && (m >= 1)
+  )
+
+  H0 <- q^(1 / m)
+  H1 <- 1 - H0
+
   if (H0 >= 0.5) {
-    pd_adj = (pd * H1) / (pd * H1 + (1 - pd) * H0)
+    pd_adj <- (pd * H1) / (pd * H1 + (1 - pd) * H0)
   } else {
-    warning("Pr(H0) < 0.5, pd will not be corrected")
-    pd_adj = pd
+    warning("Pr(H0) < 0.5; returning unadjusted pd", call. = FALSE)
+    pd_adj <- pd
   }
-  
+
   return(pd_adj)
 }
 ```
@@ -644,10 +643,11 @@ Alternatively, researchers can specify hypothesis-specific values or "classes" o
 A strict independence-based adjustment can be overly conservative when hypotheses are correlated. In such settings, a practical approach could be to replace $m$ with an effective number of tests $m_{\text{eff}}$ that reflects the dependence structure. This can be achieved by computing a correlation matrix $R$ that captures the correlation among tests (e.g., posterior distributions from the same model) and mapping $R$ to $m_{\text{eff}}$ using eigenvalue-based methods [@Cheverud2001; @Li2005]. The resulting $m_{\text{eff}}$ is then used in the prior-odds adjustment instead of the nominal $m$. Operationally, this makes the “global skepticism” encoded by $q$ (or by $r$) track the amount of *independent* information rather than the raw hypothesis count.
 
 
-## Guidelines
+## Discussion
 
 The proposed multiplicity adjustment incorporates researcher‑specific priors that may draw on evidence from previous studies, theoretical constraints, measurement reliability, or structured expert elicitation [**REFs**]. For transparency, researchers should report the raw *pd* for each parameter alongside at least one multiplicity‑aware measure derived from the prior‑odds adjustment. When possible, presenting both an independence‑based adjustment (a conservative benchmark) and a dependence‑informed adjustment helps illustrate how sensitive the conclusions are to the assumed multiplicity structure.
 
+A key advantage of this procedure is that it can be applied to *pd* values computed from posterior distributions obtained under different models. In principle, the most coherent approach is to analyze all data relevant to a study within a single joint model that represents dependence explicitly, and to base inference on the resulting joint posterior distribution [**REFs**]. In practice, however, this is not always feasible. As a result, researchers may report *pd* across several analyses within the same paper. When the prior is centered on the null value, the proposed adjustment provides a principled way to calibrate prior odds across the full set of hypotheses under consideration.
 
 ### Software implementation 
 

@@ -20,22 +20,76 @@ bayes_posterior_analytical = function(x, sigma = 1, tau0 = 1, mu0=0) {
   return(posterior_samples)
 }
 
+# z.test
+z_test=function(x, mu0 = 0, sigma = 1){
+  z = (mean(x) - mu0) / (sigma / sqrt(length(x)))
+  pval = 2 * (1 - pnorm(abs(z)))
+  return(pval)
+} 
+
 
 ## Prior adjustment
-prior_adj = function(pd, m, q) {
-  H0_i = q^(1 / m)
-  H1_i = 1 - H0_i
+#' Prior-odds adjustment for Probability of Direction (pd)
+#'
+#' Adjusts a vector of Probability of Direction (*pd*) values using a global
+#' prior probability that all tested hypotheses are null, \eqn{q}. The adjustment
+#' converts \eqn{q} into a per-hypothesis prior probability \eqn{H0 = q^{1/m}},
+#' where \eqn{m} is the family size, and then reweights each *pd* accordingly.
+#'
+#' @param pd Numeric vector of *pd* values (typically \eqn{\in [0.5, 1]}).
+#'   Each entry should represent the posterior mass on the favored direction,
+#'   e.g., \eqn{\max\{\Pr(\theta>0\mid y), \Pr(\theta<0\mid y)\}}.
+#' @param q Numeric scalar in (0, 1). Interpreted as the prior probability that
+#'   **all** hypotheses in the family are null.
+#'
+#' @details
+#' Let \eqn{m = \mathrm{length}(pd)}. The function computes:
+#' \deqn{H0 = q^{1/m}, \quad H1 = 1 - H0.}
+#' If \eqn{H0 \ge 0.5}, each element of `pd` is adjusted as:
+#' \deqn{pd_{\mathrm{adj}} = \frac{pd \cdot H1}{pd \cdot H1 + (1-pd)\cdot H0}.}
+#' If \eqn{H0 < 0.5}, the function returns the unadjusted `pd` values and emits a
+#' warning (because the “adjustment” would no longer be conservative under that
+#' setting).
+#'
+#' @return A numeric vector of the same length as `pd`, containing adjusted *pd*
+#'   values (or the original `pd` if \eqn{H0 < 0.5}).
+#'
+#' @examples
+#' pd = c(0.55, 0.80, 0.97)
+#' prior_adj(pd, q = 0.5)
+#'
+#' # Larger family -> stronger per-hypothesis skepticism (larger H0):
+#' prior_adj(rep(0.97, 20), q = 0.5)
+#'
+
+prior_adj = function(pd, q) {
   
-  if (H0_i >= 0.5) {
-    pd_adj = (pd * H1_i) / (pd * H1_i + (1 - pd) * H0_i)
+  m = length(pd)
+  
+  stopifnot(
+    "`pd` must be numeric"        = is.numeric(pd),
+    "`pd` must be in [0.5, 1]"    = all(is.finite(pd)) && all(pd >= 0.5 & pd <= 1),
+    "`q` must be a single number" = length(q) == 1L && is.finite(q),
+    "`q` must be in (0, 1)"       = (q > 0) && (q < 1),
+    "`m` must be >= 1"            = length(m) == 1L && is.finite(m) && (m >= 1)
+  )
+  
+  H0 = q^(1 / m)
+  H1 = 1 - H0
+  
+  if (H0 >= 0.5) {
+    pd_adj = (pd * H1) / (pd * H1 + (1 - pd) * H0)
+    
   } else {
-    warning("Pr(H0) < 0.5, pd will not be corrected")
+    warning("Pr(H0) < 0.5; returning unadjusted pd")
     pd_adj = pd
   }
   
   return(pd_adj)
 }
-  
+
+
+
 
 # Simulation 1 ---------------------------
 m = c(1,2,5,10,15) # number of tests
@@ -54,7 +108,7 @@ sim_ind_1 = function(n, m, r, s, eff,nsim, q){
     X =  MASS::mvrnorm(n, rep(eff, m), Sigma = R) 
     
     # frequentist
-    pval = apply(X, 2, function(x) t.test(x)$p.value)
+    pval = apply(X, 2, function(x) z_test(x))
     # sidak adjustment
     pval_sidak = 1-(1-pval)^m #sidak
     
@@ -62,7 +116,7 @@ sim_ind_1 = function(n, m, r, s, eff,nsim, q){
     post = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
     pd = apply(post, 2, function(x) max(mean(x > 0), mean(x < 0))) #two one sided tests
     # Jeffreys adjustment
-    pd_adj = prior_adj(pd = pd, m = m, q = q)
+    pd_adj = prior_adj(pd = pd, q = q)
     
     # save data 
     data.frame(pval,pval_sidak,pd, pd_adj)}, 
@@ -81,10 +135,10 @@ sim = expand.grid(
 plan(multisession(workers = parallel::detectCores() - 2))
 sim$res = future_pmap(sim, 
                       ~sim_ind_1(n = ..1, m = ..2, s = ..3,eff = ..4,
-                               r = ..5,  q = ..6, nsim = nsim), 
+                                 r = ..5,  q = ..6, nsim = nsim), 
                       .options = furrr_options(seed = TRUE),
                       .progress = TRUE)
-
+plan(sequential)
 save(sim, file = "script/output/sim1.rda")
 
 
@@ -120,7 +174,7 @@ sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
     X = MASS::mvrnorm(n, effect, Sigma = R) 
     
     # frequentist
-    pval = apply(X, 2, function(x) t.test(x)$p.value)
+    pval = apply(X, 2, function(x) z_test(x))
     # sidak adjustment
     pval_sidak = 1-(1-pval)^m #sidak
     
@@ -128,7 +182,7 @@ sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
     post = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
     pd = apply(post, 2, function(x) max(mean(x > 0), mean(x < 0)))
     # Jeffreys adjustment
-    pd_adj = prior_adj(pd = pd, m = m, q = q)
+    pd_adj = prior_adj(pd = pd, q = q)
     
     # save data 
     data.frame(pval, pval_sidak, pd, pd_adj, is_null = all_null)
@@ -148,7 +202,7 @@ sim = expand.grid(
 plan(multisession(workers = parallel::detectCores() - 2))
 sim$res = future_pmap(sim, 
                       ~sim_ind_2(n = ..1, m = ..2, s = ..3,eff = ..4,
-                               r = ..5,  q = ..6,q_sim = ..7, nsim = nsim), 
+                                 r = ..5,  q = ..6,q_sim = ..7, nsim = nsim), 
                       .options = furrr_options(seed = TRUE),
                       .progress = TRUE)
 plan(sequential)
