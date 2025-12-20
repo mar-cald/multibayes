@@ -276,7 +276,7 @@ However, because the *pd* is a posterior probability about the sign of $\theta$,
 #| fig-pos: 'H'
 #| fig-cap: >
 #|   Null reference distributions for p-values and probability of direction.
-#|   The panel A shows the histogram of two-sided one-sample t-test p-values
+#|   The panel A shows the histogram of two-sided one-sample z-test p-values
 #|   from 10,000 replications under the global null ($\theta = 0$), with binwidth
 #|   0.025.
 #|   The panel B shows the corresponding empirical distributions of the
@@ -360,7 +360,7 @@ pd_den = ggplot(df_pd, aes(x = value)) +
 #|   the number of tests (m), based on 10,000 replications under the global null
 #|   ($\theta = 0$ for all tests). 
 #|   The pink curve corresponds to declaring at least one discovery when
-#|   at least one two-sided one-sample t-test p-value $\leq$ 0.05, whereas
+#|   at least one two-sided one-sample z-test p-value $\leq$ 0.05, whereas
 #|   the blue curve corresponds to declaring at least one discovery when
 #|   at least one pd $\geq$ 0.975 under the conjugate normal
 #|   Bayesian model. 
@@ -455,7 +455,7 @@ As *m* increases, $k$ decreases, encoding increasing prior skepticism about any 
 #|   the number of tests (m), based on 10,000 replications under the global null
 #|   ($\theta = 0$ for all tests). 
 #|   The pink curves corresponds to declaring at least one discovery when
-#|   at least one two-sided one-sample t-test p-value (or Šidák adjusted) $\leq$ 0.05, whereas
+#|   at least one two-sided one-sample z-test p-value (or Šidák adjusted) $\leq$ 0.05, whereas
 #|   the blue curve corresponds to declaring at least one discovery when
 #|   at least one pd (or pd adjusted) $\geq$ 0.975 under the conjugate normal
 #|   Bayesian model. 
@@ -562,7 +562,7 @@ In the top panel, the curves show the FWER under the global null; in the bottom 
 #|   and adjusted p-values and probability of direction as a function of the 
 #|   number of tests (m), and prior $\Pr(\text{all } \theta = 0)$. 
 #|   The pink curves corresponds to declaring at least one discovery when
-#|   at least one two-sided one-sample t-test p-value (or Šidák adjusted) $\leq$ 0.05, whereas
+#|   at least one two-sided one-sample z-test p-value (or Šidák adjusted) $\leq$ 0.05, whereas
 #|   the blue curve corresponds to declaring at least one discovery when
 #|   at least one pd (or pd adjusted) $\geq$ 0.975 under the conjugate normal
 #|   Bayesian model. The panel A shows the rate under a global all 
