@@ -3,7 +3,7 @@ rm(list=ls())
 
 # load pkgs
 pkg = c("dplyr","MASS","tidyr","shape",
-        "dplyr","furrr","tibble","purrr")
+        "furrr","tibble","purrr")
 
 invisible(sapply(pkg, require, character.only = T))
 set.seed(150595)
@@ -143,13 +143,13 @@ save(sim, file = "script/output/sim1.rda")
 
 
 # Simuation 2 ---------------------------------
-m = c(1,2,5,10,15) # number of tests
+m = c(1,2,3,4,5,10,15) # number of tests
 n = 100 # number of subjects
 nsim = 1e4 # number of simulations
 r = 0 # correlation
 s = 2 # prior sd
 eff = 0.25 # theta under H1 
-q = c(0.3,0.1)  # prior all null
+q = c(0.5, 0.4, 0.3,0.2, 0.1)  # prior all null
 q_sim = 0.3 # true all null
 
 sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
