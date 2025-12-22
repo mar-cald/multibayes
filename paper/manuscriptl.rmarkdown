@@ -1,6 +1,6 @@
 ---
-title: "Probability of Direction under Multiple Hypotheses"
-subtitle: "A Rationale for Prior-Odds Adjustment"
+title: "Multiple Probabilities of Direction"
+subtitle: "A Rationale for Prior-odds Adjustment"
 shorttitle: "PROBABILITY OF DIRECTION UNDER MULTIPLICITY"
 author:
   - name: Margherita Calderan
@@ -166,6 +166,8 @@ for(i in 1:nrow(sim_res2)){
 
 ```
 
+
+
 Over the past two decades, the proportion of articles reporting Bayesian analyses in psychology has increased considerably [@Van2017; @Jevremov2024; @Pfadt2025]. Unfortunately, this expansion has been accompanied by practices reminiscent of the "null ritual" in frequentist statistics, where widespread use was associated with automatic application rather than principled reasoning [@Gigerenzer2004; @Cohen1994]. For instance, researchers sometimes treat Bayes factor thresholds (e.g., BF \> 3) as dichotomous decision rules or claim that an effect "exists" because the posterior probability of a positive effect exceeds a conventional benchmark such as 95% [@Heck2023; @Kelter2023; @Tendeiro2024; @Hoijtink2016; @Tendeiro2019; @Kruschke2018]. While such summaries are convenient, their use as default cutoffs encourages all-or-none interpretations. When these binary judgments are applied repeatedly across many parameters, the issue of multiplicity arises.
 
 In the frequentist framework, multiplicity is typically framed as Type I error (false-positive) problem: if each individual test is conducted at level $\alpha$, the probability of at least one false positive increases with the number of tests. Classical approaches therefore control either the familywise error rate (the probability of at least one Type I error) or the false discovery rate (the expected proportion of false positives among rejected hypotheses) \[**REFs**\]. However, multiplicity concerns extend beyond false positives. When researchers examine many parameters and highlight the most extreme estimates, selection effects can produce exaggerated magnitudes [@Gelman2000; @Zwet2021; @Altoe2020]. Bayesian shrinkage methods address these distortions by pulling extreme estimates toward more plausible values. Such shrinkage can arise through hierarchical models with partial pooling [@Gelman2012; @GelmanBook; @Kruschke2011; @Berry1999] and/or through informative priors that reduce overestimation in low signal-to-noise settings [@Zwet2022; @Dawid1994].
@@ -191,6 +193,8 @@ A convenient reference point for calibration is the mapping between *pd* and the
 $$
 pd = \max(Pr(\theta < \theta_{null} \mid y), Pr(\theta > \theta_{null} \mid y)) = 1 - p,
 $$ with the two-sided correspondence being $p_{two-sided} = 2p = 2(1 - pd)$.
+
+
 
 ```{r}
 #| label: fig-posterior-pd
@@ -256,6 +260,8 @@ ggplot(df, aes(x = x, y = y)) +
   theme_light(base_size = 12)
 ```
 
+
+
 ## Probability of Direction under the null hypothesis
 
 To motivate calibration, this section first characterizes how the *pd* behaves when the true effect is zero, and how this behavior depends on prior regularization and on the number of tests considered simultaneously. 
@@ -271,6 +277,8 @@ Under the null hypothesis, two-sided *p*-values are uniformly distributed on $[0
 However, because the *pd* is a posterior probability about the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates probability near 0 (i.e., how readily the prior “expects” near-null effects). Showing this prior dependence at $m=1$ makes the target of later multiplicity analyses explicit: even before any multiplicity is introduced, a fixed cutoff such as $pd \ge 0.975$ does not have a universal “null meaning” across priors and sample sizes (see @fig-uniform-pd). Put differently, the single-test simulation establishes the baseline calibration of “extreme $pd$” under the chosen model. With this baseline in hand, multiplicity can be introduced as a second, distinct mechanism: even if each individual test has only a small chance of producing an extreme *pd* under $H_0$, the probability that at least one of $pd_1,\ldots,pd_m$ is extreme increases with $m$. To make this separation explicit, the simulation extends from $m=1$ to $m=15$ under the global null and summarizes familywise behavior by computing the probability of at least one $pd \ge 0.975$ across the family of tests (@fig-fwer1-pd).
 
 \newpage
+
+
 
 ```{r}
 #| label: fig-uniform-pd
@@ -351,7 +359,11 @@ pd_den = ggplot(df_pd, aes(x = value)) +
 ```
 
 
+
+
 \newpage
+
+
 
 ```{r}
 #| label: fig-fwer1-pd
@@ -404,6 +416,8 @@ sim_res1 |>
 ```
 
 
+
+
 ...
 
 ## aggiungo riassunto risultati simulazione
@@ -447,6 +461,8 @@ $$
 
 As *m* increases, $k$ decreases, encoding increasing prior skepticism about any particular deviation from the null hypothesis (@fig-prior-adj). 
 
+
+
 ```{r}
 #| label: fig-prior-adj
 #| dev: cairo_pdf
@@ -475,10 +491,14 @@ ggplot(sim_k, aes(y = k, x = m) )+
 ```
 
 
+
+
 Although derived from a Bayesian prior-odds argument, the behavior of the resulting procedure under independence closely resembles frequentists multiplicity corrections. In this simulation, we compare Jeffreys’ method with the Šidák adjustment ($p_{adj} = 1 - (1 - p)^m$), which gives exact frequentist family-wise error rate control under independence (@fig-fwer2-pd).
 
 
 \newpage
+
+
 
 ```{r}
 #| label: fig-fwer2-pd
@@ -532,6 +552,8 @@ sim_res1 |>
 ```
 
 
+
+
 ...
 
 ## aggiungo riassunto risultati simulazione
@@ -547,6 +569,8 @@ k = 1 - q^{1/m}.
 $$
 
 However, with small $m$ and low $q$ values, this formula can paradoxically inflate rather than reduce posterior probabilities. This occurs when the per-hypothesis prior probability of the null hypothesis ($\Pr(\text{one null}) = q^{1/m}$) falls below 0.5, effectively favoring the alternative hypothesis a priori. Because we conceive this adjustment as a safeguard against inflated false positives, it is crucial to ensure it never acts in the opposite direction. To this end, the procedure should include a safeguard: if $\Pr(\text{one null}) < 0.5$, the original posterior probabilities should remain unmodified.
+
+
 
 
 ```{r}
@@ -587,9 +611,13 @@ prior_adj = function(pd, q) {
 ```
 
 
+
+
 Once $q$ is fixed, the prior odds for each individual hypothesis become a deterministic function of the family size $m$: larger families imply smaller $k$, and therefore stronger prior shrinkage toward the global null for each test. As a result, when $m$ is large, the *pd*-based adjustment becomes more conservative because the prior increasingly concentrates on configurations with few (or no) true effects.
 To illustrate this behavior, @fig-fwer3-pd plots the probability of at least one discovery as a function of $m$ under a mixed data-generating scenario. For each family, $\Pr(\text{all } \theta = 0)=0.3$; otherwise, with probability $0.7$, exactly one $\theta$ equals $0.25$ and the remaining $m-1$ $\theta$ equal $0$. We repeated the previous simulation procedure with $\tau = 2$, $n = 100$, and $q \in \{0.50,\,0.40, \,0.30,\,0.20,\,0.10\}$.
 In the top panel, the curves show the FWER under the global null; in the bottom panel, they show the probability of at least one true positive when exactly one alternative is present. Unadjusted *p*-values gain power as $m$ increases but also exhibit rapidly inflating FWER, whereas Šidák-adjusted *p*-values keep FWER near the nominal level at the cost of reduced power in larger families. Unadjusted *pd* behaves similarly to unadjusted *p*-values. When the multiplicity-adjusted *pd* uses the correct $\Pr(\text{all } \theta = 0)=0.3$, it closely matches Šidák’s error control while retaining comparatively higher power for moderate $m$; in contrast, using a lower $q$ increases the error rate and yields a substantial power gain.
+
+
 
 ```{r}
 #| label: fig-fwer3-pd
@@ -671,6 +699,8 @@ ppw = sim_res2 |>
 ```
 
 
+
+
 ...
 
 ## elabora su pw vs. fwer
@@ -694,4 +724,5 @@ A key advantage of this procedure is that it can be applied to *pd* values compu
 ### Software implementation 
 
 For implementation, it might be best to integrate the adjustment directly into bayestestR, since it already promotes p_direction. We could reach out to its developer to discuss adding this feature instead of creating a separate package.
+
 

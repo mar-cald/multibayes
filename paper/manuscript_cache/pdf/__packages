@@ -10,3 +10,8 @@ purrr
 mvtnorm
 patchwork
 ggpubr
+tidyverse
+readr
+stringr
+forcats
+lubridate
