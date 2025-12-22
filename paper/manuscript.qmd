@@ -261,6 +261,7 @@ ggplot(df, aes(x = x, y = y)) +
 The *pd* can be embedded in a three-sided testing framework [@Goeman2010], where thresholding $pd > c$ yields a claim that an effect exists *and* has a particular sign.
 The three-sided testing framework partitions the parameter space into three mutually exclusive regions: $H_{-}: \theta < 0$ (inferiority), $H_{0}: \theta = 0$ (equivalence), and $H_{+}: \theta > 0$ (superiority). Within this partition, *pd* maps naturally onto the two directional regions because it is the posterior probability of the dominant sign, i.e., the larger of $\Pr(\theta>0\mid y)$ and $\Pr(\theta<0\mid y)$. Thus, $pd > c$ implies either $\Pr(\theta > 0 \mid y) > c$ or $\Pr(\theta < 0 \mid y) > c$. 
 
+**da spigare meglio**
 When $pd > c$ supports $\theta>0$, the posterior probability assigned to nonpositive values is bounded by $\Pr(\theta \le 0 \mid y) < 1-c$ (analogously, when $pd > c$ supports $\theta<0$, $\Pr(\theta \ge 0 \mid y) < 1-c$). This decision rule does more than compare $H_{+}$ versus $H_{-}$, it also excludes zero by ensuring that posterior mass on the null-or-opposite-sign region remains below $1-c$. Since $\Pr(\theta \le 0 \mid y) < 1-c$, zero must lie below the $(1-c)$-quantile of the posterior distribution. Equivalently, the $(1-c)$-quantile is strictly positive, meaning the $c$% credible interval excludes zero (see @fig-pd-ci).
 
 
