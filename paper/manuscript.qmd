@@ -370,7 +370,7 @@ h0 = ggplot(df, aes(x = x, y = y)) +
 ```
 
 
-Pure directional testing conditions on the assumption that $\theta \neq 0$ and evaluates only the sign of the effect by comparing $H_{+}$ versus $H_{-}$; $H_{0}:\theta=0$ is not among the hypotheses under consideration. In contrast, the three-sided framework explicitly includes $H_{0}$ and separates decisions about *existence* (excluding zero) from decisions about direction (positive vs negative).
+Pure directional testing conditions on the assumption that $\theta \neq 0$ and evaluates only the sign of the effect by comparing $H_{+}$ versus $H_{-}$; $H_{0}:\theta=0$ is not among the hypotheses under consideration. In contrast, the three-sided framework explicitly includes $H_{0}$ and separates decisions about *existence* (excluding zero) from decisions about direction (positive vs negative). 
 
 Error types follow directly from this distinction. Under the three-sided framework, a Type I error occurs when the true parameter lies in $H_{0}$ but $H_{0}$ is rejected in favor of $H_{+}$ or $H_{-}$. A directional error, by definition, requires $\theta \neq 0$ and corresponds to selecting the wrong sign. Our simulations implement the three-sided Type I error definition by generating data under the global null ($\theta=0$) and estimating $\Pr(pd \ge c \mid \theta=0)$. Operationally, this quantifies how often the procedure falsely excludes zero from the credible region, that is, incorrectly concludes that an effect exists (with a particular sign) when the true parameter is zero.
 
