@@ -90,7 +90,7 @@ prior_adj = function(pd, q = 0.5, m = length(pd)) {
 
 
 # Simulation 1 ---------------------------
-m = c(1,2,5,10,15) # number of tests
+m = c(1,2,5,10,20) # number of tests
 n = c(30,50,100) # number of subjects
 nsim = 10000 # number of simulations
 r = 0 # correlation
@@ -107,13 +107,13 @@ sim_ind_1 = function(n, m, r, s, eff,nsim, q){
     
     # frequentist
     pval = apply(X, 2, function(x) z_test(x))
-    # sidak adjustment
+    # adjustment
     pval_sidak = 1-(1-pval)^m #sidak
     
     # bayes
     post = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
-    pd = apply(post, 2, function(x) max(mean(x > 0), mean(x < 0))) #two one sided tests
-    # Jeffreys adjustment
+    pd = apply(post, 2, function(x) max(mean(x > 0), mean(x < 0))) 
+    # adjustment
     pd_adj = prior_adj(pd = pd, q = q)
     
     # save data 
@@ -141,7 +141,7 @@ save(sim, file = "script/output/sim1.rda")
 
 
 # Simuation 2 ---------------------------------
-m = c(1,2,3,4,5,10,15) # number of tests
+m = c(1,2,3,4,5,10,20) # number of tests
 n = 100 # number of subjects
 nsim = 1e4 # number of simulations
 r = 0 # correlation
@@ -179,7 +179,7 @@ sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
     # bayes
     post = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
     pd = apply(post, 2, function(x) max(mean(x > 0), mean(x < 0)))
-    # Jeffreys adjustment
+    # adjustment
     pd_adj = prior_adj(pd = pd, q = q)
     
     # save data 
