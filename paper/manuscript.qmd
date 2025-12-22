@@ -65,7 +65,7 @@ author-note:
     gratitude: ~
     authorship-agreements: ~
     
-abstract: "The probability of direction (*pd*) is a Bayesian index that quantifies directional evidence by reporting the posterior probability that a parameter is greater or smaller than a null value. When *pd* is interpreted using fixed thresholds and applied across multiple parameters, multiplicity concerns arise that are rarely addressed explicitly. In this paper, we examine the operating characteristics of *pd* under repeated use by leveraging its correspondence with the frequentist *p*-value under common default priors. Simulation results show that extreme *pd* values can occur by chance and that the rate of misleading evidence increases with the number of tests. We further express *pd* in terms of posterior odds and introduce prior-odds adjustments that provide multiplicity control while preserving Bayesian coherence. To support practical implementation, we developed an R package that applies prior-odds corrections." 
+abstract: "In psychological research, Bayesian analyses are often summarized using posterior indices and then interpreted with conventional cutoffs across many parameters The probability of direction (*pd*) is one such index, defined as the posterior probability that a parameter is greater or smaller than a null value. When *pd* is thresholded and used repeatedly, multiplicity becomes consequential but is rarely handled explicitly. Here, we examine the operating characteristics of *pd* under repeated use by leveraging its correspondence with the frequentist *p*-value under common default priors. Simulations show that extreme *pd* values can arise by chance and that misleading conclusions become more frequent as the number of tests increases. We further express *pd* in terms of posterior odds and propose prior-odds adjustments that provide multiplicity control while preserving Bayesian coherence. To support practical implementation, we provide an R package that applies the proposed prior-odds corrections." 
 
 keywords: [probability of direction, multiple testing, prior-odds]
 bibliography: "biblio.bib"
@@ -176,7 +176,8 @@ Other justifications invokes the *subjectivist* interpretation of Bayesian infer
 
 Accordingly, we adopt a *falsificationist* perspective, which treats Bayesian procedures as tools to be calibrated rather than as soley expressions of belief [@Box1980; @GelmanShalizi2013; @GelmanHennig2017; @Rubin1984; @Mayo2018]. Here, we focus on the Probability of Direction (*pd*), a Bayesian index that can be mapped directly to the frequentist *p*-value in common settings [@Marsman2017; @Berger1987; @Casella1987; @Makowski2019]. This correspondence allows us to evaluate *pd*'s behavior under repeated use and to compare Bayesian and frequentist approaches to multiplicity control on common ground.
 
-The paper proceeds in four steps. First, we introduce *pd* and make explicit its connection to the frequentist *p*-value, which provides a reference point for calibration. Second, we examine *pd*'s behavior under the null hypothesis and in multiple-testing settings, using simulations to show how extreme values arise by chance. Third, we connect *pd* to directional Bayes factors, highlighting the role of prior odds. Finally, we present prior-odds adjustments for multiplicity following @Jeffreys1938 [see also @Westfall1997], discuss implementation under dependence, and provide guidance for reporting both raw and multiplicity-adjusted *pd* values.
+The paper proceeds in four steps. First, we introduce *pd* and make explicit its connection to the frequentist *p*-value, which provides a reference point for calibration. Second, we characterize *pd*'s null distribution within a three-sided hypothesis testing framework [@Goeman2010] and examine its multiple-testing behavior through simulations that quantify false-positive rates. Third, we relate *pd* to directional Bayes factors and formalize the role of prior odds. Finally, we present prior-odds adjustments for multiplicity following Jeffreys [@Jeffreys1938; see also @Westfall1997], discuss implementation under dependence, and provide guidance for reporting both raw and multiplicity-adjusted *pd* values.
+
 
 ## Probability of Direction and *p*-value
 
@@ -259,12 +260,12 @@ ggplot(df, aes(x = x, y = y)) +
 
 The *pd* can be embedded in a three-sided testing framework [@Goeman2010] where thresholding $pd \geq c$ simultaneously excludes the point null $H_0: \theta = 0$ and specifies a directional claim, either $H_{+}: \theta > 0$ or $H_{-}: \theta < 0$. The three-sided testing framework partitions the parameter space into three mutually exclusive hypotheses: $H_{-}: \theta < 0$ (inferiority), $H_0: \theta = 0$ (equivalence), and $H_{+}: \theta > 0$ (superiority). The *pd* maps naturally onto this partition because it quantifies the maximum posterior probability across the two directional regions: when $pd \geq c$, either $\Pr(\theta > 0 \mid y) \geq c$ or $\Pr(\theta < 0 \mid y) \geq c$, providing evidence against $H_0$ and in favor of a specific directional alternative.
 
-Crucially, thresholding *pd* constitutes a test of existence with direction, not merely direction conditional on existence. When $pd \geq c$ leads us to claim $\theta > 0$, we simultaneously exclude two regions: the point null ($\theta = 0$) and the opposite direction ($\theta < 0$). This is an assertion that an effect of a particular sign exists—that $\theta$ is both non-zero and positive.  This interpretation is supported by the relationship between *pd* and credible intervals: when $pd \geq c$, zero is excluded from the corresponding one-sided credible bound. Specifically, $pd \geq c$ implies either $\Pr(\theta \leq 0 \mid y) \leq 1-c$ or $\Pr(\theta \geq 0 \mid y) \leq 1-c$, placing at most $(1-c) \times 100\%$ posterior probability on values at or beyond zero in the opposite direction. This credible-interval exclusion of zero constitutes an existence claim (@fig-pd-ci).
+Crucially, thresholding *pd* constitutes a test of existence with direction, not merely direction conditional on existence. When $pd \geq c$ leads us to claim $\theta > 0$, we simultaneously exclude two regions: the point null ($\theta = 0$) and the opposite direction ($\theta < 0$). This is an assertion that an effect of a particular sign exists: $\theta$ is both non-zero and positive. This interpretation is supported by the relationship between *pd* and credible intervals: when $pd \geq c$, zero is excluded from the corresponding one-sided credible bound. Specifically, $pd \geq c$ implies either $\Pr(\theta \leq 0 \mid y) \leq 1-c$ or $\Pr(\theta \geq 0 \mid y) \leq 1-c$, placing at most $(1-c) \times 100\%$ posterior probability on values at or beyond zero in the opposite direction. This credible-interval exclusion of zero constitutes an existence claim (@fig-pd-ci).
 
 ```{r}
 #| label: fig-pd-ci
 #| dev: cairo_pdf
-#| fig-cap: "Posterior distributions comparing pd and CI exclusion of 0. **Left**: Narrow posterior where 95% CI excludes 0. **Right**: Wider posterior where 95% CI includes 0, despite high pd. Meaning that "
+#| fig-cap: "Posterior distributions comparing pd and CI exclusion of 0. **Left**: Narrow posterior where 95% CI excludes 0. **Right**: Wider posterior where 95% CI includes 0, despite high pd."
 #| fig-width: 12
 #| fig-height: 5
 #| echo: false
@@ -371,9 +372,9 @@ h0 = ggplot(df, aes(x = x, y = y)) +
 ```
 
 
-The three-sided framework contrasts sharply with pure directional testing, which assumes from the outset that $\theta \neq 0$ and asks only which direction an existing effect takes. In pure directional testing, the null hypothesis $\theta = 0$ is not among the possibilities being evaluated; instead, inference compares only $H_{+}$ versus $H_{-}$, conditional on $\theta$ being non-zero. This distinction between existence and directional testing has direct implications for interpreting our null simulations. When data are generated under the global null ($\theta = 0$) and the event $pd \geq c$ occurs, this represents a Type I error: falsely claiming an effect exists with a specified sign when the true parameter is zero. This differs fundamentally from a directional error, which occurs when an effect exists ($\theta \neq 0$) but we incorrectly identify its sign.  
+Pure directional testing conditions on the assumption that $\theta \neq 0$ and evaluates only the sign of the effect by comparing $H_{+}$ versus $H_{-}$; $H_{0}:\theta=0$ is not among the hypotheses under consideration. In contrast, the three-sided framework explicitly includes $H_{0}$ and separates decisions about *existence* (excluding zero) from decisions about direction (positive vs negative).
 
-In the three-sided framework, a Type I error occurs when the true parameter lies in $H_0$ but we reject $H_0$ in favor of $H_{+}$ or $H_{-}$.  Our calibration simulations operationalize precisely this error definition: by generating data under $\theta = 0$ and measuring how often $pd$ exceeds threshold $c$, we quantify the rate at which the procedure falsely excludes zero from the credible region—that is, the rate at which it falsely claims effects exist.
+Error types follow directly from this distinction. Under the three-sided framework, a Type I error occurs when the true parameter lies in $H_{0}$ but $H_{0}$ is rejected in favor of $H_{+}$ or $H_{-}$. A directional error, by definition, requires $\theta \neq 0$ and corresponds to selecting the wrong sign. Our simulations implement the three-sided Type I error definition by generating data under the global null ($\theta=0$) and estimating $\Pr(pd \ge c \mid \theta=0)$. Operationally, this quantifies how often the procedure falsely excludes zero from the credible region, that is, incorrectly concludes that an effect exists (with a particular sign) when the true parameter is zero.
 
 
 ### Simulation setup
@@ -383,7 +384,7 @@ Our simulations generate data under the global null (all $\theta_i = 0$) and qua
 ### Prior influence
 
 Under the null hypothesis, two-sided *p*-values are uniformly distributed on $[0,1]$, and because *pd* can be mapped to the *p*-value, this implies a corresponding null reference behavior for *pd* on $[0.5,1]$ in the continuous case.
-However, because the *pd* is a posterior probability about the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates probability near 0 (i.e., how readily the prior “expects” near-null effects). Showing this prior dependence at $m=1$ makes the target of later multiplicity analyses explicit: even before any multiplicity is introduced, a fixed cutoff such as $pd \ge 0.975$ does not have a universal “null meaning” across priors and sample sizes (see @fig-uniform-pd). Put differently, the single-test simulation establishes the baseline calibration of “extreme $pd$” under the chosen model. With this baseline in hand, multiplicity can be introduced as a second, distinct mechanism: even if each individual test has only a small chance of producing an extreme *pd* under $H_0$, the probability that at least one of $pd_1,\ldots,pd_m$ is extreme increases with $m$. To make this separation explicit, the simulation extends from $m=1$ to $m=15$ under the global null and summarizes familywise behavior by computing the probability of at least one $pd \ge 0.975$ across the family of tests (@fig-fwer1-pd).
+However, because the *pd* is a posterior probability about the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates probability near 0 (i.e., how readily the prior “expects” near-null effects). Showing this prior dependence at $m=1$ makes the target of later multiplicity analyses explicit: even before any multiplicity is introduced, a fixed cutoff such as $pd \ge 0.975$ does not have a universal “null meaning” across priors and sample sizes (see @fig-uniform-pd). Put differently, the first simulation establishes the baseline calibration of “extreme $pd$” under the chosen model. With this baseline in hand, multiplicity can be introduced as a second, distinct mechanism: even if each individual test has only a small chance of producing an extreme *pd* under $H_0$, the probability that at least one of $pd_1,\ldots,pd_m$ is extreme increases with $m$. To make this separation explicit, the simulation extends from $m=1$ to $m=15$ under the global null and summarizes familywise behavior by computing the probability of at least one $pd \ge 0.975$ across the family of tests (@fig-fwer1-pd).
 
 
 \newpage
@@ -534,7 +535,7 @@ sim_res1 |>
 As previously noted, the probability of direction (*pd*) is defined as the maximum of the two posterior tail probabilities: 
 $pd = \max(\text{Pr}(\theta > \theta_{null} \mid y), \text{Pr}(\theta < \theta_{null} \mid y)).$
 
-To give $pd$ an evidential interpretation, consider the directional hypotheses $H_{+}:\theta>0$ and $H_{-}:\theta<0$. If the prior is continuous and symmetric about $0$ (i.e., $\pi(\theta)=\pi(-\theta)$), then $H_{+}$ and $H_{-}$ have equal prior probability: $\Pr(H_{+})=\Pr(H_{-})=0.5$. In this setting, $pd$ is simply the posterior probability of the favored direction. Without loss of generality, suppose the posterior favors $H_{+}$, so that $\Pr(H_{+}\mid y)=pd$ and $\Pr(H_{-}\mid y)=1-pd$. By standard Bayesian updating, these posterior odds factorize into a Bayes factor and prior odds:
+To give $pd$ an evidential interpretation, consider the directional hypotheses $H_{+}:\theta>0$ and $H_{-}:\theta<0$. If the prior on $\theta$ is continuous and symmetric about $0$ (i.e., $\pi(\theta)=\pi(-\theta)$), then $H_{+}$ and $H_{-}$ have equal prior probability: $\Pr(H_{+})=\Pr(H_{-})=0.5$. In this setting, $pd$ is simply the posterior probability of the favored direction. Without loss of generality, suppose the posterior favors $H_{+}$, so that $\Pr(H_{+}\mid y)=pd$ and $\Pr(H_{-}\mid y)=1-pd$. By standard Bayesian updating, these posterior odds factorize into a Bayes factor and prior odds:
 $$
 \frac{pd}{1-pd}
 =
@@ -589,7 +590,7 @@ ggplot(sim_k, aes(y = k, x = m) )+
 ```
 
 
-Although derived from a Bayesian prior-odds argument, the behavior of the resulting procedure under independence closely resembles frequentists multiplicity corrections. In this simulation, we compare Jeffreys’ method with the Šidák adjustment ($p_{adj} = 1 - (1 - p)^m$), which gives exact frequentist family-wise error rate control under independence (@fig-fwer2-pd).
+Although derived from a Bayesian prior-odds argument, the behavior of the resulting procedure under independence closely resembles frequentists multiplicity corrections [@Westfall1997]. In this simulation, we compare this method with the Šidák adjustment ($p_{adj} = 1 - (1 - p)^m$), which gives exact frequentist family-wise error rate control under independence (@fig-fwer2-pd).
 
 
 \newpage
@@ -652,7 +653,8 @@ sim_res1 |>
 
 ...
 
-### Dependence and effective number of tests
+### Choosing the global null probability
+
 The framework for multiplicity adjustment via adjusted prior odds naturally allows researchers to incorporate substantive prior information based on background knowledge. One approach is to specify a global prior probability that all effects are null, $q = \Pr(\text{all null})$, and translate that belief into the per-hypothesis prior probability $k$. Under the assumption of independence, each hypothesis is non-null with probability $k$, such that $\Pr(\text{all null}) = (1 - k)^m$. Domain knowledge guides the choice of $q$: if one expects that no real effects are present, $q$ may be large (e.g., 0.5), whereas studies targeting well-established effects might justify a smaller $q$ (e.g., 0.1). This leads to the general calibration:
 $$
 (1 - k)^m = q
@@ -669,14 +671,13 @@ However, with small $m$ and low $q$ values, this formula can paradoxically infla
 
 #' Prior-odds adjustment for Probability of Direction (pd)
 #'
-#' Adjusts a vector of Probability of Direction (*pd*) values using a global
+#' Adjusts a vector of Probability of Direction (pd) values using a global
 #' prior probability that all tested hypotheses are null, q. The adjustment
 #' converts q into a per-hypothesis prior probability H0 = q^(1/m),
-#' where m is the family size, and then reweights each *pd* accordingly.
+#' where m is the family size, and then reweights each pd accordingly.
 #'
 
-prior_adj = function(pd, q) {
-  m = length(pd)
+prior_adj = function(pd, q = 0.5, m = length(pd)) {
   
   stopifnot(
     "`pd` must be numeric"        = is.numeric(pd),
@@ -703,7 +704,11 @@ prior_adj = function(pd, q) {
 
 Once $q$ is fixed, the prior odds for each individual hypothesis become a deterministic function of the family size $m$: larger families imply smaller $k$, and therefore stronger prior shrinkage toward the global null for each test. As a result, when $m$ is large, the *pd*-based adjustment becomes more conservative because the prior increasingly concentrates on configurations with few (or no) true effects.
 To illustrate this behavior, @fig-fwer3-pd plots the probability of at least one discovery as a function of $m$ under a mixed data-generating scenario. For each family, $\Pr(\text{all } \theta = 0)=0.3$; otherwise, with probability $0.7$, exactly one $\theta$ equals $0.25$ and the remaining $m-1$ $\theta$ equal $0$. We repeated the previous simulation procedure with $\tau = 2$, $n = 100$, and $q \in \{0.50,\,0.40, \,0.30,\,0.20,\,0.10\}$.
-In the top panel, the curves show the FWER under the global null; in the bottom panel, they show the probability of at least one true positive when exactly one alternative is present. Unadjusted *p*-values gain power as $m$ increases but also exhibit rapidly inflating FWER, whereas Šidák-adjusted *p*-values keep FWER near the nominal level at the cost of reduced power in larger families. Unadjusted *pd* behaves similarly to unadjusted *p*-values. When the multiplicity-adjusted *pd* uses the correct $\Pr(\text{all } \theta = 0)=0.3$, it closely matches Šidák’s error control while retaining comparatively higher power for moderate $m$; in contrast, using a lower $q$ increases the error rate and yields a substantial power gain.
+In the top panel, the curves show the FWER under the global null; in the bottom panel, they show the probability of at least one true positive when exactly one alternative is present. 
+
+Šidák-adjusted *p*-values keep FWER near the nominal level at the cost of reduced power in larger families. When the multiplicity-adjusted *pd* uses the correct $\Pr(\text{all } \theta = 0)=0.3$, it closely follows Šidák’s error control while retaining comparatively higher power for moderate $m$; in contrast, using a lower $q$ increases the error rate and yields a substantial power gain. Notably, $\Pr(\text{all } \theta = 0)=0.4$ yields an FWER and power trajectory that is equivalent to the Šidák adjustment across all values of $m$, indicating that the Bayesian procedure can emulate classical strong FWER control. 
+
+\newpage
 
 ```{r}
 #| label: fig-fwer3-pd
@@ -785,16 +790,16 @@ ppw = sim_res2 |>
 ```
 
 
-...
 
-## elabora su pw vs. fwer e su 0.4 = sidak
 
 ...
 
 
 ## Discussion
 
-The proposed multiplicity adjustment incorporates researcher-specific priors that may draw on evidence from previous studies, theoretical constraints, measurement reliability, or structured expert elicitation [**REFs**]. For transparency, researchers should report the raw *pd* for each parameter alongside at least one multiplicity-aware quantity derived from the prior-odds adjustment. When possible, presenting both an independence-based adjustment (as a conservative benchmark) and a dependence-informed adjustment helps clarify how sensitive conclusions are to the assumed multiplicity structure. 
+The proposed multiplicity adjustment can incorporate researcher-specific priors that may draw on evidence from previous studies, theoretical constraints, measurement reliability, or structured expert elicitation [**REFs**]. For transparency, researchers should report the raw *pd* for each parameter alongside at least one multiplicity-aware quantity derived from the prior-odds adjustment. When possible, presenting both the conservative benchmark (i.e., $pd$ when $\Pr(\text{all } \theta = 0)=0.4$) and an informed adjustment helps clarify how sensitive conclusions are to the assumed multiplicity structure. 
+
+RICORDA AGGIUNGERE PRIOR PARAM + PRIOR HPS
 
 Because strict independence-based adjustments can be overly conservative when hypotheses are correlated, a practical option is to replace the nominal number of tests $m$ with an effective number $m_{\text{eff}}$ that reflects the dependence structure. This can be done by computing a correlation matrix $R$ capturing correlation among tests (e.g., posterior distributions from the same model) and mapping $R$ to $m_{\text{eff}}$ via eigenvalue-based methods [@Cheverud2001; @Li2005; @Giudice2021]. Importantly, the resulting $m_{\text{eff}}$ will generally depend on how $R$ is defined and estimated, so it should be treated as a sensitivity choice rather than a uniquely determined quantity.
 

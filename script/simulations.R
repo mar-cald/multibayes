@@ -62,10 +62,8 @@ z_test=function(x, mu0 = 0, sigma = 1){
 #' prior_adj(rep(0.97, 20), q = 0.5)
 #'
 
-prior_adj = function(pd, q) {
-  
-  m = length(pd)
-  
+prior_adj = function(pd, q = 0.5, m = length(pd)) {
+
   stopifnot(
     "`pd` must be numeric"        = is.numeric(pd),
     "`pd` must be in [0.5, 1]"    = all(is.finite(pd)) && all(pd >= 0.5 & pd <= 1),
