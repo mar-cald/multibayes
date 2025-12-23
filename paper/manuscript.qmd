@@ -82,6 +82,7 @@ execute:
 ```{r}
 #| label: setup
 #| include: false
+#| cache: false
 pkg = c("dplyr","MASS","tidyr","shape","ggplot2",
         "tibble","furrr","tibble","purrr",
         "mvtnorm", "patchwork","ggpubr")
@@ -131,13 +132,13 @@ for(i in 1:nrow(sim_res1)){
 # Compute FWER
 sign_pd = function(data, th){
   data |> 
-    group_by(eff, m, s, n, is_null,q_sim,q, nsim) |> 
+    group_by(m, n,q, is_null,nsim) |> 
     reframe(sign = any(value > th))  
 }
 
 sign_pval = function(data, th){
   data |> 
-    group_by(eff, m, s, n, is_null,q_sim,q, nsim) |> 
+    group_by(m, n,q,is_null, nsim) |> 
     reframe(sign = any(value < th))  
 }
 
@@ -146,7 +147,7 @@ sim2 = tibble(sim)
 
 sim_res2 = sim2 |> 
   unnest(res) |> 
-  group_by(eff,m, s, n,q_sim,q) |> 
+  group_by(m, n,q) |> 
   mutate(nsim = 1:n()) |> 
   ungroup() |> 
   unnest(res) |> 
@@ -170,7 +171,7 @@ Over the past two decades, the proportion of articles reporting Bayesian analyse
 
 In the frequentist framework, multiplicity is typically framed as Type I error (false-positive) problem: if each individual test is conducted at level $\alpha$, the probability of at least one false positive increases with the number of tests. Classical approaches therefore control either the familywise error rate (the probability of at least one Type I error) or the false discovery rate (the expected proportion of false positives among rejected hypotheses) [**REFs**]. However, multiplicity concerns extend beyond false positives. When researchers examine many parameters and highlight the most extreme estimates, selection effects can produce exaggerated magnitudes [@Gelman2000; @Zwet2021; @Altoe2020]. Bayesian shrinkage methods address these distortions by pulling extreme estimates toward more plausible values. Such shrinkage can arise through hierarchical models with partial pooling [@Gelman2012; @GelmanBook; @Kruschke2011; @Berry1999] and/or through informative priors that reduce overestimation in low signal-to-noise settings [@Zwet2022; @Dawid1994].
 
-Regularization improves estimation, but it does not by itself calibrate repeated threshold-based decisions across many parameters. If the same cutoff is applied to many parameters (e.g., declaring an effect whenever posterior probability exceeds 0.95), the chance of at least one spurious finding can remain inflated, even if shrinkage reduces it. Bayesian approaches that directly target this issue typically rely on either simultaneous credible statements [@Gelman2000; @Pruzek2016; @Schnell2020; @Goeman2026; @Box1992] or priors on the hypothesis/model space that scale with the number of tested effects [@Scott2006; @Scott2010; @Jeffreys1938; @Westfall1997]. Nevertheless, psychological researchers often conflate selection effects that distort estimates with the distinct problem of making many simultaneous decisions. As a result, shrinkage is sometimes treated as sufficient for multiplicity control [@Basket2015; @Limbachia2021; @Chen2020; @Hogeveen2022; @Mathar2022].
+Regularization improves estimation, but it does not by itself calibrate repeated threshold-based decisions across many parameters. If the same cutoff is applied to many parameters (e.g., declaring an effect whenever posterior probability exceeds 0.95), the chance of at least one spurious finding can remain inflated, even if shrinkage reduces it. Bayesian approaches that directly target this issue typically rely on either simultaneous credible statements [@Gelman2000; @Pruzek2016; @Schnell2020;  @Box1992] or priors on the hypothesis/model space that scale with the number of tested effects [@Scott2006; @Scott2010; @Jeffreys1938; @Westfall1997]. Nevertheless, psychological researchers often conflate selection effects that distort estimates with the distinct problem of making many simultaneous decisions. As a result, shrinkage is sometimes treated as sufficient for multiplicity control [@Basket2015; @Limbachia2021; @Chen2020; @Hogeveen2022; @Mathar2022].
 
 Other justifications invokes the *subjectivist* interpretation of Bayesian inference, which treats posterior probabilities as rational degrees of personal belief [@Lindley1972; @Edwards1963; @Rozeboom1960; @DeFinetti1975]. However, this interpretation fits poorly with common psychological practice, where researchers typically apply default software priors (often weakly informative) rather than priors encoding substantive domain knowledge [@Van2017; @Smid2020]. When default priors are combined with sufficient data, Bayesian and frequentist procedures often converge to similar conclusions [@Bernardo1994; @GelmanBook; @Albers2018]. This convergence makes it both natural and useful to evaluate the frequentist operating characteristics of Bayesian decision rules under multiplicity.
 
@@ -372,17 +373,15 @@ h0 = ggplot(df, aes(x = x, y = y)) +
 ```
 
 
-Pure directional testing conditions on the assumption that $\theta \neq 0$ and evaluates only the sign of the effect by comparing $H_{+}$ versus $H_{-}$; $H_{0}:\theta=0$ is not among the hypotheses under consideration. In contrast, the three-sided framework explicitly includes $H_{0}$ and separates decisions about *existence* (excluding zero) from decisions about direction (positive vs negative). Error types follow directly from this distinction. Under the three-sided framework, a Type I error occurs when the true parameter lies in $H_{0}$ but $H_{0}$ is rejected in favor of $H_{+}$ or $H_{-}$. A directional error, by definition, requires $\theta \neq 0$ and corresponds to selecting the wrong sign. Our simulations implement the three-sided Type I error definition by generating data under the global null ($\theta=0$) and estimating $\Pr(pd \ge c \mid \theta=0)$. Operationally, this quantifies how often the procedure falsely excludes zero from the credible region, that is, incorrectly concludes that an effect exists (with a particular sign) when the true parameter is zero.
-
+Pure directional testing conditions on the assumption that $\theta \neq 0$ and evaluates only the sign of the effect by comparing $H_{+}$ versus $H_{-}$; $H_{0}:\theta=0$ is not among the hypotheses under consideration. In contrast, the three-sided framework explicitly includes $H_{0}$ and separates decisions about *existence* (excluding zero) from decisions about direction (positive vs negative). Error types follow directly from this distinction. Under the three-sided framework, a Type I error occurs when the true parameter lies in $H_{0}$ but $H_{0}$ is rejected in favor of $H_{+}$ or $H_{-}$. 
 
 ### Simulation setup
-
-Our simulations generate data under the global null (all $\theta_i = 0$) and quantify how often *pd* exceeds the threshold ($> 0.975$), measuring the probability of falsely claiming that non-zero effects exist. Specifically, we conduct a Monte Carlo simulation in which, for each condition, we generated families of size $m \in \{1,2,5,10,25\}$, with $n \in \{30,50,100\}$ observations per dataset, and repeated the procedure $10{,}000$ times. In every replication, data were generated under the global null: each dataset had true mean $0$ and unit variance, $y \sim \mathcal{N}(0,1)$. Each dataset was analyzed using a conjugate normal model with known variance $\sigma^2=1$ and prior $\theta \sim \mathcal{N}(0,\tau^2)$, where $\tau \in \{0.2,0.5,1,1.5,2\}$ spans skeptical to flat priors. We drew posterior samples of $\theta$ from the resulting normal posterior and computed *pd* as $pd=\max(\Pr(\theta>0\mid y),\Pr(\theta<0\mid y))$ using these draws. For the frequentist comparison, we conducted two-sided one-sample $z$-tests.
+Our simulations implement the three-sided Type I error definition by generating data under the global null (all $\theta=0$) and estimating $\Pr(pd > c \mid \theta=0)$. Operationally, this quantifies how often the procedure falsely excludes zero from the credible region, that is, incorrectly concludes that an effect exists (with a particular sign) when the true parameter is zero. Specifically, we conduct a Monte Carlo simulation in which, for each condition, we generated families of size $m \in \{1,2,5,10,25\}$, with $n \in \{30,50,100\}$ observations per dataset, and repeated the procedure $10{,}000$ times. In every replication, data were generated under the global null: each dataset had true mean $0$ and unit variance, $y \sim \mathcal{N}(0,1)$. Each dataset was analyzed using a conjugate normal model with known variance $\sigma^2=1$ and prior $\theta \sim \mathcal{N}(0,\tau^2)$, where $\tau \in \{0.2,0.5,1,1.5,2\}$ spans skeptical to flat priors. We drew posterior samples of $\theta$ from the resulting normal posterior and computed *pd* as $pd=\max(\Pr(\theta>0\mid y),\Pr(\theta<0\mid y))$ using these draws. For the frequentist comparison, we conducted two-sided one-sample $z$-tests.
 
 ### Prior influence
 
 Under the null hypothesis, two-sided *p*-values are uniformly distributed on $[0,1]$, and because *pd* can be mapped to the *p*-value, this implies a corresponding null reference behavior for *pd* on $[0.5,1]$ in the continuous case.
-However, because the *pd* is a posterior probability about the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates probability near 0 (i.e., how readily the prior “expects” near-null effects). Showing this prior dependence at $m=1$ makes the target of later multiplicity analyses explicit: even before any multiplicity is introduced, a fixed cutoff such as $pd \ge 0.975$ does not have a universal “null meaning” across priors and sample sizes (see @fig-uniform-pd). Put differently, the first simulation establishes the baseline calibration of “extreme $pd$” under the chosen model. With this baseline in hand, multiplicity can be introduced as a second, distinct mechanism: even if each individual test has only a small chance of producing an extreme *pd* under $H_0$, the probability that at least one of $pd_1,\ldots,pd_m$ is extreme increases with $m$. To make this separation explicit, the simulation extends from $m=1$ to $m=20$ under the global null and summarizes familywise behavior by computing the probability of at least one $pd \ge 0.975$ across the family of tests (@fig-fwer1-pd).
+However, because the *pd* is a posterior probability about the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates probability near 0 (i.e., how readily the prior “expects” near-null effects). Showing this prior dependence at $m=1$ makes the target of later multiplicity analyses explicit: even before any multiplicity is introduced, a fixed cutoff such as $pd > 0.975$ does not have a universal “null meaning” across priors and sample sizes (see @fig-uniform-pd). Put differently, the first simulation establishes the baseline calibration of “extreme $pd$” under the chosen model. With this baseline in hand, multiplicity can be introduced as a second, distinct mechanism: even if each individual test has only a small chance of producing an extreme *pd* under $H_0$, the probability that at least one of $pd_1,\ldots,pd_m$ is extreme increases with $m$. To make this separation explicit, the simulation extends from $m=1$ to $m=20$ under the global null and summarizes familywise behavior by computing the probability of at least one $pd > 0.975$ across the family of tests (@fig-fwer1-pd).
 
 
 \newpage
@@ -428,8 +427,8 @@ pval_den = ggplot(df_pval, aes(x = value)) +
     aes(y = after_stat(density)),alpha = .7, 
     fill = "deeppink3", color = "white",
   ) +
-  geom_vline(xintercept = 0.05, size = 1, alpha = .8)+
-  geom_hline(yintercept = 1, size = 1, alpha = .8)+
+  geom_vline(xintercept = 0.05, size = 1.5, alpha = .8)+
+  geom_hline(yintercept = 1, size = 1.5, alpha = .8)+
   coord_cartesian(xlim = c(0, 1)) +
   labs(x = "p-value", y = " ") +
   theme_light(base_size = 18)+
@@ -454,8 +453,8 @@ pd_den = ggplot(df_pd, aes(x = value)) +
     fill = "deepskyblue3", color = "white",
   ) +
   facet_grid(n~s)+
-  geom_vline(xintercept = 0.975,  size = 1, alpha = .8)+
-  geom_hline(yintercept = 2,  size = 1, alpha = .8)+
+  geom_vline(xintercept = 0.975,  size = 1.5, alpha = .8)+
+  geom_hline(yintercept = 2,  size = 1.5, alpha = .8)+
   coord_cartesian(xlim = c(0.5, 1)) +
   labs(x = "pd", y = " ") +
   theme_light(base_size = 18)+
@@ -597,16 +596,16 @@ Although derived from a Bayesian prior-odds argument, the behavior of the result
 #| label: fig-fwer2-pd
 #| dev: cairo_pdf
 #| fig-cap: >
-#|   Familywise error rates under the global null for unadjusted and adjusted
+#|   Familywise error rates under the global null for adjusted
 #|   p-values and probability of direction.
 #|   The figure shows the estimated familywise error rate (fwer), defined as the
 #|   probability of at least one false positive across m tests, as a function of
 #|   the number of tests (m), based on 10,000 replications under the global null
 #|   ($\theta = 0$ for all tests). 
 #|   The red curve corresponds to declaring at least one discovery when
-#|   at least one two-sided one-sample z-test p-value (Šidák adjusted) < 0.05, whereas
+#|   at least one two-sided one-sample z-test p-value < 0.05, whereas
 #|   the blue curve corresponds to declaring at least one discovery when
-#|   at least one pd (adjusted) > 0.975 under the conjugate normal
+#|   at least one pd > 0.975 under the conjugate normal
 #|   Bayesian model. 
 #|   Rows vary the per-test sample size ($n = 30, 50, 100$), and columns vary the
 #|   prior scale ($\theta \sim \mathcal{N}(0, \tau^2)$ with
@@ -700,11 +699,13 @@ prior_adj = function(pd, q = 0.5, m = length(pd)) {
 ```
 
 
-Once $q$ is fixed, the prior odds for each individual hypothesis become a deterministic function of the family size $m$: larger families imply smaller $k$, and therefore stronger prior shrinkage toward the global null for each test. As a result, when $m$ is large, the *pd*-based adjustment becomes more conservative because the prior increasingly concentrates on configurations with few (or no) true effects.
-To illustrate this behavior, @fig-fwer3-pd plots the probability of at least one discovery as a function of $m$ under a mixed data-generating scenario. For each family, $\Pr(\text{all } \theta = 0)=0.3$; otherwise, with probability $0.7$, exactly one $\theta$ equals $0.25$ and the remaining $m-1$ $\theta$ equal $0$. We repeated the previous simulation procedure with $\tau = 2$, $n = 100$, and $q \in \{0.50,\,0.40, \,0.30,\,0.20,\,0.10\}$.
-In the top panel, the curves show the FWER under the global null; in the bottom panel, they show the probability of at least one true positive when exactly one alternative is present. 
+Once $q$ is fixed, the prior odds for each individual hypothesis become a deterministic function of the family size $m$: larger families imply smaller $k$, and therefore higher prior probability toward the null for each test. 
 
-Šidák-adjusted *p*-values keep FWER near the nominal level at the cost of reduced power in larger families. When the multiplicity-adjusted *pd* uses the correct $\Pr(\text{all } \theta = 0)=0.3$, it closely follows Šidák’s error control while retaining comparatively higher power for moderate $m$; in contrast, using a lower $q$ increases the error rate and yields a substantial power gain. Notably, $\Pr(\text{all } \theta = 0)=0.4$ yields an FWER and power trajectory that is equivalent to the Šidák adjustment across all values of $m$, indicating that the Bayesian procedure can emulate classical strong FWER control. 
+To illustrate this behavior, we simulated a mixed data-generating scenario $\Pr(\text{all } \theta = 0)=0.5$; otherwise, $theta = 0.25$. We repeated the previous simulation procedure with $\tau = 2$, $n \in \{30,\,50,\,100\}$, and $q \in \{0.50,\,0.40, \,0.30,\,0.20,\,0.10\}$.
+
+@fig-fwer3-pd show the FWER ; @fig-pw-pd shows the probability of at least one true positive. 
+
+Šidák-adjusted *p*-values maintain FWER near the nominal level across all values of $m$ at the cost of reduced power, particularly in larger families. In contrast, pd_adj with lower values of $q$ (corresponding to lower $\Pr(\text{all } \theta = 0)$) yields substantial power gains but at the expense of inflated FWER, especially for smaller m. Notably, setting $\Pr(\text{all } \theta = 0) = 0.4$ produces an FWER and power trajectory that closely matches the Šidák adjustment across all family sizes, indicating that the Bayesian procedure can emulate classical strong FWER control in certain conditions. This demonstrates the flexibility of the prior-adjusted approach to balance between strict error control and increased sensitivity depending on the researcher's prior beliefs about the prevalence of true effects.
 
 \newpage
 
@@ -712,19 +713,14 @@ In the top panel, the curves show the FWER under the global null; in the bottom 
 #| label: fig-fwer3-pd
 #| dev: cairo_pdf
 #| fig-cap: >
-#|   Familywise error rate (**panel A**) and power (**panel B**) for adjusted p-values 
+#|   Familywise error rate for adjusted p-values 
 #|   and probability of direction as a function of the 
 #|   number of tests (m), and prior $\Pr(\text{all } \theta = 0)$. 
 #|   The red curve corresponds to declaring at least one discovery when
-#|   at least one two-sided one-sample z-test p-value (Šidák adjusted) < 0.05, whereas
+#|   at least one two-sided one-sample z-test p-value < 0.05, whereas
 #|   the blue curve corresponds to declaring at least one discovery when
-#|   at least one pd (adjusted) > 0.975 under the conjugate normal
-#|   Bayesian model. The panel A shows the rate under a global all 
-#|   null scenario ($\theta = 0$ for all tests). 
-#|   Panel B shows the rate in the condition when exactly one 
-#|   alternative hypothesis is true (one 
-#|   $\theta = 0.25$, others $\theta = 0$). 
-#|   Both are based on 10,000 replications with $n = 100$ observations. 
+#|   at least one pd > 0.975 under the conjugate normal
+#|   Bayesian model. 
 #| fig-pos: 'H'
 #| fig-width: 12
 #| fig-height: 12
@@ -737,7 +733,7 @@ In the top panel, the curves show the FWER under the global null; in the bottom 
 pnull = sim_res2 |> 
   unnest(fwer) |> 
   subset(is_null==1 &(name == "pd_adj" | name == "pval_sidak"))|>
-  group_by(name, m, s,n,q_sim,q) |> 
+  group_by(name, m, n,q) |> 
   summarise(fwer = mean(sign)) |>
   ggplot(aes(x = m, y = fwer, color =name)) +
   geom_line(aes(colour = name), size = 0.8, show.legend = TRUE) +
@@ -745,8 +741,64 @@ pnull = sim_res2 |>
              size = 2, show.legend = TRUE)+
   scale_colour_manual(values = c(pd_adj = "deepskyblue3",
                                  pval_sidak = "deeppink3")) +
-  facet_grid(~q,
+  facet_grid(n~q,
              labeller = as_labeller(c(
+               `30` = "n = 30",
+               `50` = "n = 50",
+               `100` = "n = 100",
+               `0.1` = "Pr(all null) = 0.1",
+               `0.2` = "Pr(all null) = 0.2",
+               `0.3` = "Pr(all null) = 0.3",
+               `0.4` = "Pr(all null) = 0.4",
+               `0.5` = "Pr(all null) = 0.5"))) +
+  scale_y_continuous(breaks = seq(0,.25,.025))+
+  scale_x_continuous(breaks = c(1,2,5,10,20))+
+  xlab("m")+ylab("fwer")+
+  geom_hline(yintercept = 0.05, linetype = "dashed")+
+  labs(colour = "index")+
+  theme_light(base_size = 18)+ theme(legend.position = "top")
+
+pnull
+```
+
+
+```{r}
+#| label: fig-pwfw-pd
+#| dev: cairo_pdf
+#| fig-cap: >
+#|   Power for adjusted p-values 
+#|   and probability of direction as a function of the 
+#|   number of tests (m), and prior $\Pr(\text{all } \theta = 0)$. 
+#|   The red curve corresponds to declaring at least one discovery when
+#|   at least one two-sided one-sample z-test p-value < 0.05, whereas
+#|   the blue curve corresponds to declaring at least one discovery when
+#|   at least one pd > 0.975 under the conjugate normal
+#|   Bayesian model.  
+#| fig-pos: 'H'
+#| fig-width: 12
+#| fig-height: 12
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-align: left
+
+# Plot family wise error rate
+pnull = sim_res2 |> 
+  unnest(fwer) |> 
+  subset(is_null==1 &(name == "pd_adj" | name == "pval_sidak"))|>
+  group_by(name, m, n,q) |> 
+  summarise(fwer = mean(sign)) |>
+  ggplot(aes(x = m, y = fwer, color =name)) +
+  geom_line(aes(colour = name), size = 0.8, show.legend = TRUE) +
+  geom_point(aes(colour = name),
+             size = 2, show.legend = TRUE)+
+  scale_colour_manual(values = c(pd_adj = "deepskyblue3",
+                                 pval_sidak = "deeppink3")) +
+  facet_grid(n~q,
+             labeller = as_labeller(c(
+               `30` = "n = 30",
+               `50` = "n = 50",
+               `100` = "n = 100",
                `0.1` = "Pr(all null) = 0.1",
                `0.2` = "Pr(all null) = 0.2",
                `0.3` = "Pr(all null) = 0.3",
@@ -762,7 +814,7 @@ pnull = sim_res2 |>
 ppw = sim_res2 |> 
   unnest(fwer) |> 
   subset(is_null==0 &(name == "pd_adj" | name == "pval_sidak"))|>
-  group_by(name, m, s,n,q_sim,q) |> 
+  group_by(name, m, n,q) |> 
   summarise(fwer = mean(sign)) |>
   ggplot(aes(x = m, y = fwer, color =name)) +
   geom_line(aes(colour = name), size = 0.8, show.legend = TRUE) +
@@ -770,8 +822,11 @@ ppw = sim_res2 |>
              size = 2, show.legend = TRUE)+
   scale_colour_manual(values = c(pd_adj = "deepskyblue3",
                                  pval_sidak = "deeppink3")) +
-  facet_grid(~q,
+ facet_grid(n~q,
              labeller = as_labeller(c(
+               `30` = "n = 30",
+               `50` = "n = 50",
+               `100` = "n = 100",
                `0.1` = "Pr(all null) = 0.1",
                `0.2` = "Pr(all null) = 0.2",
                `0.3` = "Pr(all null) = 0.3",
@@ -786,9 +841,6 @@ ppw = sim_res2 |>
 (pnull / ppw) + plot_annotation(tag_levels = "A")
 
 ```
-
-
-
 
 ...
 

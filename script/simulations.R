@@ -142,29 +142,22 @@ save(sim, file = "script/output/sim1.rda")
 
 # Simuation 2 ---------------------------------
 m = c(1,2,3,4,5,10,20) # number of tests
-n = 100 # number of subjects
+n = c(30,50,100) # number of subjects
 nsim = 1e4 # number of simulations
 r = 0 # correlation
 s = 2 # prior sd
 eff = 0.25 # theta under H1 
 q = c(0.5, 0.4, 0.3,0.2, 0.1)  # prior all null
-q_sim = 0.3 # true all null
+q_sim = 0.5 # true all null
 
 sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
   replicate(nsim, {
     
-    # chance all tests in family are null
-    all_null = runif(1) < q_sim
+    qH0 = q_sim^(1 / m)
+    is_null = rbinom(m, 1, qH0) == 1  # TRUE with prob qH0
     
-    if(all_null){
-      # All null
-      effect = rep(0, m)
-    } else {
-      # Otherwise: one effect, rest null
-      which_effect = sample(1:m, 1)  # Randomly pick 1 test
-      effect = rep(0, m)             # Start with all null
-      effect[which_effect] = eff     # Set exactly one to eff
-    }
+    # Set effects: 0 for nulls, eff for alternatives
+    effect = ifelse(is_null, 0, eff)
     
     r = r
     S = r + diag(1 - r, m) 
@@ -174,7 +167,7 @@ sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
     # frequentist
     pval = apply(X, 2, function(x) z_test(x))
     # sidak adjustment
-    pval_sidak = 1-(1-pval)^m #sidak
+    pval_sidak = 1-(1-pval)^m
     
     # bayes
     post = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
@@ -182,10 +175,13 @@ sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
     # adjustment
     pd_adj = prior_adj(pd = pd, q = q)
     
-    # save data 
-    data.frame(pval, pval_sidak, pd, pd_adj, is_null = all_null)
+    # save data
+    data.frame(pval, pval_sidak, pd, pd_adj, 
+               true_effect = effect,
+               is_null = is_null)
   }, simplify = FALSE)
 }
+
 
 sim = expand.grid(
   n = n,
