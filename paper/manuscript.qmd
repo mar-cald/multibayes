@@ -192,8 +192,8 @@ As proposed and popularized in applied Bayesian workflows, *pd* offers an intuit
 #| label: fig-posterior-pd
 #| dev: cairo_pdf
 #| fig-cap: "Posterior distribution with shaded directional posterior area. In this example, the probability of direction (pd) is the greater posterior probability on either side of 0."
-#| fig-width: 4
-#| fig-height: 2
+#| fig-width: 5
+#| fig-height: 2.5
 #| echo: false
 #| message: false
 #| warning: false
@@ -231,7 +231,7 @@ ggplot(df, aes(x = x, y = y)) +
   geom_vline(xintercept = 0, linetype = "dashed", linewidth = 1) +
   annotate(
     "label",
-    x = quantile(draws, .98),
+    x = 1,
     y = max(df$y) * 0.8,
     hjust = 0.5,
     vjust = 0.5,
@@ -251,19 +251,35 @@ ggplot(df, aes(x = x, y = y)) +
 ```
 
 Because *pd* is a functional of the posterior, it inherits dependence on the full model specification (likelihood and prior), so its long-run error behavior is not a property of *pd* “in isolation” but of the overall Bayesian procedure that generates the posterior. A convenient starting point for calibration is the mapping between *pd* and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), *pd* is simply the posterior on the dominant side of $\theta_{null}$, which corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987]: 
-$pd = \max(Pr(\theta < \theta_{null} \mid y), Pr(\theta > \theta_{null} \mid y)) = 1 - p,$ with the two-sided correspondence being $p_{two-sided} = 2p = 2(1 - pd)$.
+$$
+pd = \max(Pr(\theta < \theta_{null} \mid y), Pr(\theta > \theta_{null} \mid y)) = 1 - p,
+$$ 
+with the two-sided correspondence being $p_{two-sided} = 2p = 2(1 - pd)$.
 
 ## Probability of Direction as a test of existence and direction
 
-The *pd* can be embedded in a three-sided testing framework [@Goeman2010], where thresholding $pd > c$ yields a claim that an effect exists *and* has a particular sign.
-The three-sided testing framework partitions the parameter space into three mutually exclusive regions: $H_{-}: \theta < 0$ (inferiority), $H_{0}: \theta = 0$ (equivalence), and $H_{+}: \theta > 0$ (superiority). Within this partition, *pd* maps naturally onto the two directional regions because it is the posterior probability of the dominant sign, i.e., the larger of $\Pr(\theta>0\mid y)$ and $\Pr(\theta<0\mid y)$. Thus, $pd > c$ implies either $\Pr(\theta > 0 \mid y) > c$ or $\Pr(\theta < 0 \mid y) > c$. 
+The *pd* can be embedded in a three-sided testing framework [@Goeman2010], where thresholding $pd > c$ yields a claim that an effect exists *and* has a particular sign. The three-sided testing framework partitions the parameter space into three mutually exclusive regions: 
 
-When $pd > c$ supports $\theta>0$, the posterior probability assigned to nonpositive values is bounded by $\Pr(\theta \le 0 \mid y) < 1-c$ (analogously, when $pd > c$ supports $\theta<0$, $\Pr(\theta \ge 0 \mid y) < 1-c$). This decision rule does more than compare $H_{+}$ versus $H_{-}$, it also excludes zero by ensuring that posterior mass on the null-or-opposite-sign region remains below $1-c$. Since $\Pr(\theta \le 0 \mid y) < 1-c$, zero must lie below the $(1-c)$-quantile of the posterior distribution. Equivalently, the $(1-c)$-quantile is strictly positive. As a result, the central credible interval (bounded by the ($1-c$) and $c$ quantiles) excludes zero (see @fig-pd-ci).
+$H_{-}: \theta < 0$ (inferiority), 
+
+$H_{0}: \theta = 0$ (equivalence), 
+
+$H_{+}: \theta > 0$ (superiority). 
+
+Within this partition, *pd* maps naturally onto the two directional regions because it is the posterior probability of the dominant sign, i.e., the larger of $\Pr(\theta>0\mid y)$ and $\Pr(\theta<0\mid y)$. Thus, $pd > c$ implies either $\Pr(\theta > 0 \mid y) > c$ or $\Pr(\theta < 0 \mid y) > c$. 
+When $pd > c$ supports $\theta>0$, the posterior probability assigned to nonpositive values is bounded by 
+$$\Pr(\theta \le 0 \mid y) < 1-c$$ 
+(analogously, when $pd > c$ supports $\theta<0$, $\Pr(\theta \ge 0 \mid y) < 1-c$). 
+This decision rule does more than compare $H_{+}$ versus $H_{-}$, it also excludes $0$ by ensuring that posterior mass on the null-or-opposite-sign region remains below $1-c$. Since $\Pr(\theta \le 0 \mid y) < 1-c$, zero must lie below the $(1-c)$-quantile of the posterior distribution. Equivalently, the $(1-c)$-quantile is strictly positive. As a result, the central credible interval (bounded by the ($1-c$) and $c$ quantiles) excludes $0$ (see @fig-pd-ci).
 
 ```{r}
 #| label: fig-pd-ci
 #| dev: cairo_pdf
-#| fig-cap: "Posterior distributions illustrating the relationship between the probability of direction (pd) and credible-interval (CI), using c = 0.975. **Left:** A narrow posterior whose 95% CI excludes 0. **Right:** A wider posterior whose 95% CI overlaps 0."
+#| fig-cap: > 
+#|  Posterior distributions illustrating the relationship between
+#|  the probability of direction (pd) and credible-interval (CI), using c =
+#|  0.975 and $\theta_{null} = 0$. **Left:** A narrow posterior whose 95% CI
+#|  excludes 0. **Right:** A wider posterior whose 95% CI overlaps 0.
 #| fig-width: 12
 #| fig-height: 5
 #| echo: false
