@@ -551,9 +551,9 @@ where $\text{BF}_{+/-}$ is the directional Bayes factor (the ratio of integrated
 
 ### Multiplicity adjustment via post-hoc prior-odds
 
-When assessing a single directional claim under a symmetric prior centered at the null, prior odds equal 1, encoding prior indifference between positive and negative effects. However, when *m* hypotheses are assessed simultaneously and the same default prior odds are used for each, the implied prior distribution over the number of non-null directional effects across the family can become unrealistically optimistic as *m* increases.
+When assessing a single directional claim under a symmetric prior centered at the null, prior odds equal 1, encoding prior indifference between positive and negative effects. However, when *m* hypotheses are assessed simultaneously assigning prior probability $0.5$ to each non-null directional effect makes it almost certain a priori that at least one effect is non-zero. For instance, with $m = 10$ the implied prior probability that all effects are zero or in the opposite direction is $0.5^{10} \approx 0.001$, which is often unrealistically low. 
 
-A coherent approach to multiplicity control is to decrease the prior odds assigned to any particular directional claim as a function of *m*, while leaving the likelihood, and hence the Bayes factor component, unchanged. Because the analysis is symmetric in the sign of $\theta$ and *pd* is defined as the posterior probability of the dominant direction, the same adjustment can be applied regardless of whether the posterior favors $\theta>0$ or $\theta<0$. This yields an adjusted posterior-odds expression of the form
+A principled way to address multiplicity is to decrease the prior odds assigned to any particular directional claim as a function of *m*, while leaving the likelihood, and hence the Bayes factor component, unchanged. Because the analysis is symmetric in the sign of $\theta$ and *pd* is defined as the posterior probability of the dominant direction, the same adjustment can be applied regardless of whether the posterior favors $\theta>0$ or $\theta<0$. This yields an adjusted posterior-odds expression of the form
 $$
 \text{Posterior odds}_{\text{adjusted}} = \frac{pd}{1-pd} \times \text{ adjustment factor}(m).
 $$
