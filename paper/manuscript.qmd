@@ -253,7 +253,9 @@ $$ with the two-sided correspondence being $p_{two-sided} = 2p = 2(1 - pd)$.
 
 ## Probability of Direction as a test of existence and direction
 
-The *pd* can be embedded in a testing framework, where thresholding $pd > c$ yields a claim that an effect exists *and* has a particular sign. For instance, when $pd > c$ supports $\theta>0$, the posterior probability assigned to nonpositive values is bounded by $$\Pr(\theta \le 0 \mid y) < 1-c$$ (analogously, when $pd > c$ supports $\theta<0$, $\Pr(\theta \ge 0 \mid y) < 1-c$). This decision rule does more than compare $H_{+}$ versus $H_{-}$, it also excludes $0$ by ensuring that posterior mass on the null-or-opposite-sign region remains below $1-c$. Since $\Pr(\theta \le 0 \mid y) < 1-c$, zero must lie below the $(1-c)$-quantile of the posterior distribution. Equivalently, the $(1-c)$-quantile is strictly positive. As a result, the central credible interval (bounded by the ($1-c$) and $c$ quantiles) excludes $0$ (see @fig-pd-ci).
+The *pd* can be embedded in a testing framework, where thresholding $pd > c$ yields a claim that an effect exists *and* has a particular sign. For instance, when $pd > c$ supports $\theta>0$, the posterior probability assigned to nonpositive values is bounded by 
+$$\Pr(\theta \le 0 \mid y) < 1-c
+$$ (analogously, when $pd > c$ supports $\theta<0$, $\Pr(\theta \ge 0 \mid y) < 1-c$). This decision rule does more than compare $H_{+}$ versus $H_{-}$, it also excludes $0$ by ensuring that posterior mass on the null-or-opposite-sign region remains below $1-c$. Since $\Pr(\theta \le 0 \mid y) < 1-c$, zero must lie below the $(1-c)$-quantile of the posterior distribution. Equivalently, the $(1-c)$-quantile is strictly positive. As a result, the central credible interval (bounded by the ($1-c$) and $c$ quantiles) excludes $0$ (see @fig-pd-ci).
 
 ```{r}
 #| label: fig-pd-ci
@@ -518,12 +520,7 @@ sim_res1 |>
 
 ### From posterior probabilities to posterior odds
 
-The probability of direction (*pd*) is defined as the maximum of the two posterior tail probabilities around a null value $\theta_{\text{null}}$:  
-$pd=\max(\Pr(\theta>\theta_{\text{null}}\mid y),\Pr(\theta<\theta_{\text{null}}\mid y)).$  For notational simplicity, we set $\theta_{\text{null}}=0$ throughout this section.
-
-To connect $pd$ to an evidential interpretation, consider the directional hypotheses $H_{+}:\theta>0$ and $H_{-}:\theta<0$. If the prior for $\theta$ is continuous and symmetric about 0, then $\Pr(H_{+})=\Pr(H_{-})=1/2$.  Without loss of generality, assume the posterior favors $H_{+}$, so that $pd=\Pr(H_{+}\mid y)=\Pr(\theta>0\mid y)$. The complement probability is then $1-pd=\Pr(\theta\le 0\mid y)$; under a continuous symmetric prior and posterior, $\Pr(\theta=0\mid y)=0$ and therefore $1-pd=\Pr(\theta<0\mid y)=\Pr(H_{-}\mid y)$ (the “$\le$” notation simply makes the boundary inclusion explicit).
-
-Hence the posterior odds for the favored direction are
+The probability of direction (*pd*) is defined as the maximum of the two posterior tail probabilities around a null value $\theta_{\text{null}}$. For notational simplicity, we set $\theta_{\text{null}}=0$ throughout this section. To connect $pd$ to an evidential interpretation, consider the directional hypotheses $H_{+}:\theta>0$ and $H_{-}:\theta<0$. If the prior for $\theta$ is continuous and symmetric about 0, then $\Pr(H_{+})=\Pr(H_{-})=1/2$.  Without loss of generality, assume the posterior favors $H_{+}$, so that $pd=\Pr(H_{+}\mid y)=\Pr(\theta>0\mid y)$. The complement probability is then $1-pd=\Pr(\theta\le 0\mid y)$; under a continuous symmetric prior and posterior, $\Pr(\theta=0\mid y)=0$ and therefore $1-pd=\Pr(\theta<0\mid y)=\Pr(H_{-}\mid y)$ (the “$\le$” notation simply makes the boundary inclusion explicit). Hence the posterior odds for the favored direction are
 $$
 \frac{pd}{1-pd}=\frac{\Pr(H_{+}\mid y)}{\Pr(H_{-}\mid y)}.
 $$ 
@@ -533,13 +530,13 @@ $$
 =
 \text{BF}_{+/-}\times\frac{\Pr(H_{+})}{\Pr(H_{-})},
 $$
-where $\text{BF}_{+/-}=p(y\mid H_{+})/p(y\mid H_{-})$ is the directional Bayes factor. Under prior symmetry, $\Pr(H_{+})/\Pr(H_{-})=1$, so $\frac{pd}{1-pd}=\text{BF}_{+/-}$ [@Marsman2017; @Casella1987].  Thus, the odds $pd/(1-pd)$ computed from posterior draws can be interpreted directly as evidence favoring $\theta>0$ over $\theta<0$ (equivalently, $\{\theta\le 0\}$).
+where $\text{BF}_{+/-}=p(y\mid H_{+})/p(y\mid H_{-})$ is the directional Bayes factor. Under prior symmetry, $\Pr(H_{+})/\Pr(H_{-})=1$, so $\frac{pd}{1-pd}=\text{BF}_{+/-}$ [@Marsman2017; @Casella1987].  Thus, the odds $pd/(1-pd)$ computed from posterior draws can be interpreted directly as evidence favoring $\theta>0$ over $\theta \le 0$.
 
 ### Multiplicity adjustment via post-hoc prior-odds
 
 When assessing a single directional claim under a symmetric prior centered at the null, prior odds equal 1, encoding prior indifference between positive and negative effects. However, when *m* hypotheses are assessed simultaneously, assigning prior probability $\frac{1}{2}$ to each directional claim implies a joint prior that rapidly concentrates probability on the event that *at least one* effect departs from 0. For instance, with $m = 10$ the implied prior probability that all effects are “not in the favored direction” is $0.5^{10} \approx 0.001$, which is often unrealistically low.
 
-A principled way to address multiplicity is to decrease the prior odds assigned to any particular directional claim as a function of *m*, while leaving the likelihood (and hence the Bayes factor component) unchanged.  Because the analysis is symmetric in the sign of $\theta$ and *pd* is defined as the posterior probability of the dominant direction, the same adjustment can be applied regardless of whether the posterior favors $\theta>0$ or $\theta<0$. 
+A principled way to address multiplicity is to decrease the prior odds assigned to any particular directional claim as a function of *m*, while leaving the the Bayes factor component unchanged.  Because the analysis is symmetric in the sign of $\theta$ and *pd* is defined as the posterior probability of the dominant direction, the same adjustment can be applied regardless of whether the posterior favors $\theta>0$ or $\theta<0$. 
 
 Concretely, let $\Pr(H_{0})$ and $\Pr(H_{1})$ denote the multiplicity-adjusted prior probabilities assigned to the favored direction and its complement, respectively (with $\Pr(H_{0})+\Pr(H_{1})=1$). The adjusted posterior odds are then
 $$
