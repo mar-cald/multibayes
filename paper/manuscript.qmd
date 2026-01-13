@@ -71,8 +71,12 @@ keywords: [probability of direction, multiple testing, prior-odds]
 bibliography: "biblio.bib"
 reference-section-title: References
 format:
-  apaquarto-docx: default
-  apaquarto-pdf: default
+  apaquarto-docx: 
+    floatsintext: true   
+  apaquarto-pdf:
+    fig-pos: 'H'
+    floatsintext: true   
+    out-width: "100%"   
 execute:
   cache: true
   cache-lazy: false
@@ -214,7 +218,7 @@ As proposed and popularized in applied Bayesian workflows, *pd* offers an intuit
 #| dev: cairo_pdf
 #| fig-cap: "Posterior distribution with directional posterior mass on either side of 0 shown in different colors; the probability of direction (pd) is the larger of the two posterior probabilities."
 #| fig-width: 5
-#| fig-height: 2.5
+#| fig-height: 3  
 #| echo: false
 #| message: false
 #| warning: false
@@ -268,7 +272,7 @@ ggplot(df, aes(x = x, y = y)) +
     values = c("\u03B8 < 0" = "deepskyblue", "\u03B8 > 0" = "deepskyblue4")
   ) +
   theme(legend.position = "top")+
-  theme_clean(base_size = 10)
+  theme_clean(base_size = 12)
 ```
 
 Because *pd* is a functional of the posterior, it inherits dependence on the full model specification (likelihood and prior), so its long-run error behavior is not a property of *pd* “in isolation” but of the overall Bayesian procedure that generates the posterior. 
@@ -296,8 +300,9 @@ Finally, $c$ can be set so that the interval between the $1-c$ and $c$ posterior
 #|  Posterior distributions illustrating the relationship between
 #|  the probability of direction (pd) and credible-interval (CI), using c =
 #|  0.975 and $\theta_{null} = 0$. 
-#| fig-width: 12
-#| fig-height: 5
+#| fig-height: 4
+#| fig-width: 7
+#| apa-twocolumn: true 
 #| echo: false
 #| cache: true
 #| message: false
@@ -350,7 +355,7 @@ h1 = ggplot(df1, aes(x = x, y = y)) +
   ) +
   labs(x = expression(theta), y = "Posterior density", fill = NULL) +
   scale_fill_manual(values = c("θ < 0" = "deepskyblue2", "θ > 0" = "deepskyblue4")) +
-  theme(legend.position = "top") + theme_clean(base_size = 18)+
+  theme(legend.position = "top") + theme_clean(base_size = 12)+
   scale_x_continuous(breaks = c(-.5,0,.5,1), limits = c(-1,1))
 
 # Case 2: Wide posterior (includes zero) 
@@ -395,7 +400,7 @@ h0 = ggplot(df, aes(x = x, y = y)) +
   ) +
   labs(x = expression(theta), y = " ", fill = NULL) +
   scale_fill_manual(values = c("θ < 0" = "deepskyblue", "θ > 0" = "deepskyblue4")) +
-  theme(legend.position = "top") + theme_clean(base_size = 18)+
+  theme(legend.position = "top") + theme_clean(base_size = 12)+
   scale_x_continuous(breaks = c(-.5,0,.5,1), limits = c(-1,1))
 
 (h1 | h0) + plot_layout(guides = "collect")&
@@ -421,7 +426,6 @@ As shown in @fig-uniform-pd, *pd* exhibits behavior broadly analogous to a *p*-v
 ```{r}
 #| label: fig-uniform-pd
 #| dev: cairo_pdf
-#| fig-pos: 'H'
 #| fig-cap: >
 #|   Null reference distributions for p-values and probability of direction.
 #|   Panel A shows the histogram of two-sided one-sample z-test p-values
@@ -435,12 +439,13 @@ As shown in @fig-uniform-pd, *pd* exhibits behavior broadly analogous to a *p*-v
 #|   The vertical dashed line marks the commonly used evidential cutoff
 #|   (pd = 0.975), which corresponds to a two-sided p-value of 0.05 under the
 #|   standard conversion $p = 2(1 - pd)$.
-#| fig-width: 14
-#| fig-height: 14
+#| fig-height:  6 
+#| fig-width: 10   
 #| echo: false
 #| message: false
 #| warning: false
 #| fig-align: left
+#| apa-twocolumn: true 
 
 # Distribution of pd under the null 
 pval = sim_res1[[2]][[1]]
@@ -523,9 +528,9 @@ As expected, *pd* again behaves broadly analogously to the *p*-value when sample
 #|   Rows vary the per-test sample size ($n = 30, 50, 100$), and columns vary the
 #|   prior scale ($\theta \sim \mathcal{N}(0, \tau^2)$ with
 #|   $\tau \in \{0.2, 0.5, 1, 1.5, 2\}$).
-#| fig-pos: 'H'
-#| fig-width: 12
-#| fig-height: 11
+#| fig-width: 7.5        
+#| fig-height: 5       
+#| out-width: "100%"   
 #| echo: false
 #| message: false
 #| warning: false
@@ -613,9 +618,8 @@ As $m$ increases, the per-hypothesis prior probability $k=\Pr(H_{1_m})$ decrease
 #|   Per-hypothesis prior probability $k$ s a function of the total number of hypotheses $m$,  
 #|   with the overall prior probability of at least one effect fixed at $q = 0.5$. 
 #|   The per-hypothesis prior is given by $k = 1 - 0.5^{1/m}$.
-#| fig-pos: 'H'
-#| fig-width: 8
-#| fig-height: 4
+#| fig-width: 5
+#| fig-height: 3.5
 #| echo: false
 #| message: false
 #| warning: false
@@ -655,9 +659,8 @@ In this simulation, we compare this method with the Šidák *p*-value adjustment
 #|   Rows vary the per-test sample size ($n = 30, 50, 100$), and columns vary the
 #|   prior scale ($\theta \sim \mathcal{N}(0, \tau^2)$ with
 #|   $\tau \in \{0.2, 0.5, 1, 1.5, 2\}$). 
-#| fig-pos: 'H'
-#| fig-width: 10
-#| fig-height: 10
+#| fig-width: 7       
+#| fig-height: 5       
 #| echo: false
 #| message: false
 #| warning: false
@@ -711,9 +714,8 @@ Once $q$ is fixed, the prior odds assigned to each individual hypothesis become 
 #|   Familywise error rate (Panel A), power (Panel B), and difference between method
 #|   (Panel C) for adjusted *p*-values and probability of direction as a function of the 
 #|   number of tests ($m$) and prior $\Pr(\text{all } \theta=0)$. The Šidák-adjusted *p*-value curve (pink) declares at least one discovery when any two-sided one-sample *z*-test satisfies $p<0.05$, whereas the adjusted *pd* curve (blue) declares at least one discovery when any $pd>0.975$ under the conjugate normal Bayesian model. Panel C shows the difference (adjusted pd minus Šidák-adjusted p-value) for FWER (under the global null) and power (under the global alternative).
-#| fig-pos: 'H'
-#| fig-width: 14
-#| fig-height: 14
+#| fig-width: 7       
+#| fig-height: 5       
 #| echo: false
 #| message: false
 #| warning: false
