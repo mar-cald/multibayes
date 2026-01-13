@@ -1,0 +1,27 @@
+Package: pdAdjust
+Type: Package
+Title: Prior-Odds Adjustment for Probability of Direction
+Version: 0.1.0
+Authors@R: 
+    person("Margherita", "Calderan", 
+           email = "margherita.calderan@gmail.com", 
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0005-5668-5162"))
+Description: Provides methods for Bayesian multiplicity adjustment using 
+    probability of direction (pd) values. The main function adjusts pd values 
+    using a global prior probability that all tested hypotheses are null, 
+    converting it into per-hypothesis prior odds that account for family size. 
+    This approach offers a principled framework for controlling multiplicity 
+    in Bayesian inference while maintaining interpretability.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 4.0.0)
+Suggests: 
+    testthat (>= 3.0.0)
+URL: https://github.com/Mar-Cald/my-prior-odds
+BugReports: https://github.com/Mar-Cald/my-prior-odds/issues
+Config/testthat/edition: 3

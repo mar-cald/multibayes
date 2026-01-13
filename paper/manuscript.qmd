@@ -128,7 +128,7 @@ sign_pval = function(data, th){
 }
 
 # Simulation 1
-load(file = "~/my-prior-odds/script/output/sim1.rda")
+load(file = "script/output/sim1.rda")
 sim1 = tibble(sim)
 sim_res1 = sim1 |> 
   unnest(res) |> 
@@ -165,7 +165,7 @@ sign_pval = function(data, th){
     reframe(sign = any(value < th))  
 }
 
-load(file = "~/my-prior-odds/script/output/sim2.rda")
+load(file = "script/output/sim2.rda")
 sim2 = tibble(sim)
 
 sim_res2 = sim2 |> 
