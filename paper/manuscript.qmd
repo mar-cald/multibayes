@@ -16,7 +16,7 @@ author:
         country: Italy
         postal-code: 35131
   - name: Filippo Gambarota
-    corresponding: true
+    corresponding: false
     orcid: 0000-0002-6666-1747
     email: filippo.gambarota@unipd.it
     affiliations:
@@ -28,7 +28,7 @@ author:
         country: Italy
         postal-code: 35131
   - name: Enrico Toffalini
-    corresponding: true
+    corresponding: false
     orcid: 0000-0002-1404-5133
     email: enrico.toffalinia@unipd.it
     affiliations:
@@ -40,7 +40,7 @@ author:
         country: Italy
         postal-code: 35131
   - name: Gianmarco Altoè
-    corresponding: true
+    corresponding: false
     orcid: 0000-0003-1254-9528
     email: gianmarco.altoe@unipd.it
     affiliations:
@@ -71,9 +71,8 @@ keywords: [probability of direction, multiple testing, prior-odds]
 bibliography: "biblio.bib"
 reference-section-title: References
 format:
-  apaquarto-pdf:
-    floatsintext: true
-    documentmode: man
+  apaquarto-docx: default
+  apaquarto-pdf: default
 execute:
   cache: true
   cache-lazy: false
@@ -202,9 +201,9 @@ Accordingly, we adopt a *falsificationist* perspective, which treats Bayesian pr
 
 The paper proceeds in four steps. First, we introduce *pd* and make explicit its connection to the frequentist *p*-value, which provides a reference point for calibration. Second, we characterize *pd*'s null distribution and examine its multiple-testing behavior through simulations that quantify false-positive rates. Third, we relate *pd* to directional Bayes factors and formalize the role of prior odds. Finally, we present prior-odds adjustments for multiplicity following Jeffreys [@Jeffreys1938; see also @Westfall1997], discuss implementation under dependence, and provide guidance for reporting both raw and multiplicity-adjusted *pd*.
 
-### Probability of Direction and *p*-value
+### Probability of direction and p-value
 
-The Probability of Direction (*pd*) for continuous distributions can be defined as the maximum between the posterior probabilities that a parameter is greater or smaller than the null value:
+The probability of direction (*pd*) for continuous distributions can be defined as the maximum between the posterior probabilities that a parameter is greater or smaller than the null value:
 $$
 pd = \max(\Pr(\theta < \theta_{null} \mid y),\ \Pr(\theta > \theta_{null} \mid y)).
 $$ 
@@ -278,9 +277,9 @@ A convenient starting point for calibration is the mapping between *pd* and the 
 pd = \max(Pr(\theta < \theta_{null} \mid y), Pr(\theta > \theta_{null} \mid y)) = 1 - p,
 $$ with the two-sided correspondence being $p_{two-sided} = 2p = 2(1 - pd)$.
 
-### Probability of Direction as a test of existence and direction
+### Probability of direction as a test of existence and direction
 
-The *pd* can be embedded in a testing framework, where thresholding $pd > c$ yields a claim that an effect exists and has a particular sign. For instance, when $pd > c$ supports $\theta>0$, the posterior probability assigned to nonpositive values is bounded by 
+The *pd* can be embedded in a testing framework, where thresholding $pd > c$ yields a claim that an effect exists and has a particular sign. For example, when $pd > c$ supports $\theta>0$, the posterior probability assigned to nonpositive values is bounded by 
 $$\Pr(\theta \le 0 \mid y) < 1-c,$$
 and, analogously, when $pd > c$ supports $\theta<0$, it follows that $\Pr(\theta \ge 0 \mid y) < 1-c$. 
 
@@ -557,31 +556,26 @@ sim_res1 |>
 ```
 
 
-The results of this simulation imply that Type I error can, in principle, be reduced by adopting a more skeptical prior for the effect within each individual model; however, this is unlikely to be the most appropriate way to address multiplicity. In particular, we think that the prior used to estimate a given effect should be driven by substantive knowledge about that specific quantity, not by the mere fact that other hypotheses are being tested in parallel [**REF**]. For this reason, the approach proposed below focuses on adjusting between-model prior probabilities (i.e., prior odds across competing hypotheses), rather than modifying the within-model prior for any single parameter [**REF**]. 
+The results of this simulation imply that Type I error can, in principle, be reduced by adopting a more skeptical prior for the parameters within each individual model; however, this is unlikely to be the most appropriate way to address multiplicity. In particular, we think that the prior used to estimate a given parameter should be driven by substantive knowledge about that specific quantity, not by the mere fact that other hypotheses are being tested in parallel [**REF**]. For this reason, the approach proposed below focuses on adjusting between-model prior probabilities (i.e., prior odds across competing hypotheses), rather than modifying the within-model prior for any single parameter [**REF**]. 
 
-## Probability of Direction, posterior odds, and prior-odds adjustment
+## Probability of direction, posterior odds, and prior-odds adjustment
 
 ### From posterior probabilities to posterior odds
 
-To connect $pd$ to an evidential interpretation, consider the directional hypotheses $H_{+}:\theta>0$ and $H_{-}:\theta<0$. These hypotheses partition the parameter space based on the sign of $\theta$. If the prior for $\theta$ is continuous and symmetric about 0, then the two directions are equally plausible a priori:
-
-$\Pr(H_{+})=\Pr(H_{-})=1/2.$
+To connect $pd$ to an evidential interpretation, consider the directional hypotheses $H_{+}:\theta>0$ and $H_{-}:\theta<0$. These hypotheses partition the parameter space based on the sign of $\theta$. If the prior for $\theta$ is continuous and symmetric about 0, then the two directions are equally plausible a priori: $\Pr(H_{+})=\Pr(H_{-})=1/2$.
 
 Without loss of generality, assume the posterior favors $H_{+}$, so that $pd=\Pr(H_{+}\mid y)=\Pr(\theta>0\mid y)$ (if the posterior instead favors $H_{-}$, we simply relabel the hypotheses), then the complement is given by $1-pd=\Pr(\theta\le0\mid y)$. 
 The posterior odds comparing these two hypothesis are therefore:
-
-$\frac{pd}{1-pd}=\frac{\Pr(H_{+}\mid y)}{\Pr(H_{-}\mid y)}.$ 
+$$\frac{pd}{1-pd}=\frac{\Pr(H_{+}\mid y)}{\Pr(H_{-}\mid y)}.$$ 
 
 Applying Bayes' rule, these posterior odds can be decomposed into a Bayes factor and prior odds:
-
 $$
 \frac{\Pr(H_{+}\mid y)}{\Pr(H_{-}\mid y)}
 =
 \text{BF}_{+/-}\times\frac{\Pr(H_{+})}{\Pr(H_{-})},
 $$
-where $\text{BF}{+/-}$ quantifies how much more predictive $H_+$ is compared to $H_-$. 
 
-Under prior symmetry, $\frac{\Pr(H_{+})}{\Pr(H_{-})} = 1$, which yields $\frac{pd}{1-pd}=\text{BF}_{+/-}$ [@Marsman2017; @Casella1987]. Thus, the odds $\frac{pd}{(1-pd}$ computed from posterior draws can be interpreted directly as evidence favoring $\theta>0$ over $\theta \le 0$ (or $\theta<0$ over $\theta \geq 0$).
+where $\text{BF}{+/-}$ quantifies the relative likelihood of the data under $H+$ versus $H_-$. Under prior symmetry, $\frac{\Pr(H_{+})}{\Pr(H_{-})} = 1$, which yields $\frac{pd}{1-pd}=\text{BF}_{+/-}$ [@Marsman2017; @Casella1987]. Thus, the odds $\frac{pd}{(1-pd)}$ computed from posterior draws can be interpreted directly as evidence favoring $\theta>0$ over $\theta \le 0$ (or $\theta<0$ over $\theta \geq 0$).
 
 ### Multiplicity adjustment via post-hoc prior-odds
 
@@ -589,32 +583,28 @@ When assessing a single directional claim under a symmetric prior centered at th
 
 In this scenario, a principled way to address multiplicity is to decrease the prior odds assigned to any particular directional claim as a function of *m*, while leaving the the Bayes factor component unchanged. Because the analysis is symmetric in the sign of $\theta$ and *pd* is defined as the posterior probability of the dominant direction, the same adjustment can be applied regardless of whether the posterior favors $\theta>0$ or $\theta<0$. 
 
-Concretely, let $\Pr(H_{0})$ and $\Pr(H_{1})$ denote the multiplicity-adjusted prior probabilities assigned to the favored direction and its complement, respectively (with $\Pr(H_{0})+\Pr(H_{1})=1$). The adjusted posterior odds are then:
+Concretely, let $\Pr(H_{0_m})$ and $\Pr(H_{1_m})$ denote the multiplicity-adjusted prior probabilities assigned to the favored direction and its complement, respectively (with $\Pr(H_{0_m})+\Pr(H_{1_m})=1$). The adjusted posterior odds are then:
 
 $$
 \frac{pd_{\text{adj}}}{1-pd_{\text{adj}}}
 =
-\frac{pd}{1-pd}\times \frac{\Pr(H_{1})}{\Pr(H_{0})},
+\frac{pd}{1-pd}\times \frac{\Pr(H_{1_m})}{\Pr(H_{0_m})},
 $$
 so that, equivalently,
 $$
 pd_{\text{adj}}
 =
-\frac{pd\cdot \Pr(H_{1})}{pd\cdot \Pr(H_{1}) + (1-pd)\cdot \Pr(H_{0})}.
+\frac{pd\cdot \Pr(H_{1_m})}{pd\cdot \Pr(H_{1_m}) + (1-pd)\cdot \Pr(H_{0_m})}.
 $$
-Thus, the multiplicity adjustment acts through the prior-odds factor $\Pr(H_{1})/\Pr(H_{0})$.
+Thus, the multiplicity adjustment acts through the prior-odds factor $\Pr(H_{1_m})/\Pr(H_{0_m})$.
 
-One common formalization [@Jeffreys1938; @Westfall1997] introduces a global null event $Q$ (all null hypotheses are true) and its complement $\neg Q$ (at least one null is false), and assigns equal prior probability 
-$$\text{Pr}(Q)=\text{Pr}(\neg Q)=\frac{1}{2}.$$ 
 
-Under independence and a common per-hypothesis probability $k$ that a null is false, this implies:
-$$
-(1-k)^m = 0.5
-\quad\Rightarrow\quad
-k = 1 - 0.5^{1/m}.
-$$
+### Choosing the prior-odds
 
-As $m$ increases, the per-hypothesis prior probability $k=\Pr(H_1)$ decreases (Figure @fig-prior-adj), encoding increasing prior skepticism about any particular deviation from the null; correspondingly, $\Pr(H_0)$ increases.
+One common formalization [@Jeffreys1938; @Westfall1997] introduces a global null event $Q$ (all null hypotheses are true) and its complement $\neg Q$ (at least one null is false), and assigns equal prior probability: $\text{Pr}(Q)=\text{Pr}(\neg Q)= 1/2$. Under independence and a common per-hypothesis probability $k$ that a null is false, this implies:
+$(1-k)^m = 0.5 \quad\Rightarrow\quad k = 1 - 0.5^{1/m}.$
+
+As $m$ increases, the per-hypothesis prior probability $k=\Pr(H_{1_m})$ decreases (Figure @fig-prior-adj), encoding increasing prior skepticism about any particular deviation from the null; correspondingly, $\Pr(H_{0_m})$ increases.
 
 ```{r}
 #| label: fig-prior-adj
@@ -643,7 +633,7 @@ ggplot(sim_k, aes(y = k, x = m) )+
 
 ```
 
-In this simulation, we compare this method with the Šidák adjustment ($p_{adj} = 1 - (1 - p)^m$), which gives exact frequentist family-wise error rate control under independence.
+In this simulation, we compare this method with the Šidák *p*-value adjustment ($p_{adj} = 1 - (1 - p)^m$), which gives exact frequentist family-wise error rate control under independence.
 
 \newpage
 
@@ -702,21 +692,14 @@ sim_res1 |>
 While grounded in Bayesian prior-odds logic, the procedure exhibits behavior similar to frequentist multiplicity correction, though it tends to be more conservative even when 
 $n$ and $\tau$ are large.
 
+This procedure naturally allows to incorporate prior information based on background knowledge. Rather than fixing $\Pr(H_0) = 0.5$, researchers can specify their prior belief $q$ about the global null hypothesis, that is, the probability that all $m$ hypotheses are null. This global prior $q$ can be translated into a per-hypothesis prior probability $k$.
 
-### Choosing the global null probability
+Assuming independence across hypotheses, if each hypothesis is non-null with probability $k$, then the probability that all hypotheses are null is $(1 - k)^m$. Prior knowledge guides the choice of $q$: when few or no real effects are expected, $q$ should be large (e.g., 0.5); when targeting well-established effects, $q$ can be smaller (e.g., 0.1). This leads to the general calibration:
+$$(1 - k)^m = q \quad\Rightarrow\quad k = 1 - q^{1/m}.$$
 
-As a Bayesian procedure, this framework naturally allows researchers to incorporate prior information based on background knowledge. One approach is to specify a global prior probability that all effects are null, $q = \Pr(\text{all null})$, and translate that belief into the per-hypothesis prior probability $k$. Under the assumption of independence, each hypothesis is non-null with probability $k$, such that $\Pr(\text{all null}) = (1 - k)^m$. Domain knowledge guides the choice of $q$: if one expects that no real effects are present, $q$ may be large (e.g., 0.5), whereas studies targeting well-established effects might justify a smaller $q$ (e.g., 0.1). This leads to the general calibration: 
-$$
-(1 - k)^m = q
-\quad\Rightarrow\quad
-k = 1 - q^{1/m}.
-$$
+However, with small $m$ and low $q$ values, this formula can paradoxically inflate rather than reduce posterior probabilities. This occurs when the per-hypothesis prior probability of the null hypothesis ($\Pr(H_{0_m}) = q^{1/m}$) falls below 0.5, effectively favoring the alternative hypothesis. Because we conceive this adjustment as a safeguard against inflated false positives, it is crucial to ensure it never acts in the opposite direction. To this end, the procedure should include a safeguard: if $\Pr(H_{0_m}) < 0.5$, the original posterior probabilities should remain unmodified.
 
-However, with small $m$ and low $q$ values, this formula can paradoxically inflate rather than reduce posterior probabilities. This occurs when the per-hypothesis prior probability of the null hypothesis ($\Pr(\text{one null}) = q^{1/m}$) falls below 0.5, effectively favoring the alternative hypothesis. Because we conceive this adjustment as a safeguard against inflated false positives, it is crucial to ensure it never acts in the opposite direction. To this end, the procedure should include a safeguard: if $\Pr(\text{one null}) < 0.5$, the original posterior probabilities should remain unmodified.
-
-Once $q$ is fixed, the prior odds assigned to each individual hypothesis become a deterministic function of the family size $m$: larger families imply smaller $k$, and consequently a higher prior probability on the null for each test (@fig-prior-adj).
-
-To illustrate this dependence, we consider two data-generating regimes: a global-null scenario in which $\theta_{1}=\cdots=\theta_{m}=0$, and an alternative scenario in which all but one effect are null ($\theta_{1}=\cdots=\theta_{m-1}=0 \text{, } \theta_{m}=0.2$). We then repeat the previous simulation procedure with $\tau=2$ and $n=50$, i.e. a setting in which *pd* and *p*-value behavior is broadly comparable, while varying only the number of tests $m\in\{1,2,3,4,5,10\}$ and the prior parameter $q\in\{0.50,0.40,0.30,0.20,0.10\}$.
+Once $q$ is fixed, the prior odds assigned to each individual hypothesis become a deterministic function of the family size $m$: larger families imply smaller $k$, and consequently a higher prior probability on the null for each test. To illustrate this dependence, we consider two data-generating regimes: a global-null scenario in which $\theta_{1}=\cdots=\theta_{m}=0$, and an alternative scenario in which all but one effect are null ($\theta_{1}=\cdots=\theta_{m-1}=0 \text{, } \theta_{m}=0.2$). We then repeat the previous simulation procedure with $\tau=2$ and $n=50$, i.e. a setting in which *pd* and *p*-value behavior is broadly comparable, while varying only the number of tests $m\in\{1,2,3,4,5,10\}$ and the prior parameter $q\in\{0.50,0.40,0.30,0.20,0.10\}$.
 
 
 \newpage
