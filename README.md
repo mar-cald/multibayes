@@ -73,7 +73,7 @@ R package version 0.1.0. https://github.com/Mar-Cald/pdAdjust
 MIT License
 
 ## Related Paper
-This package accompanies the paper: [Multiple Probabilities of Direction: A Rationale for Prior-odds Adjustment](~\paper\manuscript.pdf](https://github.com/Mar-Cald/pdAdjust/blob/main/paper/manuscript.pdf)
+This package accompanies the paper: [Multiple Probabilities of Direction: A Rationale for Prior-odds Adjustment](https://github.com/Mar-Cald/pdAdjust/blob/main/paper/manuscript.pdf)
 
 ## Issues and Contributions
 Please report issues at: https://github.com/Mar-Cald/pdAdjust/issues
