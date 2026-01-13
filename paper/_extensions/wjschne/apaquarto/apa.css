@@ -7,8 +7,14 @@ div.Author p {
 .FigureTitle {font-weight: bold; margin: 5pt 0; font-size: 12pt; color: black;}
 .FigureTitle p {text-indent: 0; text-align: left;}
 .FigureNote p {text-indent: 0; margin: 0; padding: 0}
-.Caption {font-style: italic; font-size: 12pt; color: black; text-align: left}
-.Caption p {text-indent: 0; font-size: 12pt;}
+/* Quarto figure captions */
+figcaption.quarto-float-caption,
+figcaption.figure-caption,
+.Caption,
+.Caption p {
+  font-size: 10pt;
+  line-height: 1.2em;
+}
 .quarto-float, .quarto-float-tbl, .figure {margin: 0; margin-block-start: 0; margin-block-end: 0; margin-block-start: 0; margin-inline-start: 0; margin-inline-end: 0}
 
 h1, h2, h3, h4, h5 {border: none; margin: 0; padding: 0;line-height: 2; text-indent: 0 }

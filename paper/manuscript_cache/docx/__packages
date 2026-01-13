@@ -1,0 +1,12 @@
+dplyr
+MASS
+tidyr
+shape
+ggplot2
+tibble
+future
+furrr
+purrr
+mvtnorm
+patchwork
+ggpubr

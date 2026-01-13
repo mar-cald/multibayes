@@ -141,28 +141,25 @@ save(sim, file = "script/output/sim1.rda")
 
 
 # Simuation 2 ---------------------------------
-m = c(1,2,3,4,5,10,20) # number of tests
-n = c(30,50,100) # number of subjects
+m = c(1,2,3,4,5,10) # number of tests
+n = 50 # number of subjects
 nsim = 1e4 # number of simulations
 r = 0 # correlation
 s = 2 # prior sd
-eff = 0.25 # theta under H1 
+eff = c(0,0.2)
 q = c(0.5, 0.4, 0.3,0.2, 0.1)  # prior all null
-q_sim = 0.5 # true all null
 
 sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
   replicate(nsim, {
     
-    qH0 = q_sim^(1 / m)
-    is_null = rbinom(m, 1, qH0) == 1  # TRUE with prob qH0
-    
-    # Set effects: 0 for nulls, eff for alternatives
-    effect = ifelse(is_null, 0, eff)
-    
     r = r
     S = r + diag(1 - r, m) 
     R = S
-    X = MASS::mvrnorm(n, effect, Sigma = R) 
+    
+    eff = rep(eff, m)
+    effsim = ifelse(eff == 0, rep(eff,m), c(rep(0,m-1),eff))
+    
+    X = MASS::mvrnorm(n, effsim, Sigma = R) 
     
     # frequentist
     pval = apply(X, 2, function(x) z_test(x))
@@ -176,9 +173,7 @@ sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
     pd_adj = prior_adj(pd = pd, q = q)
     
     # save data
-    data.frame(pval, pval_sidak, pd, pd_adj, 
-               true_effect = effect,
-               is_null = is_null)
+    data.frame(pval, pval_sidak, pd, pd_adj)
   }, simplify = FALSE)
 }
 
@@ -189,16 +184,17 @@ sim = expand.grid(
   s = s,
   eff = eff,
   r = r,
-  q = q,
-  q_sim = q_sim
+  q = q
 )
 
 plan(multisession(workers = parallel::detectCores() - 2))
 sim$res = future_pmap(sim, 
                       ~sim_ind_2(n = ..1, m = ..2, s = ..3,eff = ..4,
-                                 r = ..5,  q = ..6,q_sim = ..7, nsim = nsim), 
+                                 r = ..5,  q = ..6,nsim = nsim), 
                       .options = furrr_options(seed = TRUE),
                       .progress = TRUE)
 plan(sequential)
 save(sim, file = "script/output/sim2.rda")
+
+
 
