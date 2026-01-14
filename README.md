@@ -30,7 +30,7 @@ pd_large <- rep(0.97, 20)
 prior_adj(pd_large, q = 0.5)
 
 # Custom family size
-prior_adj(c(0.90, 0.95), q = 0.5, m = 10)
+prior_adj(c(0.90, 0.95, 0.97), q = 0.5, m = 2)
 ```
 
 ## Function Details
