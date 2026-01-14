@@ -2,7 +2,7 @@
 #'
 #' Adjusts a vector of Probability of Direction (*pd*) values using a global
 #' prior probability that all tested hypotheses are null, \eqn{q}. The adjustment
-#' converts \eqn{q} into a per-hypothesis prior probability \eqn{H0 = q^{1/m}},
+#' converts \eqn{q} into a per-hypothesis prior probability \eqn{H_{0_m} = q^{1/m}},
 #' where \eqn{m} is the family size, and then reweights each *pd* accordingly.
 #'
 #' @param pd Numeric vector of *pd* values (typically \eqn{pd \in [0.5, 1]}).
@@ -12,7 +12,7 @@
 #'   `length(pd)`.
 #'   
 #' @return A numeric vector of the same length as `pd`, containing adjusted *pd*
-#'   values (or the original `pd` if \eqn{H0 < 0.5}).
+#'   values (or the original `pd` if \eqn{H_{0_m} < 0.5}).
 #'
 #' @export
 #' @examples
