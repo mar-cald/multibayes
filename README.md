@@ -20,23 +20,23 @@ remotes::install_github("Mar-Cald/pdAdjust")
 library(pdAdjust)
 # Adjust a vector of pd values
 pd <- c(0.55, 0.80, 0.97)
-prior_adj(pd, q = 0.5)
-#> [0.5238095 0.7272727 0.9411765]
+prior_adj(pd, q = 0.4)
+#> [0.3039065 0.5882800 0.9203171]
 ```
 The adjustment becomes more conservative as family size increases:
 ```r
 # With 20 hypotheses
-pd_large <- rep(0.97, 20)
-prior_adj(pd_large, q = 0.5)
+pd_large <- rep(0.97, 10)
+prior_adj(pd_large, q = 0.4)
 
-# Custom family size
+# Custom family size and q
 prior_adj(c(0.90, 0.95, 0.97), q = 0.5, m = 2)
 ```
 
 ## Function Details
 
 ```r
-prior_adj(pd, q = 0.5, m = length(pd))
+prior_adj(pd, q = 0.4, m = length(pd))
 ```
 
 Arguments:

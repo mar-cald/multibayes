@@ -4,15 +4,16 @@
 \alias{prior_adj}
 \title{Prior-odds adjustment for Probability of Direction (pd)}
 \usage{
-prior_adj(pd, q = 0.5, m = length(pd))
+prior_adj(pd, q = 0.4, m = length(pd))
 }
 \arguments{
-\item{pd}{Numeric vector of \emph{pd} values (typically \eqn{\in [0.5, 1]}).}
+\item{pd}{Numeric vector of \emph{pd} values (typically \eqn{pd \in [0.5, 1]}).}
 
-\item{q}{Numeric scalar in (0, 1). Interpreted as the prior probability that
-\strong{all} hypotheses in the family are null.}
+\item{q}{Numeric scalar in \eqn{(0, 1)} giving the prior probability that
+\strong{all} hypotheses in the family are null. Defaults to \code{0.4}.}
 
-\item{m}{Numeric scalar (>0). Number of tested hypotheses.}
+\item{m}{Positive integer giving the number of tested hypotheses. Defaults to
+\code{length(pd)}.}
 }
 \value{
 A numeric vector of the same length as \code{pd}, containing adjusted \emph{pd}
@@ -26,6 +27,6 @@ where \eqn{m} is the family size, and then reweights each \emph{pd} accordingly.
 }
 \examples{
 pd = c(0.55, 0.80, 0.97)
-prior_adj(pd, q = 0.5)
-
+prior_adj(pd, q = 0.4)
+0.3039065 0.5882800 0.9203171
 }
