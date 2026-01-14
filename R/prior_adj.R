@@ -21,7 +21,7 @@
 #' 0.3039065 0.5882800 0.9203171
 
 
-prior_adj = function(pd, q = 0.5, m = length(pd)) {
+prior_adj = function(pd, q = 0.4, m = length(pd)) {
   
   stopifnot(
     "`pd` must be numeric"        = is.numeric(pd),
