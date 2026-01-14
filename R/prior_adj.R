@@ -5,10 +5,11 @@
 #' converts \eqn{q} into a per-hypothesis prior probability \eqn{H0 = q^{1/m}},
 #' where \eqn{m} is the family size, and then reweights each *pd* accordingly.
 #'
-#' @param pd Numeric vector of *pd* values (typically \eqn{\in [0.5, 1]}).
-#' @param q Numeric scalar in (0, 1). Interpreted as the prior probability that
-#'   **all** hypotheses in the family are null.
-#'@param m Numeric scalar (>0). Number of tested hypotheses.
+#' @param pd Numeric vector of *pd* values (typically \eqn{pd \in [0.5, 1]}).
+#' @param q Numeric scalar in \eqn{(0, 1)} giving the prior probability that
+#'   **all** hypotheses in the family are null. Defaults to `0.4`.
+#' @param m Positive integer giving the number of tested hypotheses. Defaults to
+#'   `length(pd)`.
 #'   
 #' @return A numeric vector of the same length as `pd`, containing adjusted *pd*
 #'   values (or the original `pd` if \eqn{H0 < 0.5}).
@@ -16,8 +17,8 @@
 #' @export
 #' @examples
 #' pd = c(0.55, 0.80, 0.97)
-#' prior_adj(pd, q = 0.5)
-#'
+#' prior_adj(pd, q = 0.4)
+#' 0.3039065 0.5882800 0.9203171
 
 
 prior_adj = function(pd, q = 0.5, m = length(pd)) {
