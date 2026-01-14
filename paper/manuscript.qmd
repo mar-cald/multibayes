@@ -415,7 +415,7 @@ In our simulations we generate data under the global null (all $\theta=0$) and w
 
 Under the null hypothesis, two-sided *p*-values are uniformly distributed on $[0,1]$, and because *pd* can be mapped to the *p*-value, this implies a corresponding null reference behavior for *pd* on $[0.5,1]$ in the continuous case. However, because the *pd* is a posterior probability about the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates probability near 0 (i.e., how readily the prior “expects” near-null effects). Showing this prior dependence at $m=1$ makes the target of later multiplicity analyses explicit: even before any multiplicity is introduced, a fixed cutoff such as $pd > 0.975$ does not have a universal “null meaning” across priors and sample sizes. 
 
-As shown in @fig-uniform-pd, *pd* exhibits behavior broadly analogous to a *p*-value when samples are large and the prior places relatively little mass near 0. However, increasing prior skepticism (i.e., concentrating more prior mass around 0) reduces the Type I error rate.
+As shown in @fig-uniform-pd, *pd* exhibits behavior broadly analogous to a *p*-value when samples are large and the prior places relatively little mass near 0. However, increasing prior skepticism (i.e., concentrating more prior mass around 0) reduces the frequency of extreme *pd* values.
 
 \newpage
 
@@ -499,9 +499,9 @@ pd_den = ggplot(df_pd, aes(x = value)) +
 
 ### Behavior under multiplicity
 
-Building on this baseline, multiplicity can be introduced as a second, distinct mechanism: even when each individual test has only a small probability of producing an extreme *pd* under $H_{0}$, the probability that at least one among $pd_{1},\ldots,pd_{m}$ is extreme increases with the number of tests $m$.  We quantify this familywise error rate (FWER) behavior by estimating *pd* for families ranging from $m=1$ to $m=20$.
+Building on this baseline, multiplicity can be introduced as a second, distinct mechanism: even when each individual test has only a small probability of producing an extreme *pd* under $H_{0}$, the probability that at least one among $pd_{1},\ldots,pd_{m}$ is extreme increases with the number of tests $m$. We quantify this familywise error rate (FWER) behavior by estimating the frequency of $pd > 0.975$ for families ranging from $m=1$ to $m=20$.
 
-As expected, *pd* again behaves broadly analogously to the *p*-value when sample sizes are large and the prior places relatively little mass near 0 (@fig-fwer1-pd).  By contrast, as the prior becomes more skeptical (i.e., increasingly concentrated around 0), the FWER decreases.
+As expected, *pd*-based decisions behaves broadly analogously to their frequentist counterpart when sample sizes are large and the prior places relatively little mass near 0 (@fig-fwer1-pd). By contrast, as the prior becomes more skeptical (i.e., increasingly concentrated around 0), the FWER decreases.
 
 \newpage
 
@@ -555,7 +555,7 @@ sim_res1 |>
 ```
 
 
-The simulation results suggest that Type I error could, in principle, be reduced by adopting a more skeptical within-model prior for each parameter. However, using within-model prior skepticism as a general remedy for multiplicity is typically not the most appropriate response, because it conflates two separate goals: (i) encoding substantive prior knowledge about a specific parameter value and (ii) calibrating a decision rule’s error rate under repeated testing. In particular, the prior used to estimate a given parameter should be driven by background knowledge about that specific quantity, not by the mere fact that many other hypotheses are being tested in parallel [@Lindley1972]. For this reason, the approach developed below targets multiplicity at the level where it arises (the competition among hypotheses), by adjusting the prior odds assigned across competing hypotheses while leaving the within-model prior for any single parameter unchanged.
+The simulation results suggest that Type I error could, in principle, be reduced by adopting a more skeptical within-model prior for each parameter. However, using within-model prior skepticism as a general remedy for multiplicity is typically not the most appropriate response, because it conflates two separate goals: (i) encoding substantive prior knowledge about a specific parameter value and (ii) calibrating a decision rule’s error rate under repeated testing. For this reason, the approach developed below targets multiplicity at the level where it arises (the competition among hypotheses), by adjusting the prior odds assigned across competing hypotheses while leaving the within-model prior for any single parameter unchanged.
 
 ## Probability of direction, posterior odds, and prior-odds adjustment
 
@@ -802,7 +802,7 @@ diff= sim_res2 |>
 ```
 
 
-Across all values of $m$, Šidák-adjusted *p*-values maintain the family-wise error rate (FWER; @fig-fwer-pw, Panel A) near the nominal level, but this control comes at the expense of diminished power (@fig-fwer-pw, Panel B).  By contrast, the adjusted *pd* procedure exhibits FWER and power trajectories that depend on the prior parameter $q$. For smaller values of $q$ ($q\in\{0.30,0.20,0.10\}$), the tradeoff is favorable: the increase in power is larger than the corresponding increase in FWER, implying gains relative to the loss of error control (@fig-fwer-pw, Panel C). By contrast, $q=0.4$ yields FWER and power curves that closely mirror the Šidák adjustment across the full range of $m$, suggesting that this calibration allows the Bayesian adjustment to approximate classical strong FWER control (@fig-fwer-pw).
+Across all values of $m$, Šidák-adjusted *p*-values maintain the family-wise error rate (FWER; @fig-fwer-pw, Panel A) near the nominal level, but this control comes at the expense of diminished power (@fig-fwer-pw, Panel B).  By contrast, the adjusted *pd* procedure exhibits FWER and power trajectories that depend on the prior parameter $q$. For smaller values of $q$ ($q\in\{0.30,0.20,0.10\}$), the tradeoff is favorable: the increase in power is larger than the corresponding increase in FWER, implying gains relative to the loss of error control (@fig-fwer-pw, Panel C). Notably, $q=0.4$ yields FWER and power curves that closely mirror the Šidák adjustment across the full range of $m$, suggesting that this calibration allows the Bayesian adjustment to approximate classical strong FWER control (@fig-fwer-pw).
 
 ## Application
 
