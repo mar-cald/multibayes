@@ -1,6 +1,6 @@
 ---
-title: "Multiple Probabilities of Direction"
-subtitle: "A Rationale for Prior-odds Adjustment"
+title: "From Probability of Direction to Multiple Decisions:"
+subtitle: "A Prior-Odds Adjustment"
 shorttitle: "PROBABILITY OF DIRECTION UNDER MULTIPLICITY"
 author:
   - name: Margherita Calderan
@@ -65,7 +65,7 @@ author-note:
     gratitude: ~
     authorship-agreements: ~
     
-abstract: "In psychological research, Bayesian analyses are often summarized using posterior indices and then interpreted with conventional cutoffs across many parameters. The probability of direction (*pd*) is one such index, defined as the posterior probability that a parameter is greater or smaller than a null value. When *pd* is thresholded and used repeatedly, multiplicity becomes consequential but is rarely handled explicitly. Here, we examine the operating characteristics of *pd* under repeated use by leveraging its correspondence with the frequentist *p*-value under common settings. Simulations show that extreme *pd* can arise by chance and that misleading conclusions become more frequent as the number of tests increases. We further express *pd* in terms of posterior odds and propose post-hoc prior-odds adjustments that provide multiplicity control. To support practical implementation, we provide an R package that applies the proposed prior-odds corrections." 
+abstract: "In psychological research, Bayesian analyses are often summarized using posterior indices and then interpreted with conventional cutoffs across many parameters. The probability of direction (*pd*) is one such index, defined as the posterior probability that a parameter is greater or smaller than a null value. When *pd* is thresholded and used repeatedly, multiplicity becomes consequential but is rarely handled explicitly. Here, we examine the operating characteristics of *pd* under repeated use by leveraging its correspondence with the frequentist *p*-value under common settings. Simulations show that extreme *pd* can arise by chance and that misleading conclusions become more frequent as the number of tests increases. We further express *pd* in terms of posterior odds and propose an adjustment that provide multiplicity control. To support practical implementation, we provide an R package that applies the proposed prior-odds corrections." 
 
 keywords: [probability of direction, multiple testing, prior-odds]
 bibliography: "biblio.bib"
