@@ -1,7 +1,7 @@
 #' Prior-odds adjustment for Probability of Direction (pd)
 #'
 #' Adjusts a vector of Probability of Direction (*pd*) values using a global
-#' prior probability that all tested hypotheses are null, \eqn{q}. The adjustment
+#' prior probability that **all** tested hypotheses are null, \eqn{q}. The adjustment
 #' converts \eqn{q} into a per-hypothesis prior probability \eqn{H_{0_m} = q^{1/m}},
 #' where \eqn{m} is the family size, and then reweights each *pd* accordingly.
 #'

@@ -21,7 +21,7 @@ values (or the original \code{pd} if \eqn{H_{0_m} < 0.5}).
 }
 \description{
 Adjusts a vector of Probability of Direction (\emph{pd}) values using a global
-prior probability that all tested hypotheses are null, \eqn{q}. The adjustment
+prior probability that \strong{all} tested hypotheses are null, \eqn{q}. The adjustment
 converts \eqn{q} into a per-hypothesis prior probability \eqn{H_{0_m} = q^{1/m}},
 where \eqn{m} is the family size, and then reweights each \emph{pd} accordingly.
 }
