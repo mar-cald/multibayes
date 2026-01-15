@@ -53,7 +53,7 @@ Numeric vector of adjusted pd values.
 
 **Details**:
 
-The function computes per-hypothesis prior odds as $\Pr(H_{0_i}) = q^(1/m)$, where m is the family size. 
+The function computes per-hypothesis prior odds as $\Pr(H_{0_i}) = q^{1/m}$, where m is the family size. 
 If $\Pr(H_{0_i}) \geq 0.5$, each pd value is adjusted as:
 
 $pd_{adj_i} = (pd_i \cdot \Pr(H_{1_i})) / (pd_i \cdot \Pr(H_{1_i}) + (1 - pd_i) \cdot \Pr(H_{0_i}))$
