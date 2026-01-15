@@ -1,10 +1,11 @@
 # pdAdjust
 
-Bayesian multiplicity adjustment using probability of direction (pd) values.
+Bayesian multiplicity adjustment using probability of direction (*pd*) values.
 
 ## Overview
 
-The `pdAdjust` package provides a principled approach to Bayesian multiplicity adjustment based on prior-odds reweighting of probability of direction values. The main function adjusts pd values using a global prior probability that all tested hypotheses are null, converting it into per-hypothesis prior odds that account for family size.
+The `pdAdjust` package provides a principled approach to Bayesian multiplicity adjustment based on prior-odds reweighting of probability of direction values (*pd*). 
+The main function adjusts *pd* values using a global prior probability that all tested hypotheses are null, converting it into per-hypothesis prior odds that account for family size.
 
 
 ## Installation
@@ -43,7 +44,7 @@ prior_adj(pd, q = 0.4, m = length(pd))
 
 -  **pd**: Numeric vector of pd values (in [0.5, 1]). Each entry represents the posterior mass on the favored direction.
 
--  **q**: Numeric scalar in (0, 1). Prior probability that all hypotheses in the family are null (default: 0.5).
+-  **q**: Numeric scalar in (0, 1). Prior probability that all hypotheses in the family are null (default: 0.4).
 
 -  **m**: Family size (default: length of pd vector).
 
@@ -53,14 +54,14 @@ Numeric vector of adjusted pd values.
 
 **Details**:
 
-The function computes per-hypothesis prior odds as $\Pr(H_{0_i}) = q^{1/m}$, where m is the family size. 
-If $\Pr(H_{0_i}) \geq 0.5$, each pd value is adjusted as:
+The function computes per-hypothesis prior odds as $\Pr(H_{0_i}) = q^{1/m}$, where $m$ is the family size. 
+If $\Pr(H_{0_i}) \geq 0.5$, each *pd* value is adjusted as:
 
 $pd_{adj_i} = (pd_i \cdot \Pr(H_{1_i})) / (pd_i \cdot \Pr(H_{1_i}) + (1 - pd_i) \cdot \Pr(H_{0_i}))$
 
 where $\Pr(H_{1_i}) = 1 - \Pr(H_{0_i})$.
 
-Otherwise original pd values are reported.
+Otherwise original *pd* values are reported.
 
 ## Citation
 If you use this package in your research, please cite:
