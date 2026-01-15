@@ -39,7 +39,7 @@ prior_adj(c(0.90, 0.95, 0.97), q = 0.5, m = 2)
 prior_adj(pd, q = 0.4, m = length(pd))
 ```
 
-Arguments:
+**Arguments**:
 
 -  **pd**: Numeric vector of pd values (in [0.5, 1]). Each entry represents the posterior mass on the favored direction.
 
@@ -47,32 +47,29 @@ Arguments:
 
 -  **m**: Family size (default: length of pd vector).
 
-Returns:
+**Returns**:
 
 Numeric vector of adjusted pd values.
 
-Details:
+**Details**:
 
-The function computes per-hypothesis prior odds as H₀ = q^(1/m), where m is the family size. 
-If H₀ ≥ 0.5, each pd value is adjusted as:
+The function computes per-hypothesis prior odds as $\Pr(H_{0_i}) = q^(1/m)$, where m is the family size. 
+If $\Pr(H_{0_i}) \geq 0.5$, each pd value is adjusted as:
 
-pd_adj = (pd · H₁) / (pd · H₁ + (1 - pd) · H₀)
+$pd_adj = (pd_i \dot \Pr(H_{1_i})) / (pd_i \dot \Pr(H_{1_i}) + (1 - pd_i) \dot \Pr(H_{0_i}))$
 
-where H₁ = 1 - H₀.
+where $\Pr(H_{1_i}) = 1 - \Pr(H_{0_i})$.
 
-Otherwise orginal pd values are reported.
+Otherwise original pd values are reported.
 
 ## Citation
 If you use this package in your research, please cite:
 
-Calderan, M., Gambarota, F., Toffalini, E., & Altoè, G. (2026). Multiple Probabilities of Direction: A Rationale for Prior-odds Adjustment.
+Calderan, M., Gambarota, F., Toffalini, E., & Altoè, G. (2026). Multiple Probabilities of Direction: A Rationale for Prior-odds Adjustment,
 R package version 0.1.0. https://github.com/Mar-Cald/pdAdjust
 
 ## License
 MIT License
-
-## Related Paper
-This package accompanies the paper: [Multiple Probabilities of Direction: A Rationale for Prior-odds Adjustment](https://github.com/Mar-Cald/pdAdjust/blob/main/paper/manuscript.pdf)
 
 ## Issues and Contributions
 Please report issues at: https://github.com/Mar-Cald/pdAdjust/issues
