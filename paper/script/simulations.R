@@ -16,8 +16,8 @@ bayes_posterior_analytical = function(x, sigma = 1, tau0 = 1, mu0=0) {
   bar_y  = mean(x)
   post_mean  = (bar_y * (n / sigma^2) + mu0 * (1 / tau0^2)) / (n / sigma^2 + 1 / tau0^2)
   post_sd  = sqrt(1 / (n / sigma^2 + 1 / tau0^2))
-  posterior_samples   =  rnorm(10000, mean = post_mean, sd = post_sd)
-  return(posterior_samples)
+  pd = pnorm(abs(post_mean - 0) / post_sd)
+  return(pd)
 }
 
 # z.test
@@ -31,7 +31,7 @@ z_test=function(x, mu0 = 0, sigma = 1){
 # Simulation 1 ---------------------------
 m = c(1,2,5,10,20) # number of tests
 n = c(30,50,100) # number of subjects
-nsim = 10000 # number of simulations
+nsim = 1e4 # number of simulations
 r = 0 # correlation
 s = c(.2, .5, 1, 1.5, 2) # prior sd
 eff = 0 # simulation under the null 
@@ -47,16 +47,15 @@ sim_ind_1 = function(n, m, r, s, eff,nsim, q){
     # frequentist
     pval = apply(X, 2, function(x) z_test(x))
     # adjustment
-    pval_sidak = 1-(1-pval)^m #sidak
+    pval_bonf= pval*m #bonf
     
     # bayes
-    post = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
-    pd = apply(post, 2, function(x) max(mean(x > 0), mean(x < 0))) 
+    pd = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
     # adjustment
     pd_adj = prior_adj(pd = pd, q = q)
     
     # save data 
-    data.frame(pval,pval_sidak,pd, pd_adj)}, 
+    data.frame(pval,pval_bonf,pd, pd_adj)}, 
     simplify = FALSE)
 }
 
@@ -76,11 +75,11 @@ sim$res = future_pmap(sim,
                       .options = furrr_options(seed = TRUE),
                       .progress = TRUE)
 plan(sequential)
-save(sim, file = "script/output/sim1.rda")
+save(sim, file = "paper/script/output/sim1.rda")
 
 
 # Simuation 2 ---------------------------------
-m = c(1,2,3,4,5,10) # number of tests
+m = c(1,2,3,4,5,10,20,100) # number of tests
 n = 50 # number of subjects
 nsim = 1e4 # number of simulations
 r = 0 # correlation
@@ -88,7 +87,7 @@ s = 2 # prior sd
 eff = c(0,0.2)
 q = c(0.5, 0.4, 0.3,0.2, 0.1)  # prior all null
 
-sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
+sim_ind_2 = function(n, m, r, s, eff, nsim, q){
   replicate(nsim, {
     
     r = r
@@ -102,17 +101,16 @@ sim_ind_2 = function(n, m, r, s, eff, nsim, q, q_sim){
     
     # frequentist
     pval = apply(X, 2, function(x) z_test(x))
-    # sidak adjustment
-    pval_sidak = 1-(1-pval)^m
+    # bonf adjustment
+    pval_bonf = pval*m
     
     # bayes
-    post = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
-    pd = apply(post, 2, function(x) max(mean(x > 0), mean(x < 0)))
+    pd = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
     # adjustment
     pd_adj = prior_adj(pd = pd, q = q)
     
     # save data
-    data.frame(pval, pval_sidak, pd, pd_adj)
+    data.frame(pval, pval_bonf, pd, pd_adj)
   }, simplify = FALSE)
 }
 
@@ -133,7 +131,6 @@ sim$res = future_pmap(sim,
                       .options = furrr_options(seed = TRUE),
                       .progress = TRUE)
 plan(sequential)
-save(sim, file = "script/output/sim2.rda")
-
+save(sim, file = "paper/script/output/sim2.rda")
 
 
