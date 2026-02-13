@@ -4,7 +4,7 @@ Bayesian multiplicity adjustment using probability of direction (*pd*) values.
 
 ## Overview
 
-he `pdAdjust` package provides a principled approach to Bayesian multiplicity adjustment based on prior-odds reweighting of probability of direction values (*pd*). 
+The `pdAdjust` package provides a principled approach to Bayesian multiplicity adjustment based on prior-odds reweighting of probability of direction values (*pd*). 
 The main function adjusts *pd* values using a global prior probability that all tested hypotheses are null, converting it into per-hypothesis prior odds that account for family size. It also supports adjusting for dependent hypotheses using a posterior correlation matrix.
 
 ## Installation
