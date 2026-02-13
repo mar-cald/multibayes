@@ -322,9 +322,9 @@ $$
 $$
 With $\alpha=0.05$, this gives $c=0.975$: the rule $pd>0.975$ requires that $\Pr(\theta\le \theta_{\text{null}}\mid y)<0.025$, placing less than 2.5% of posterior mass at or below $\theta_{\text{null}}$. 
 
-Let $q_p$ denote the $p$-th posterior quantile, so the central $(1-\alpha)$ equi-tailed credible interval is $[q_{\alpha/2},\,q_{1-\alpha/2}]$, which leaves probability $\alpha/2$ in each tail. The condition $\Pr(\theta\le \theta_{\text{null}}\mid y)<\alpha/2$ holds if and only if $\theta_{\text{null}}$ falls below $q_{\alpha/2}$, that is, when $\theta_{\text{null}}\notin [q_{\alpha/2},\,q_{1-\alpha/2}]$. Thus, observing $pd>0.975$ is equivalent to excluding $\theta_{\text{null}}$ from the central 95% equi-tailed credible interval (see @fig-pd-ci). When the credible interval excludes the null value, one can infer that the null is relatively implausible.
+Let $q_p$ denote the $p$-th posterior quantile, so the central $(1-\alpha)$ equi-tailed credible interval is $[q_{\alpha/2},\,q_{1-\alpha/2}]$, which leaves probability $\alpha/2$ in each tail. The condition $\Pr(\theta\le \theta_{\text{null}}\mid y)<\alpha/2$ holds if and only if $\theta_{\text{null}}$ falls below $q_{\alpha/2}$, that is, when $\theta_{\text{null}}\notin [q_{\alpha/2},\,q_{1-\alpha/2}]$. Thus, observing $pd>0.975$ is equivalent to excluding $\theta_{\text{null}}$ from the central 95% equi-tailed credible interval (see @fig-pd-ci). When the credible interval excludes the null value, one can infer that the null is relatively implausible (@Box1992).
 
-Given these considerations, although *pd* and the frequentist *p*-value target different quantities, it is plausible that decision rules of the form $pd>c$ approximate the operating characteristics of familiar frequentist rules such as $p<\alpha$.
+Given these considerations, although *pd* and the frequentist *p*-value target different quantities, it is expected that decision rules of the form $pd>c$ approximate the operating characteristics of familiar frequentist rules such as $p<\alpha$.
 
 
 ```{r}
@@ -859,7 +859,7 @@ To evaluate whether this adjustment reduces conservativeness under dependence wh
 
 In each replication, true parameter values were drawn from a multivariate normal distribution with equicorrelation structure: $\theta \sim \mathcal{N}(\mu, \Sigma)$, where $\mu_1=\cdots=\mu_{m/2}=0$ (null hypotheses) and $\mu_{m/2+1}=\cdots=\mu_m=0.3$ (non-null hypotheses); a possible scenario were half of the null hypothesis are true. The correlation matrix $\mathbf{R}$ had constant pairwise correlation $\rho \in \{0.2, 0.4, 0.6, 0.8\}$.
 
-For each dataset, we obtained posterior distributions using a multivariate normal conjugate model with $\tau = 2$, and for the adjustment we set the prior parameter $q=0.4$ based on previous results. We computed FWER under the null subset and average power [@Benjamini1995; @Grant2025], the proportion of true discoveries under $\mu = 0.3$. We compared the multiplicity adjustment procedure when accounting for correlations (using $m_{\text{eff}}$) versus ignoring them (using $m$).
+For each dataset, we obtained posterior distributions using a multivariate normal conjugate model with $\mu = 0$ and $\tau = 2$, and for the adjustment we set the prior parameter $q=0.4$ based on previous results. We computed FWER under the null subset and average power [@Benjamini1995; @Grant2025], the proportion of true discoveries under $\mu = 0.3$. We compared the multiplicity adjustment procedure when accounting for correlations (using $m_{\text{eff}}$) versus ignoring them (using $m$).
 
 As shown in @fig-corr, the method accounting for correlation provided better performance, particularly under high correlation scenarios, by maintaining proper FWER control while preserving greater power. Without this adjustment, the procedure became excessively conservative as correlation increased. 
 
