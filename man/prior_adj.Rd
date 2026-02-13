@@ -4,7 +4,7 @@
 \alias{prior_adj}
 \title{Prior-odds adjustment for Probability of Direction (pd)}
 \usage{
-prior_adj(pd, q = 0.4, m = length(pd))
+prior_adj(pd, q = 0.4, m = length(pd), post_corr = NULL)
 }
 \arguments{
 \item{pd}{Numeric vector of \emph{pd} values (typically \eqn{pd \in [0.5, 1]}).}
@@ -14,6 +14,11 @@ prior_adj(pd, q = 0.4, m = length(pd))
 
 \item{m}{Positive integer giving the number of tested hypotheses. Defaults to
 \code{length(pd)}.}
+
+\item{post_corr}{Optional correlation matrix of posterior draws (\code{NULL} by default).
+If provided, must be a square matrix with dimensions matching \code{length(pd)}.
+Adjusts the effective number of tests using eigenvalue-based correction
+to account for dependence between hypotheses.}
 }
 \value{
 A numeric vector of the same length as \code{pd}, containing adjusted \emph{pd}
@@ -26,7 +31,14 @@ converts \eqn{q} into a per-hypothesis prior probability \eqn{H_{0_m} = q^{1/m}}
 where \eqn{m} is the family size, and then reweights each \emph{pd} accordingly.
 }
 \examples{
-pd = c(0.55, 0.80, 0.97)
+# Without correlation adjustment
+pd <- c(0.55, 0.80, 0.97)
 prior_adj(pd, q = 0.4)
-0.3039065 0.5882800 0.9203171
+#> [1] 0.3039065 0.5882800 0.9203171
+
+# With correlation adjustment
+corr_mat <- matrix(c(1.0, 0.5, 0.3,
+                     0.5, 1.0, 0.4,
+                     0.3, 0.4, 1.0), nrow = 3)
+prior_adj(pd, q = 0.4, post_corr = corr_mat)
 }

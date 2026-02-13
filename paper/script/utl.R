@@ -48,7 +48,8 @@ z_test=function(x, mu0 = 0, sigma = 1){
 } 
 
 
-## MaxT correction Z test
+# not used
+## MaxT correction Z test 
 maxZ = function(X){
   n = nrow(X)
   m = ncol(X)
