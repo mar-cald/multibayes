@@ -139,14 +139,14 @@ sim_corr_1 = function(n = 50, m, eff = 0.3,r = r, s = 2, nsim = 1e4, q = 0.4){
     
     X = MASS::mvrnorm(n, effsim, Sigma = R)
     
-    # Bayesian Analysis
+    # bayes
     out = bayes_posterior_multivariate(X, tau0 = s)
     pd = out[[1]]
     post_cor = out[[2]]
-    # adjustment
+    # adjustment corr
     pd_adj = prior_adj(pd = pd, q = q, post_corr = post_cor)
     pd_meff = pd_adj > 0.975
-    
+    # adjustment no corr
     pd_adj = prior_adj(pd = pd, q = q, post_corr = NULL)
     pd_m = pd_adj > 0.975
     
