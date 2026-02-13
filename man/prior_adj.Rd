@@ -32,13 +32,14 @@ where \eqn{m} is the family size, and then reweights each \emph{pd} accordingly.
 }
 \examples{
 # Without correlation adjustment
-pd <- c(0.55, 0.80, 0.97)
+pd <- c(0.99, 0.98, 0.978)
 prior_adj(pd, q = 0.4)
-#> [1] 0.3039065 0.5882800 0.9203171
+#> [1] 0.9725000 0.9459554 0.9407567
 
 # With correlation adjustment
 corr_mat <- matrix(c(1.0, 0.5, 0.3,
                      0.5, 1.0, 0.4,
                      0.3, 0.4, 1.0), nrow = 3)
 prior_adj(pd, q = 0.4, post_corr = corr_mat)
+#>[1] 0.9759573 0.9525872 0.9479914
 }
