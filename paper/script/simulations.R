@@ -38,7 +38,7 @@ sim_ind_1 = function(n, m, r, s, eff,nsim, q){
     # bayes
     pd = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
     # adjustment
-    pd_adj = prior_adj(pd = pd, q = q)
+    pd_adj = pd.adjust(pd = pd, q = q)
     
     # save data 
     data.frame(pval,pval_bonf,pd, pd_adj)}, 
@@ -96,7 +96,7 @@ sim_ind_2 = function(n, m, r, s, eff, nsim, q){
     # bayes
     pd = apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
     # adjustment
-    pd_adj = prior_adj(pd = pd, q = q)
+    pd_adj = pd.adjust(pd = pd, q = q)
     
     # save data
     data.frame(pval, pval_bonf, pd, pd_adj)
@@ -144,10 +144,10 @@ sim_corr_1 = function(n = 50, m, eff = 0.3,r = r, s = 2, nsim = 1e4, q = 0.4){
     pd = out[[1]]
     post_cor = out[[2]]
     # adjustment corr
-    pd_adj = prior_adj(pd = pd, q = q, post_corr = post_cor)
+    pd_adj = pd.adjust(pd = pd, q = q, post_corr = post_cor)
     pd_meff = pd_adj > 0.975
     # adjustment no corr
-    pd_adj = prior_adj(pd = pd, q = q, post_corr = NULL)
+    pd_adj = pd.adjust(pd = pd, q = q, post_corr = NULL)
     pd_m = pd_adj > 0.975
     
     # save data
