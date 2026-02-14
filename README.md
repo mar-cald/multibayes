@@ -19,6 +19,6 @@ You can install the development version from GitHub:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("Mar-Cald/multibayes")
+remotes::install_github("mar-cald/multibayes")
 ```
 

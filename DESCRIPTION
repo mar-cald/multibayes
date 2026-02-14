@@ -23,6 +23,6 @@ Depends:
     R (>= 4.0.0)
 Suggests: 
     testthat (>= 3.0.0)
-URL: https://github.com/Mar-Cald/multibayes
-BugReports: https://github.com/Mar-Cald/multibayes/issues
+URL: https://github.com/mar-cald/multibayes
+BugReports: https://github.com/mar-cald/multibayes/issues
 Config/testthat/edition: 3
