@@ -1,23 +1,23 @@
-# pdAdjust
+# multibayes
 
 Bayesian multiplicity adjustment using probability of direction (*pd*) values.
 
 ## Overview
 
-The `pdAdjust` package provides a principled approach to Bayesian multiplicity adjustment based on prior-odds reweighting of probability of direction values (*pd*). 
+The `multibayes` package provides a principled approach to Bayesian multiplicity adjustment based on prior-odds reweighting of probability of direction values (*pd*). 
 The main function adjusts *pd* values using a global prior probability that all tested hypotheses are null, converting it into per-hypothesis prior odds that account for family size. It also supports adjusting for dependent hypotheses using a posterior correlation matrix.
 
 ## Installation
 
-You can install the development version of pdAdjust from GitHub:
+You can install the development version of multibayes from GitHub:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("Mar-Cald/pdAdjust")
+remotes::install_github("Mar-Cald/multibayes")
 ```
 ## Usage
 ```r
-library(pdAdjust)
+library(multibayes)
 
 # 1. Standard adjustment
 pd <- c(0.985, 0.999, 0.975)
@@ -70,13 +70,13 @@ Otherwise original *pd* values are reported.
 ## Citation
 If you use this package in your research, please cite:
 
-Calderan, M., Gambarota, F., Toffalini, E., & Altoè, G. (2026). Multiple Probabilities of Direction: A Rationale for Prior-odds Adjustment,
-https://github.com/Mar-Cald/pdAdjust
+Calderan, M., Gambarota, F., Toffalini, E., & Altoè, G. (2026). Adjusting the Probability of Direction for Multiple Testing,
+https://github.com/Mar-Cald/multibayes
 
 ## License
 MIT License
 
 ## Issues and Contributions
-Please report issues at: https://github.com/Mar-Cald/pdAdjust/issues
+Please report issues at: https://github.com/Mar-Cald/multibayes/issues
 
 

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(pdAdjust)
+library(multibayes)
 
-test_check("pdAdjust")
+test_check("multibayes")

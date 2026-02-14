@@ -1,4 +1,4 @@
-Package: pdAdjust
+Package: multibayes
 Type: Package
 Title: Prior-Odds Adjustment for Probability of Direction
 Version: 0.1.0
@@ -22,6 +22,6 @@ Depends:
     R (>= 4.0.0)
 Suggests: 
     testthat (>= 3.0.0)
-URL: https://github.com/Mar-Cald/pdAdjust
-BugReports: https://github.com/Mar-Cald/pdAdjust/issues
+URL: https://github.com/Mar-Cald/multibayes
+BugReports: https://github.com/Mar-Cald/multibayes/issues
 Config/testthat/edition: 3

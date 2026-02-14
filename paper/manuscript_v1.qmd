@@ -1,5 +1,6 @@
 ---
-title: "Adjusting the Probability of Direction for Multiple Testing"
+title: "Multiple Probabilities of Direction:"
+subtitle: "A Rationale for Prior-odds Adjustment"
 shorttitle: "PROBABILITY OF DIRECTION UNDER MULTIPLICITY"
 author:
   - name: Margherita Calderan
@@ -64,7 +65,7 @@ author-note:
     gratitude: ~
     authorship-agreements: ~
     
-abstract: "Bayesian methods are increasingly adopted in psychological research for practical reasons, such as computational flexibility and intuitive parameter summaries, without necessarily endorsing subjective Bayesian philosophy. When not fully committed to a subjectivist stance, researchers may wish to evaluate their inferential procedures by operating characteristics. This consideration becomes particularly relevant when posterior indices like the probability of direction (*pd*) are thresholded across many parameters. The *pd* is the posterior probability that a parameter is strictly greater or smaller than a null value. Here, we examine the operating characteristics of *pd*-based decisions under repeated use, leveraging its correspondence with the frequentist *p*-value in common settings. Simulations under the global null show that extreme *pd* values can occur by chance and that familywise error rates increase with the number of tests, exhibiting behavior comparable to uncorrected *p*-values. We reformulate *pd* as posterior odds and propose a prior-odds adjustment following Jeffreys' and Westfall's approach to multiplicity. The adjustment reduces the prior probability assigned to each hypothesis as family size increases and can be calibrated to reflect prior beliefs about the global null. We extend the method to account for correlations among hypotheses. An R package implements the procedure."
+abstract: "In psychological research, Bayesian analyses are often summarized using posterior indices and then interpreted with conventional cutoffs across many parameters. The probability of direction (*pd*) is one such index, defined as the posterior probability that a parameter is greater or smaller than a null value. When *pd* is thresholded and used repeatedly, multiplicity becomes consequential but is rarely handled explicitly. This paper examines the operating characteristics of *pd*-based decisions under repeated use, leveraging its correspondence with the frequentist *p*-value in common settings. Simulations show that extreme *pd* values can occur by chance and that misleading conclusions become more likely as the number of tests increases. We then express pd in terms of posterior odds and propose a principled prior-odds adjustment following Jeffreys' and Westfall's prior-probability approach to multiplicity. An accompanying R package implements the proposed prior-odds correction for routine use in applied settings." 
 
 keywords: [probability of direction, multiple testing, prior-odds]
 bibliography: "biblio.bib"
@@ -241,13 +242,76 @@ Given this convergence and the prevailing practices in psychological research, w
 The paper proceeds in four steps. First, we introduce *pd* and make its connection to the frequentist *p*-value explicit. Second, we characterize the null behavior of *pd* and, via simulations, examine the multiple-testing properties of *pd*-thresholded decisions, with a focus on family-wise error rate. Third, we express *pd* in terms of posterior odds, relate these odds to directional Bayes factors, and clarify the role of prior odds. Finally, building on Jeffreys’ global-null formulation [@Jeffreys1938] and the Bayesian justification for Bonferroni-style multiplicity adjustment developed by Westfall, Johnson, and Utts [@Westfall1997], we show how these prior-odds ideas extend naturally to *pd*. In the discussion, we offer practical guidance for implementation and reporting.
 
 ## Probability of Direction
-The probability of direction (*pd*) is a descriptive posterior index that quantifies how strongly the posterior distribution favors one direction of an effect relative to a reference ($\theta_{null}$) value [@Makowski2019]. For a continuous posterior, it can be defined as the larger of the two one-sided posterior probabilities:
+The probability of direction (*pd*) is a descriptive posterior index that quantifies how strongly the posterior distribution favors one direction of an effect relative to a reference ($\theta_{null}$) value [@Makowski2019]. For a continuous posterior, it can be defined as the larger of the two one-sided posterior probabilities (@fig-posterior-pd):
 $pd = \max(\Pr(\theta < \theta_{null} \mid y),\ \Pr(\theta > \theta_{null} \mid y)),$ and it ranges from 0.50 (no directional preference) to 1 (all on one side).
 
+```{r}
+#| label: fig-posterior-pd
+#| dev: cairo_pdf
+#| fig-cap: >
+#|  Posterior distribution with directional posterior mass on either side of $\theta_{null}$ (here $=0$), shown in different colors; the probability of direction (pd) is 
+#|  the larger of the two posterior probabilities.
+#| fig-width: 4.5
+#| fig-height: 2
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-align: center
+
+set.seed(1)
+
+# Example posterior draws
+draws = rnorm(40000, mean = 0.35, sd = 0.25)
+
+# Directional posterior probabilities
+p_pos = mean(draws > 0)
+p_neg = mean(draws < 0)
+
+pd = max(p_pos, p_neg)
+
+# Density for shaded area plot
+dens = density(draws, n = 2000)
+
+df = tibble(x = dens$x, y = dens$y) %>%
+  mutate(
+    side = if_else(x >= 0, "\u03B8 > 0", "\u03B8 < 0"),
+    side = factor(side, levels = c("\u03B8 < 0", "\u03B8 > 0"))
+  )
+
+label_txt = paste0(
+  "Pr(\u03B8 > 0 | y) = ", round(p_pos, 3), "\n",
+  "Pr(\u03B8 < 0 | y) = ", round(p_neg, 3), "\n",
+  "pd = ", round(pd, 3)
+)
+
+ggplot(df, aes(x = x, y = y)) +
+  geom_area(aes(fill = side), alpha = 0.6) +
+  geom_line(linewidth = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", linewidth = 1) +
+  annotate(
+    "label",
+    x = 1,
+    y = max(df$y) * 0.8,
+    hjust = 0.5,
+    vjust = 0.5,
+    label = label_txt,
+    size = 3.2
+  ) +
+  labs(
+    x = expression(theta),   # axis label in plotmath (also fine to use "\u03B8")
+    y = "Posterior density",
+    fill = NULL
+  ) +
+  scale_fill_manual(
+    values = c("\u03B8 < 0" = "deepskyblue", "\u03B8 > 0" = "deepskyblue4")
+  ) +
+  theme(legend.position = "top")+
+  theme_clean(base_size = 10)
+```
 Because *pd* is derived from the posterior, it inherits dependence on the full model specification (likelihood and prior), so the long-run error behavior of *pd*-based decisions is not a property of *pd* “in isolation” but of the overall Bayesian procedure that generates the posterior.
 
 ### Probability of Direction as a test of existence and direction
-A convenient starting point for calibration is the mapping between *pd* and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), *pd* is the posterior probability of the data-favored sign relative to $\theta_{null}$. This value corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987], with the two-sided relation approximated by $p \approx 2(1 - pd)$. In practice, the *pd* is often used to summarize both the direction and existence of an effect [**REFs**].
+A convenient starting point for calibration is the mapping between *pd* and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), *pd* is the posterior probability of the data-favored sign relative to $\theta_{null}$. This value corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987], with the two-sided relation approximated by $p \approx 2p = 2(1 - pd)$. In practice, the *pd* is often used to summarize both the direction and existence of an effect [**REFs**].
 
 This interpretation is clearest when phrased as a decision rule $pd>c$: the posterior must assign more than $c$ probability mass to the side of $\theta_{\text{null}}$ favored by the data. Setting $c=1-\alpha/2$ is convenient because it bounds the posterior mass in the opposite tail by $\alpha/2$. For concreteness, suppose the posterior favors a positive effect so that $pd=\Pr(\theta>\theta_{\text{null}}\mid y)$. Then $pd>c$ implies
 $$

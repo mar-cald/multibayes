@@ -1,7 +1,7 @@
 # Relatioship between q and alpha adjustment
 
 # Parameters
-m_values <- 1:60
+m_values <- 1:10
 alpha_base <- 0.05
 target_pd <- 0.95 # We want to maintain this posterior probability
 
@@ -9,7 +9,7 @@ target_pd <- 0.95 # We want to maintain this posterior probability
 results <- data.frame(
   m = m_values,
   alpha_adj = NA,
-  pd_adj1 = NA,
+  pd_adj = NA,
   calculated_q = NA,
   verified_pd = NA
 )
@@ -34,14 +34,14 @@ for (i in 1:length(m_values)) {
   H0_verify <- q_calculated^(1/m)
   H1_verify <- 1 - H0_verify
   # Bayesian Posterior Formula
-  pd_adj2_verify <- (pd_val * H1_verify) / 
+  pd_adj_verify <- (pd_val * H1_verify) / 
     (pd_val * H1_verify + (1 - pd_val) * H0_verify)
   
   # Store results
   results$alpha_adj[i] <- alpha_adj
-  results$pd_adj1[i] <- pd_val
+  results$pd_adj[i] <- pd_val
   results$calculated_q[i] <- q_calculated
-  results$verified_pd[i] <- pd_adj2_verify
+  results$verified_pd[i] <- pd_adj_verify
 }
 
 # Print the table

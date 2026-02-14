@@ -6,7 +6,7 @@ rm(list=ls())
 
 # load pkgs
 pkg = c("dplyr","MASS","tidyr","shape","jointest",
-        "furrr","tibble","purrr", "pdAdjust")
+        "furrr","tibble","purrr", "multibayes")
 
 invisible(sapply(pkg, require, character.only = T))
 
