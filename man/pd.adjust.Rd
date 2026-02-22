@@ -4,42 +4,55 @@
 \alias{pd.adjust}
 \title{Prior-odds adjustment for Probability of Direction (pd)}
 \usage{
-pd.adjust(pd, q = 0.4, m = length(pd), post_corr = NULL)
+pd.adjust(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL)
 }
 \arguments{
-\item{pd}{Numeric vector of \emph{pd} values (typically \eqn{pd \in [0.5, 1]}).}
+\item{pd}{Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}.}
 
-\item{q}{Numeric scalar in \eqn{(0, 1)} giving the prior probability that
-\strong{all} hypotheses in the family are null. Defaults to \code{0.4}.}
+\item{draws}{Optional matrix or data frame of posterior draws (columns = parameters).
+If provided, \code{pd} is calculated automatically.}
 
-\item{m}{Positive integer giving the number of tested hypotheses. Defaults to
-\code{length(pd)}.}
+\item{q}{Numeric scalar in \eqn{(0, 1)}: the prior probability that
+\strong{all} hypotheses are null. Defaults to \code{0.4}.}
 
-\item{post_corr}{Optional correlation matrix of posterior draws (\code{NULL} by default).
-If provided, must be a square matrix with dimensions matching \code{length(pd)}.
-Adjusts the effective number of tests using eigenvalue-based correction
-to account for dependence between hypotheses.}
+\item{m}{Positive integer. The number of tested hypotheses.
+Defaults to \code{length(pd)}. Overridden if \code{R} is provided.}
+
+\item{R}{Optional correlation matrix of posterior draws. If provided,
+\eqn{m_{eff}} is calculated and used instead of \code{m}.}
 }
 \value{
-A numeric vector of the same length as \code{pd}, containing adjusted \emph{pd}
-values (or the original \code{pd} if \eqn{H_{0_m} < 0.5}).
+A \code{data.frame} containing original \code{pd}, \code{pd_adj}, and the
+parameters \code{q} and \code{m} used for the correction.
 }
 \description{
 Adjusts a vector of Probability of Direction (\emph{pd}) values using a global
-prior probability that \strong{all} tested hypotheses are null, \eqn{q}. The adjustment
-converts \eqn{q} into a per-hypothesis prior probability \eqn{H_{0_m} = q^{1/m}},
-where \eqn{m} is the family size, and then reweights each \emph{pd} accordingly.
+prior probability that \strong{all} tested hypotheses are null, \eqn{q}. The
+adjustment converts \eqn{q} into a per-hypothesis prior probability
+\eqn{\Pr(H_0) = q^{1/m}}, where \eqn{m} is the family size (or effective
+family size when correlation is accounted for), and reweights each \emph{pd}
+via a prior-odds correction.
 }
-\examples{
-# Without correlation adjustment
-pd <- c(0.99, 0.98, 0.978)
-pd.adjust(pd, q = 0.4)
-#> [1] 0.9725000 0.9459554 0.9407567
+\details{
+The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
+\eqn{P(H_0) = q^{1/m}} and its complement \eqn{P(H_1) = 1 - P(H_0)},
+the adjusted \emph{pd} is:
+\deqn{
+   pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
+}
+If \eqn{P(H_0) \leq 0.5}, the prior is considered non-informative or
+optimistic for the alternative; no adjustment is applied and original
+values are returned with a warning.
 
-# With correlation adjustment
-corr_mat <- matrix(c(1.0, 0.5, 0.3,
-                     0.5, 1.0, 0.4,
-                     0.3, 0.4, 1.0), nrow = 3)
-pd.adjust(pd, q = 0.4, post_corr = corr_mat)
-#>[1] 0.9759573 0.9525872 0.9479914
+When \code{R} is supplied, the effective number of tests \eqn{m_{eff}}
+is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
+(Cheverud, 2001):
+\deqn{
+   m_{eff} = K \left( 1 - \frac{(K-1) \text{Var}(\lambda)}{K^2} \right)
+}
+where \eqn{K} is the number of hypotheses.
+}
+\references{
+Cheverud, J. M. (2001). A simple correction for multiple comparisons in
+interval mapping genome scans. \emph{Heredity}, 87, 52–58.
 }

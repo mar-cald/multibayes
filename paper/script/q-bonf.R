@@ -1,4 +1,4 @@
-# Relatioship between q and alpha adjustment
+# Relationship between q and alpha adjustment
 
 # Parameters
 m_values <- 1:10

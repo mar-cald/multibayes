@@ -1,72 +1,96 @@
 #' Prior-odds adjustment for Probability of Direction (pd)
 #'
 #' Adjusts a vector of Probability of Direction (*pd*) values using a global
-#' prior probability that **all** tested hypotheses are null, \eqn{q}. The adjustment
-#' converts \eqn{q} into a per-hypothesis prior probability \eqn{H_{0_m} = q^{1/m}},
-#' where \eqn{m} is the family size, and then reweights each *pd* accordingly.
+#' prior probability that **all** tested hypotheses are null, \eqn{q}. The
+#' adjustment converts \eqn{q} into a per-hypothesis prior probability
+#' \eqn{\Pr(H_0) = q^{1/m}}, where \eqn{m} is the family size (or effective
+#' family size when correlation is accounted for), and reweights each *pd*
+#' via a prior-odds correction.
 #'
-#' @param pd Numeric vector of *pd* values (typically \eqn{pd \in [0.5, 1]}).
-#' @param q Numeric scalar in \eqn{(0, 1)} giving the prior probability that
-#'   **all** hypotheses in the family are null. Defaults to `0.4`.
-#' @param m Positive integer giving the number of tested hypotheses. Defaults to
-#'   `length(pd)`.
-#' @param post_corr Optional correlation matrix of posterior draws (`NULL` by default).
-#'   If provided, must be a square matrix with dimensions matching `length(pd)`.
-#'   Adjusts the effective number of tests using eigenvalue-based correction 
-#'   to account for dependence between hypotheses.
-#'   
-#' @return A numeric vector of the same length as `pd`, containing adjusted *pd*
-#'   values (or the original `pd` if \eqn{H_{0_m} < 0.5}).
+#' @details
+#' The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
+#' \eqn{P(H_0) = q^{1/m}} and its complement \eqn{P(H_1) = 1 - P(H_0)},
+#' the adjusted *pd* is:
+#' \deqn{
+#'    pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
+#' }
+#' If \eqn{P(H_0) \leq 0.5}, the prior is considered non-informative or 
+#' optimistic for the alternative; no adjustment is applied and original 
+#' values are returned with a warning.
+#'
+#' When `R` is supplied, the effective number of tests \eqn{m_{eff}}
+#' is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix 
+#' (Cheverud, 2001):
+#' \deqn{
+#'    m_{eff} = K \left( 1 - \frac{(K-1) \text{Var}(\lambda)}{K^2} \right)
+#' }
+#' where \eqn{K} is the number of hypotheses.
+#'
+#' @param pd Numeric vector of *pd* values in \eqn{[0.5, 1]}.
+#' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
+#'   If provided, `pd` is calculated automatically.
+#' @param q Numeric scalar in \eqn{(0, 1)}: the prior probability that 
+#'   **all** hypotheses are null. Defaults to `0.4`.
+#' @param m Positive integer. The number of tested hypotheses. 
+#'   Defaults to `length(pd)`. Overridden if `R` is provided.
+#' @param R Optional correlation matrix of posterior draws. If provided, 
+#'   \eqn{m_{eff}} is calculated and used instead of `m`.
+#'
+#' @return A `data.frame` containing original `pd`, `pd_adj`, and the 
+#'   parameters `q` and `m` used for the correction.
+#'
+#' @references
+#' Cheverud, J. M. (2001). A simple correction for multiple comparisons in
+#' interval mapping genome scans. *Heredity*, 87, 52–58.
+#'
+#' @importFrom stats var
 #'
 #' @export
-#' @examples
-#' # Without correlation adjustment
-#' pd <- c(0.99, 0.98, 0.978)
-#' pd.adjust(pd, q = 0.4)
-#' #> [1] 0.9725000 0.9459554 0.9407567
-#' 
-#' # With correlation adjustment
-#' corr_mat <- matrix(c(1.0, 0.5, 0.3,
-#'                      0.5, 1.0, 0.4,
-#'                      0.3, 0.4, 1.0), nrow = 3)
-#' pd.adjust(pd, q = 0.4, post_corr = corr_mat)
-#' #>[1] 0.9759573 0.9525872 0.9479914
-
-
-
-pd.adjust = function(pd, q = 0.4, m = length(pd), post_corr = NULL) {
+pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL) {
+  
+  # --- Input Handling & Validation -------------------------------------------
+  if (!is.null(draws)) {
+    draws <- as.matrix(draws)
+    pd <- matrixStats::colMeans2(draws > 0)
+    pd <- pmax(pd, 1 - pd)
+    if (is.null(m)) m <- ncol(draws)
+  }
+  
+  if (is.null(pd)) stop("Either `pd` or `draws` must be provided.")
+  if (is.null(m))  m  <- length(pd)
   
   stopifnot(
-    "`pd`: must be numeric"        = is.numeric(pd),
-    "`pd`: must be in [0.5, 1]"    = all(is.finite(pd)) && all(pd >= 0.5 & pd <= 1),
-    "`q`: must be a single number" = length(q) == 1L && is.finite(q),
-    "`q`: must be in (0, 1)"       = (q > 0) && (q < 1),
-    "`m`: must be >= 1"            = length(m) == 1L && is.finite(m) && (m >= 1)
+    "`pd`: must be numeric in [0.5, 1]" = is.numeric(pd) && all(pd >= 0.5 & pd <= 1, na.rm = TRUE),
+    "`q`: must be a single number (0, 1)" = length(q) == 1L && q > 0 && q < 1,
+    "`m`: must be >= 1" = length(m) == 1L && m >= 1
   )
   
-  # Validate post_corr if provided
-  if (!is.null(post_corr)) {
-    stopifnot(
-      "`post_corr`: must be a matrix" = is.matrix(post_corr),
-      "`post_corr`: must be square" = ncol(post_corr) == nrow(post_corr),
-      "`post_corr`: dimensions must match length(pd)" = ncol(post_corr) == length(pd)
-    )
+  # --- Effective number of tests (Cheverud, 2001) -----------------------------
+  if (!is.null(R)) {
+    # Handle scalar correlation input
+    if (length(R) == 1) {
+      R_val <- R
+      R <- matrix(R_val, nrow = length(pd), ncol = length(pd))
+      diag(R) <- 1
+    }
     
-    # Effective number of tests correction
-    eigen_vals = eigen(post_corr)$values
-    v = sum((eigen_vals - 1)^2 / (m - 1))
-    m = m * (1 - (m - 1) * v / (m^2))
+    ev <- eigen(R, symmetric = TRUE, only.values = TRUE)$values
+    K  <- length(ev)
+    # Variance of eigenvalues
+    v_ev <- var(ev)
+    m    <- K * (1 - ((K - 1) * v_ev) / (K^2))
   }
   
-  H0 = q^(1 / m)
-  H1 = 1 - H0
+  # --- Prior-odds adjustment --------------------------------------------------
+  prior_H0 <- q^(1 / m)
   
-  if (H0 >= 0.5) {
-    pd_adj = (pd * H1) / (pd * H1 + (1 - pd) * H0)
+  if (prior_H0 > 0.5) {
+    prior_H1 <- 1 - prior_H0
+    pd_adj   <- (pd * prior_H1) / (pd * prior_H1 + (1 - pd) * prior_H0)
   } else {
-    warning("Pr(H0) < 0.5; returning unadjusted pd")
-    pd_adj = pd
+    warning("Pr(H0) <= 0.5 (Non-conservative prior); returning unadjusted pd.")
+    pd_adj <- pd
   }
   
-  return(as.vector(pd_adj))
+  data.frame(pd = pd, pd_adj = pd_adj, q = rep(q, length(pd)), m = rep(m, length(pd)))
 }

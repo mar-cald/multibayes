@@ -1,7 +1,7 @@
 # Functions
 
 ## Normal model
-bayes_posterior_analytical = function(x, sigma = 1, tau0 = 1, mu0=0) {
+bayes_posterior_analytical <- function(x, sigma = 1, tau0 = 1, mu0=0) {
   n = length(x)
   bar_y  = mean(x)
   post_mean  = (bar_y * (n / sigma^2) + mu0 * (1 / tau0^2)) / (n / sigma^2 + 1 / tau0^2)
@@ -10,8 +10,8 @@ bayes_posterior_analytical = function(x, sigma = 1, tau0 = 1, mu0=0) {
   return(pd)
 }
 
-## Multivariate normal  model
-bayes_posterior_multivariate = function(X, tau0 = 2) {
+## Multivariate normalmodel
+bayes_posterior_multivariate <- function(X, tau0 = 2) {
   n = nrow(X)
   m = ncol(X)
   
@@ -36,12 +36,12 @@ bayes_posterior_multivariate = function(X, tau0 = 2) {
   # extract pd and correlations
   pd = pnorm(abs(post_mean - 0) / post_sd)
   post_cor =  cov2cor(post_cov)
-  
-  return(list(pd,post_cor))
+  post_samp = rmvnorm(1e4,mean = post_mean, sigma = post_cov)
+  return(list(pd,post_cor,post_samp))
 }
 
 ## Z test
-z_test=function(x, mu0 = 0, sigma = 1){
+z_test  <-  function(x, mu0 = 0, sigma = 1){
   z = (mean(x) - mu0) / (sigma / sqrt(length(x)))
   pval = 2 * (1 - pnorm(abs(z)))
   return(pval)
@@ -50,7 +50,7 @@ z_test=function(x, mu0 = 0, sigma = 1){
 
 # not used
 ## MaxT correction Z test 
-maxZ = function(X){
+maxZ  <-  function(X){
   n = nrow(X)
   m = ncol(X)
   B = 10000
