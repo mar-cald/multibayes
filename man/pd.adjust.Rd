@@ -53,6 +53,8 @@ is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
 where \eqn{K} is the number of hypotheses.
 }
 \references{
-Cheverud, J. M. (2001). A simple correction for multiple comparisons in
-interval mapping genome scans. \emph{Heredity}, 87, 52–58.
+Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian Perspective on the Bonferroni Adjustment.
+Biometrika, 84(2), 419–427. \url{http://www.jstor.org/stable/2337467}
+
+Cheverud, J. A simple correction for multiple comparisons in interval mapping genome scans. Heredity 87, 52–58 (2001). \url{https://doi.org/10.1046/j.1365-2540.2001.00901.x}
 }
