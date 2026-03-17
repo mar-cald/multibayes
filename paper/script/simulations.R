@@ -75,9 +75,9 @@ save(sim, file = "paper/script/output/sim1.rda")
 
 
 # Simulation 2 ---------------------------------
-m = c(2,4,6,10,20,30) # number of tests
+m = c(2,4,6,10,20) # number of tests
 r = c(0.2,0.4,0.6,0.8)
-n = c(50,100)
+n = c(30,50,100)
 
 sim_corr = function(n = n, m, eff = 0.3, r = r, s = 2, nsim = 1e4, q = 0.4){
   replicate(nsim, {

@@ -1,6 +1,6 @@
 ---
 title: "Adjusting the Probability of Direction for Multiple Testing"
-shorttitle: "PROBABILITY OF DIRECTION UNDER MULTIPLICITY"
+shorttitle: "PROBABILITY OF DIRECTION AND MULTIPLICITY"
 author:
   - name: Margherita Calderan
     corresponding: true
@@ -84,7 +84,7 @@ execute:
 #| include: false
 #| cache: false
 pkg = c("dplyr","MASS","tidyr","shape","ggplot2",
-        "tibble","furrr","tibble","purrr",
+        "tibble", "multibayes",
         "mvtnorm", "patchwork","scales")
 
 invisible(sapply(pkg, require, character.only = T))
@@ -122,12 +122,11 @@ load("~/multibayes/paper/script/example/mod_acc.rda")
 
 ```
 
+Over the past two decades, the use of Bayesian methods in psychological research has grown considerably [@Van2017; @Jevremov2024; @Pfadt2025]. This expansion has, however, been accompanied by practices reminiscent of the "null ritual" in frequentist statistics, where widespread adoption gave way to automatic application rather than principled reasoning [@Gigerenzer2004; @Cohen1994]. For instance, researchers sometimes treat Bayes Factor thresholds (e.g., BF \> 3) as dichotomous decision rules, or claim that an effect "exists" because the posterior probability of a directional effect exceeds a conventional benchmark such as 95% [@Heck2023; @Kelter2023; @Tendeiro2024; @Hoijtink2016; @Tendeiro2019; @Kruschke2018]. While such summaries are convenient, their use as default cutoffs encourages all-or-none interpretations. When these binary judgments are applied repeatedly across many parameters, they generate a multiplicity problem no different in kind from the one long recognized in frequentist statistics.
 
-Over the past two decades, the use of Bayesian methods in psychological research has grown considerably [@Van2017; @Jevremov2024; @Pfadt2025]. This expansion has, however, been accompanied by practices reminiscent of the "null ritual" in frequentist statistics, where widespread adoption gave way to automatic application rather than principled reasoning [@Gigerenzer2004; @Cohen1994]. For instance, researchers sometimes treat Bayes Factor thresholds (e.g., BF > 3) as dichotomous decision rules, or claim that an effect "exists" because the posterior probability of a directional effect exceeds a conventional benchmark such as 95% [@Heck2023; @Kelter2023; @Tendeiro2024; @Hoijtink2016; @Tendeiro2019; @Kruschke2018]. While such summaries are convenient, their use as default cutoffs encourages all-or-none interpretations. When these binary judgments are applied repeatedly across many parameters, they generate a multiplicity problem no different in kind from the one long recognized in frequentist statistics.
+Yet even there, the problem of multiplicity has been handled inconsistently in practice. Researchers typically account for multiplicity in well-recognized cases, such as post hoc comparisons, but rarely do so when evaluating several effects simultaneously within the same model. This is routine in ANOVA or multiple regression, where main effects, interactions, and multiple predictors each constitute a distinct hypothesis test [@Bender2001; @Cramer2016]. Either way, the probability of at least one false positive accumulates with the number of tests performed, regardless of how those tests are framed or grouped.
 
-Yet even there, the problem has been handled inconsistently in practice. Researchers typically account for multiplicity in well-recognized cases, such as post hoc comparisons, but rarely do so when evaluating several effects simultaneously within the same model. This is routine in ANOVA or multiple regression, where main effects, interactions, and multiple predictors each constitute a distinct hypothesis test [@Bender2001; @Cramer2016]. Either way, the probability of at least one false positive accumulates with the number of tests performed, regardless of how those tests are framed or grouped.
-
-Frequentist methods have been developed to address precisely this accumulation, targeting either the family-wise error rate (the probability of at least one false positive) or the false discovery rate (the expected proportion of false positives among rejected hypotheses) [@Benjamini1995; @Westfall1993]. These procedures address whether a spurious result enters the literature, but leave unresolved a subtler consequence of the same selection process. When researchers examine many parameters but highlight only the most extreme estimates, selection systematically inflates reported magnitudes [@Gelman2014; @Zwet2021; @Altoe2020]. 
+Frequentist methods have been developed to address precisely this accumulation, targeting either the family-wise error rate (the probability of at least one false positive) or the false discovery rate (the expected proportion of false positives among rejected hypotheses) [@Benjamini1995; @Westfall1993]. These procedures address whether a spurious result enters the literature, but leave unresolved a subtler consequence of the same selection process. When researchers examine many parameters but highlight only the most extreme estimates, selection systematically inflates reported magnitudes [@Gelman2014; @Zwet2021; @Altoe2020].
 
 Bayesian methods can mitigate this overestimation by pulling extreme estimates toward more plausible values, via informative priors [@Zwet2022; @Dawid1994] and hierarchical modelling [@Gelman2012; @GelmanBook; @Kruschke2011; @Berry1999]. Crucially, however, magnitude bias and false positive accumulation are related but distinct problems. Shrinkage does not, on its own, provide any guarantee about the error properties of a repeated decision rule applied across many parameters: if the same cutoff is applied to many parameters (e.g., declaring an effect whenever the posterior probability exceeds 95%), the probability of at least one spurious finding can remain substantial. Bayesian solutions to this issue typically rely on either simultaneous credible statements [@Gelman2000; @Pruzek2016; @Schnell2020; @Box1992] or priors over the hypothesis space that scale with the number of tests [@Scott2006; @Scott2010; @Jeffreys1938; @Westfall1997]. Despite these available tools, hierarchical modeling alone is still routinely treated as sufficient for multiplicity control, a conflation that leaves the problem only partially addressed [@Basket2015; @Limbachia2021; @Chen2020; @Hogeveen2022; @Mathar2022].
 
@@ -135,20 +134,21 @@ At this point, one might object that multiplicity concerns do not arise under a 
 
 Rather than adjudicating these positions further, here we adopt a falsificationist approach [@Box1980; @GelmanShalizi2013; @GelmanHennig2017; @Mayo2018] and ask a more tractable question: what are the operating characteristics of a widely used Bayesian decision rule, and how can its multiplicity problem be addressed in a principled way?
 
-We focus on the Probability of Direction ($pd$) [@Makowski2019], a posterior summary that quantifies the probability that an effect falls in its dominant direction and whose use in applied psychological research has grown substantially in recent years [REF, anche su blavaan]. A key property of $pd$ is that it can be formally linked to the frequentist $p$-value in standard settings [@Marsman2017; @Berger1987; @Casella1987]. This correspondence makes the error consequences of thresholding $pd$, and therefore the multiplicity problem it generates, directly interpretable in terms familiar to most researchers.
+We focus on the Probability of Direction ($pd$) [@Makowski2019], a posterior summary that quantifies the probability that an effect falls in its dominant direction and whose use in applied psychological research has grown substantially in recent years \[REF, anche su blavaan\]. A key property of $pd$ is that it can be formally linked to the frequentist $p$-value in standard settings [@Marsman2017; @Berger1987; @Casella1987]. This correspondence makes the error consequences of thresholding $pd$, and therefore the multiplicity problem it generates, directly interpretable in terms familiar to most researchers.
 
-The paper is organized as follows. We first introduce $pd$ and examine its use as a test for existence. We then characterize the multiplicity problem that arises under repeated thresholding, discussing the role of prior choice and explaining why skeptical priors alone are insufficient to resolve it. Next, we develop the prior-odds adjustment for multiplicity control, extending the framework of @Jeffreys1938 and @Westfall1997 to $pd$: we move from posterior probabilities to posterior odds, derive the adjustment procedure, discuss how the prior odds should be chosen, and evaluate the approach via simulation. We then extend the framework to account for correlation among tests, and we conclude with a worked example using the accompanying R package [REF], followed by a general discussion.
+The paper is organized as follows. We first introduce $pd$ and examine its use as a test for existence. We then characterize the multiplicity problem that arises under repeated thresholding, discussing the role of prior choice and explaining why skeptical priors alone are insufficient to resolve it. Next, we develop the prior-odds adjustment for multiplicity control, extending the framework of @Jeffreys1938 and @Westfall1997 to $pd$: we move from posterior probabilities to posterior odds, derive the adjustment procedure, discuss how the prior odds should be chosen, and evaluate the approach via simulation. We then extend the framework to account for correlation among tests, and we conclude with a worked example using the accompanying R package \[REF\], followed by a general discussion.
 
 ## Probability of Direction
-The probability of direction ($pd$) is a descriptive posterior index that quantifies how strongly the posterior distribution favors one direction of an effect relative to a reference ($\theta_{null}$) value [@Makowski2019]. For a continuous posterior, it can be defined as the larger of the two one-sided posterior probabilities:
-$pd = \max(\Pr(\theta < \theta_{null} \mid y),\ \Pr(\theta > \theta_{null} \mid y)),$ and it ranges from 0.50 (no directional preference) to 1 (all on one side). Because $pd$ is derived from the posterior, it depends on the full model specification (likelihood and prior), so the long-run error behavior of $pd$-based decisions is not a property of $pd$ “in isolation” but of the overall Bayesian procedure that generates the posterior.
+
+The probability of direction ($pd$) is a posterior index that quantifies how strongly the posterior distribution favors one direction of an effect relative to a reference ($\theta_{null}$) value [@Makowski2019]. For a continuous posterior, it can be defined as the larger of the two one-sided posterior probabilities: $pd = \max(\Pr(\theta < \theta_{null} \mid y),\ \Pr(\theta > \theta_{null} \mid y)),$ and it ranges from 0.50 (no directional preference) to 1 (all on one side). Because $pd$ is derived from the posterior, it depends on the full model specification (likelihood and prior), so the long-run error behavior of $pd$-based decisions is not a property of $pd$ “in isolation” but of the overall Bayesian procedure that generates the posterior.
 
 ### Probability of Direction as test for existence
-A convenient starting point for calibration is the mapping between $pd$ and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), $pd$ is the posterior probability of the data-favored sign relative to $\theta_{null}$. This value corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987], yielding the two-sided approximation $p \approx 2(1 - pd)$. In practice, the $pd$ is often used to summarize both the direction and existence of an effect [**REFs**].
+
+A convenient starting point for calibration is the mapping between $pd$ and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), $pd$ is the posterior probability of the data-favored sign relative to $\theta_{null}$. This value corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987], yielding the two-sided approximation $p \approx 2(1 - pd)$. In practice, the $pd$ is often used to summarize both the direction and existence of an effect \[**REFs**\].
 
 This interpretation is clearest when phrased as a decision rule $pd>c$: the posterior must assign more than $c$ probability mass to the side of $\theta_{\text{null}}$ favored by the data. Setting $c=1-\alpha/2$ is convenient because it bounds the posterior mass in the opposite tail by $\alpha/2$. For concreteness, suppose the posterior favors a positive effect so that $pd=\Pr(\theta>0\mid y)$. An $\alpha=0.05$ implies $c=0.975$, therefore the rule $pd>c$ requires that $\Pr(\theta\le \theta_{\text{null}}\mid y)<0.025$, placing less than 2.5% of posterior mass at or below $0$.
 
-Put it differently, let $q_p$ denote the $p$-th posterior quantile, so the central $(1-\alpha)$ equi-tailed credible interval is $[q_{\alpha/2},\,q_{1-\alpha/2}]$, which leaves probability $\alpha/2$ in each tail. The condition $\Pr(\theta\le \theta_{\text{null}}\mid y)<\alpha/2$ holds if and only if $\theta_{\text{null}}$ falls below $q_{\alpha/2}$, that is, when $\theta_{\text{null}}\notin [q_{\alpha/2},\,q_{1-\alpha/2}]$. Thus, observing $pd>0.975$ is equivalent to excluding $\theta_{\text{null}}$ from the central 95% equi-tailed credible interval (see @fig-pd-ci). When the credible interval excludes the null value, one can infer that the null is relatively implausible [@Box1992].
+Put it differently, let $q_p$ denote the $p$-th posterior quantile, so the central $(1-\alpha)$ equi-tailed credible interval is $[q_{\alpha/2},\,q_{1-\alpha/2}]$, which leaves probability $\alpha/2$ in each tail. The condition $\Pr(\theta\le \theta_{\text{null}}\mid y)<\alpha/2$ holds if and only if $\theta_{\text{null}}$ falls below $q_{\alpha/2}$, that is, when $\theta_{\text{null}}\notin [q_{\alpha/2},\,q_{1-\alpha/2}]$. Thus, observing $pd>0.975$ is equivalent to excluding $\theta_{\text{null}}$ from the central 95% equi-tailed credible interval (see @fig-pd-ci). When the credible interval excludes the null value, one can infer that the null is relatively implausible \[@Box1992\].
 
 \newpage
 
@@ -260,18 +260,19 @@ h0 = ggplot(df, aes(x = x, y = y)) +
   theme(legend.position = "top") 
 ```
 
-
-Given these considerations, although $pd$ and the frequentist *p*-value target different quantities, it is expected that decision rules of the form $pd>c$ approximate the operating characteristics of familiar frequentist rules such as $p<\alpha$. 
+Given these considerations, although $pd$ and the frequentist *p*-value target different quantities, it is expected that decision rules of the form $pd>c$ approximate the operating characteristics of familiar frequentist rules such as $p<\alpha$.
 
 Although we set $\theta_{null}=0$ throughout the manuscript for ease of exposition, the procedure presented below readily extends to non-zero nulls. This simply requires defining directional hypotheses relative to the target value.
 
 ## Multiplicity Problem
+
 ### Prior impact
 
 Under the null hypothesis, $p$-values are uniformly distributed on $[0, 1]$. Because $pd$ can be mapped to the $p$-value, this implies a corresponding null reference behavior for $pd$ on $[0.5, 1]$. However, because $pd$ is a posterior probability regarding the sign of $\theta$, its null distribution is not determined by the likelihood alone: it can shift depending on how strongly the prior concentrates probability near 0 (i.e., how strongly the prior "expects" near-null effects). Demonstrating this prior dependence at $m = 1$ makes the target of subsequent multiplicity analyses explicit. Even before any multiplicity is introduced, a fixed cutoff, such as $pd > 0.975$, does not have a universal consequence across priors and sample sizes.
 
-Given these considerations, as a first step, we simulated data under the null ($\theta = 0$) and computed the frequency of $pd > c$, with $c = 0.975$ ($\alpha = 0.05$). Operationally, this quantifies how often the procedure falsely excludes zero from the 95% central credible interval (bounded by $1-c$ and $c$), incorrectly concluding that a directed effect exists^[In most applications, $pd$ is estimated from posterior draws as the larger of the two one-sided posterior probabilities: the proportion of draws above $\theta_{\text{null}}$ and the proportion below $\theta_{\text{null}}$. Because this is a Monte Carlo estimate, its numerical resolution depends directly on the number of posterior draws [@Makowski2019].
-In our simulation, however, the conjugate normal–normal model yields a Gaussian posterior: $\theta \mid y \sim \mathcal{N}(\mu_{\text{post}}, \sigma_{\text{post}}^2)$ This allows $pd$ to be computed in closed form. Specifically, we calculate: $pd = \max(\Pr(\theta > \theta_{\text{null}} \mid y), \Pr(\theta < \theta_{\text{null}} \mid y)) = \Phi\!\left(\frac{|\mu_{\text{post}} - \theta_{\text{null}}|}{\sigma_{\text{post}}}\right)$]. For the frequentist comparison, we conducted two-sided, one-sample $z$-tests (with $\alpha = 0.05$).
+Given these considerations, as a first step, we simulated data under the null ($\theta = 0$) and computed the frequency of $pd > c$, with $c = 0.975$ ($\alpha = 0.05$). Operationally, this quantifies how often the procedure falsely excludes zero from the 95% central credible interval (bounded by $1-c$ and $c$), incorrectly concluding that a directed effect exists[^1]. For the frequentist comparison, we conducted two-sided, one-sample $z$-tests (with $\alpha = 0.05$).
+
+[^1]: In most applications, $pd$ is estimated from posterior draws as the larger of the two one-sided posterior probabilities: the proportion of draws above $\theta_{\text{null}}$ and the proportion below $\theta_{\text{null}}$. Because this is a Monte Carlo estimate, its numerical resolution depends directly on the number of posterior draws [@Makowski2019]. In our simulation, however, the conjugate normal–normal model yields a Gaussian posterior: $\theta \mid y \sim \mathcal{N}(\mu_{\text{post}}, \sigma_{\text{post}}^2)$ This allows $pd$ to be computed in closed form. Specifically, we calculate: $pd = \max(\Pr(\theta > \theta_{\text{null}} \mid y), \Pr(\theta < \theta_{\text{null}} \mid y)) = \Phi\!\left(\frac{|\mu_{\text{post}} - \theta_{\text{null}}|}{\sigma_{\text{post}}}\right)$
 
 Specifically, we conducted a Monte Carlo simulation with 10,000 replications for sample sizes $n \in \{30, 50, 100\}$. In each replication, data were drawn from a standard normal distribution, $y_i \sim \mathcal{N}(0, 1)$. For every simulated dataset, we computed the posterior distribution of $\theta$ using a conjugate normal-normal model with $y_i \mid \theta \sim \mathcal{N}(\theta, 1)$ and prior $\theta \sim \mathcal{N}(0, \tau^2)$. We varied the prior scale $\tau \in \{0.2, 0.5, 1, 1.5, 2\}$ to encompass a range of priors, from skeptical to relatively diffuse.
 
@@ -324,12 +325,11 @@ pd_den <- ggplot(df_pd, aes(x = pd)) +
 pd_den
 ```
 
-
 ### Why skeptical priors alone are insufficient
+
 Building on this baseline, we examine the effects of multiplicity. Although individual tests rarely produce an extreme $pd$, the probability of at least one extreme value among $pd_1, \dots, pd_m$ increases with the number of tests, $m$. We quantify this family-wise error rate (FWER) by extending the simulation to families of size $m \in \{1, 2, 3, 4, 5, 10, 20\}$ and calculating the proportion of replications with at least one $pd > 0.975$.
 
 As expected, $pd$-based decisions behave broadly analogously to their frequentist counterparts when sample sizes are large and the prior places relatively little mass near 0 (@fig-fwer1-pd). By contrast, as the prior becomes more skeptical (i.e., increasingly concentrated around 0), the FWER decreases. Nevertheless, the larger the sample, the less the impact of prior.
-
 
 ```{r}
 #| label: fig-fwer1-pd
@@ -381,7 +381,6 @@ df_fwer |>
   )
 ```
 
-
 The simulation results suggest that Type I error rates can be reduced by adopting more skeptical within-model priors for each parameter. However, relying on prior skepticism as a general remedy for multiplicity conflates two distinct goals: (i) encoding substantive prior knowledge about a specific parameter, and (ii) calibrating the error rate of a decision rule under repeated testing. When the primary aim is error-rate control, adjusting the within-model prior introduces bias into parameter estimates as an unintended side effect.
 
 The approach presented below instead handles multiplicity at the level of prior odds, while leaving within-model priors unchanged. In particular, researchers can explicitly encode their expectations about how many effects are likely to be present, allowing multiplicity to be addressed, but without altering the underlying model (or models). This separation allows researchers to select the most appropriate prior for each parameter based on substantive knowledge, while still controlling error rates when making multiple statements.
@@ -389,47 +388,43 @@ The approach presented below instead handles multiplicity at the level of prior 
 One condition, however, must be met: because $pd$ measures the probability mass on one side of the null, the within-model prior must assign equal plausibility to effects in either direction. This symmetry requirement is satisfied by all standard default priors, and still leaves the choice of prior informativeness entirely at the researcher's discretion.
 
 ## Prior-Odds adjustment for multiplicity {#sec-adjustment}
-### From posterior probabilities to posterior odds
-To connect $pd$ to posterior odds, consider the directional hypotheses $H_{+}: \theta > 0$ and $H_{-}: \theta < 0$. These hypotheses partition the parameter space based on the sign of $\theta$. If the prior for $\theta$ is continuous and symmetric about 0, then the two directions are equally plausible a priori: $\Pr(H_{+}) = \Pr(H_{-}) = 0.5$. 
 
-Without loss of generality, assume the posterior favors $H_{+}$, such that $pd = \Pr(H_{+} \mid y) = \Pr(\theta > 0 \mid y)$. The complement is then given by $1 - pd = \Pr(\theta \le 0 \mid y)$. The posterior odds comparing these two hypotheses are therefore:
+### From posterior probabilities to posterior odds
+
+To connect $pd$ to posterior odds, consider the directional hypotheses $H_{+}: \theta > 0$ and $H_{-}: \theta < 0$. These hypotheses partition the parameter space based on the sign of $\theta$. If the prior for $\theta$ is continuous and symmetric about 0, then the two directions are equally plausible a priori: $\Pr(H_{+}) = \Pr(H_{-}) = 0.5$.
+
+Without loss of generality, assume the posterior favors $H_{+}$, such that $pd = \Pr(H_{+} \mid y) = \Pr(\theta > 0 \mid y)$. The complement is then given by $1 - pd = \Pr(\theta \le 0 \mid y)$. The posterior odds comparing these two hypotheses are therefore: 
 $$
 \frac{pd}{1 - pd} = \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-0} \mid y)}
 $$
 
 For a continuous posterior distribution, the probability of any single point (e.g., $\Pr(\theta = 0 \mid y)$) is 0, which means that one could write $\frac{pd}{1 - pd} = \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-} \mid y)}$. However, we retain the notation $H_{-0}$ in the denominator to explicitly indicate that the hypothesis includes the point null value of zero.
 
-Applying Bayes' rule, these posterior odds can be decomposed into a Bayes Factor and prior odds:
-$$
+Applying Bayes' rule, these posterior odds can be decomposed into a Bayes Factor and prior odds: $$
 \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-0} \mid y)} = \text{BF}_{+/-0} \times \frac{\Pr(H_{+})}{\Pr(H_{-0})}
-$$
-where $\text{BF}_{+/-0}$ quantifies the relative likelihood of the data under $H_{+}$ versus $H_{-0}$. Under prior symmetry, $\frac{\Pr(H_{+})}{\Pr(H_{-0})} = 1$, which yields $\frac{pd}{1 - pd} = \text{BF}_{+/-0}$ [@Marsman2017; @Casella1987]. Thus, the odds $\frac{pd}{1 - pd}$ computed from posterior draws can be interpreted directly as evidence favoring $\theta > 0$ over $\theta \le 0$ (or $\theta < 0$ over $\theta \ge 0$).
+$$ where $\text{BF}_{+/-0}$ quantifies the relative likelihood of the data under $H_{+}$ versus $H_{-0}$. Under prior symmetry, $\frac{\Pr(H_{+})}{\Pr(H_{-0})} = 1$, which yields $\frac{pd}{1 - pd} = \text{BF}_{+/-0}$ [@Marsman2017; @Casella1987]. Thus, the odds $\frac{pd}{1 - pd}$ computed from posterior draws can be interpreted directly as evidence favoring $\theta > 0$ over $\theta \le 0$ (or $\theta < 0$ over $\theta \ge 0$).
 
-### Multiplicity adjustment via prior-odds 
-Assessing a single directional claim under a symmetric prior centered at $\theta_{\text{null}}$ corresponds to prior indifference (i.e., a prior probability of 0.5). If $m$ directional claims are considered jointly and treated as independent a priori, assigning a probability of 0.5 to each claim induces a joint prior that quickly assigns high probability to the event that at least one effect is in the claimed direction. 
+### Multiplicity adjustment via prior-odds
+
+Assessing a single directional claim under a symmetric prior centered at $\theta_{\text{null}}$ corresponds to prior indifference (i.e., a prior probability of 0.5). If $m$ directional claims are considered jointly and treated as independent a priori, assigning a probability of 0.5 to each claim induces a joint prior that quickly assigns high probability to the event that at least one effect is in the claimed direction.
 
 Specifically, the prior probability that none of the $m$ effects is in the claimed direction is $(0.5)^m$, so the prior probability that at least one is in the claimed direction is $1 - (0.5)^m$. For example, with $m = 10$, $\Pr(\text{none in claimed direction}) = 0.5^{10} \approx 0.001$, and $\Pr(\text{at least one in claimed direction}) = 1 - 0.5^{10} \approx 0.999$.
 
 In this setting, a principled response to multiplicity is to reduce the prior odds assigned to any particular directional claim as a function of $m$. Because the prior is symmetric regarding the sign of $\theta$, and $pd$ is defined as the posterior probability of the dominant direction, the same prior odds adjustment applies whether the data favor $\theta > 0$ or $\theta < 0$.
 
-Concretely, for each test $i = 1, \dots, m$, let $\Pr(H_{1, i})$ denote the multiplicity-adjusted prior probability of the favored direction, and let $\Pr(H_{0, i})$ denote the prior probability of its complement (i.e., the opposite direction, with 0 included), where $\Pr(H_{0, i}) + \Pr(H_{1, i}) = 1$. Then the adjusted posterior odds satisfy:
-$$
+Concretely, for each test $i = 1, \dots, m$, let $\Pr(H_{1, i})$ denote the multiplicity-adjusted prior probability of the favored direction, and let $\Pr(H_{0, i})$ denote the prior probability of its complement (i.e., the opposite direction, with 0 included), where $\Pr(H_{0, i}) + \Pr(H_{1, i}) = 1$. Then the adjusted posterior odds satisfy: $$
 \frac{pd_{\mathrm{adj}, i}}{1 - pd_{\mathrm{adj}, i}} = \frac{pd_i}{1 - pd_i} \times \frac{\Pr(H_{1, i})}{\Pr(H_{0, i})}
-$$
-or equivalently,
-$$
+$$ or equivalently, $$
 pd_{\mathrm{adj}, i} = \frac{pd_i \Pr(H_{1, i})}{pd_i \Pr(H_{1, i}) + (1 - pd_i) \Pr(H_{0, i})}
-$$
-Thus, multiplicity acts only through the prior odds factor $\Pr(H_{1, i}) / \Pr(H_{0, i})$.
+$$ Thus, multiplicity acts only through the prior odds factor $\Pr(H_{1, i}) / \Pr(H_{0, i})$.
 
 ### Choosing the prior odds
 
 The multiplicity adjustment operates entirely through the prior odds. To specify these prior odds in a way that scales appropriately with the number of tests, we follow the global null formulation of @Jeffreys1938 (see also @Westfall1997). Conceptually, we first specify a prior probability for the global null: the event that all individual null hypotheses are true. We then work backward from this joint probability to derive the implied prior probability for each individual test.
 
-Formally, for each test $i = 1, \dots, m$, let $H_{1, i}$ be the directional claim corresponding to the posterior-dominant sign (i.e., the direction used to compute $pd_i = \Pr(H_{1, i} \mid y)$), and let $H_{0, i}$ denote its complement (which includes zero). Note that $H_{1, i}$ is defined post hoc based on the observed posterior direction. 
+Formally, for each test $i = 1, \dots, m$, let $H_{1, i}$ be the directional claim corresponding to the posterior-dominant sign (i.e., the direction used to compute $pd_i = \Pr(H_{1, i} \mid y)$), and let $H_{0, i}$ denote its complement (which includes zero). Note that $H_{1, i}$ is defined post hoc based on the observed posterior direction.
 
-The global null hypothesis, $\mathbf{H_0}$, is the event that none of the $m$ parameters lie in their respective favored directions:
-$$
+The global null hypothesis, $\mathbf{H_0}$, is the event that none of the $m$ parameters lie in their respective favored directions: $$
 \mathbf{H_0} = \bigcap_{i=1}^m H_{0, i}
 $$
 
@@ -520,8 +515,9 @@ However, a boundary condition arises when the family of tests is small ($m$) and
 
 ### Simulation Study 1
 
-To illustrate the impact of $\Pr(\mathbf{H_0})$ on both FWER and power, we simulated two data-generating regimes: a global-null scenario ($\theta_1 = \dots = \theta_m = 0$) and an alternative scenario where exactly one effect is non-null ($\theta_1 = \dots = \theta_{m-1} = 0, \theta_m = 0.3$). Replicating our previous simulation procedure with a fixed sample size of $n = 50$, we varied the global null prior across $\Pr(\mathbf{H_0}) \in \{0.50, 0.40, 0.30, 0.20, 0.10\}$. Following @Westfall1997, we compared this Bayesian multiplicity adjustment with the Bonferroni *p*-value correction, which provides strong family-wise error rate (FWER) control. 
+To illustrate the impact of $\Pr(\mathbf{H_0})$ on both FWER and power, we simulated two data-generating regimes: a global-null scenario ($\theta_1 = \dots = \theta_m = 0$) and an alternative scenario where exactly one effect is non-null ($\theta_1 = \dots = \theta_{m-1} = 0, \theta_m = 0.3$). Replicating our previous simulation procedure with a fixed sample size of $n = 50$, we varied the global null prior across $\Pr(\mathbf{H_0}) \in \{0.50, 0.40, 0.30, 0.20, 0.10\}$. Following @Westfall1997, we compared this Bayesian multiplicity adjustment with the Bonferroni *p*-value correction, which provides strong family-wise error rate (FWER) control.
 
+Of foremost importance, if highly skeptical priors are already employed for estimation (e.g., $\tau = 0.2$), applying this multiplicity adjustment constitutes a restrictive "double" correction. Beyond this case, the adjusted $pd$ procedure offers a flexible trade-off governed by the global null prior parameter, $\Pr(\mathbf{H_0})$. An area of equivalence emerges when setting $\Pr(\mathbf{H_0}) = 0.4$, which produces FWER and power trajectories that closely mirror the Bonferroni adjustment across varying family sizes (@fig-fwer2). This empirical alignment is consistent with the asymptotic proof by @Westfall1997 demonstrating that a global null probability of $\Pr(\mathbf{H_0}) = e^{-1} \approx 0.368$ reproduces Bonferroni-like behavior. Thus, selecting $\Pr(\mathbf{H_0}) \approx 0.4$ effectively calibrates the Bayesian prior to match the severity of the frequentist $\alpha$ correction.
 
 \newpage
 
@@ -571,8 +567,6 @@ fw = df_fwer |>
 fw
 ```
 
-
-
 \newpage
 
 ```{r}
@@ -621,24 +615,21 @@ pw = df_pw |>
 pw
 ```
 
-
-Of foremost importance, if highly skeptical priors are already employed for estimation (e.g., $\tau = 0.2$), applying this multiplicity adjustment constitutes a restrictive "double" correction. Beyond this case, the adjusted $pd$ procedure offers a flexible trade-off governed by the global null prior parameter, $\Pr(\mathbf{H_0})$. 
-
-An area of equivalence emerges when setting $\Pr(\mathbf{H_0}) = 0.4$, which produces FWER and power trajectories that closely mirror the Bonferroni adjustment across varying family sizes. This empirical alignment is consistent with the asymptotic proof by @Westfall1997 demonstrating that a global null probability of $\Pr(\mathbf{H_0}) = e^{-1} \approx 0.368$ reproduces Bonferroni-like behavior. Thus, selecting $\Pr(\mathbf{H_0}) \approx 0.4$ effectively calibrates the Bayesian prior to match the severity of the frequentist $\alpha$ correction.
-
 The simulation results further reveal that when researchers hold a strong expectation of non-null effects (e.g., $\Pr(\mathbf{H_0}) \leq 0.2$), the Bayesian adjustment yields higher power than the Bonferroni correction but suffers from FWER inflation, particularly as the prior scale ($\tau$) increase (@fig-fwer2). Conversely, imposing a highly skeptical global prior ($\Pr(\mathbf{H_0}) = 0.5$) over-corrects the FWER to well below the nominal 0.05 threshold, correspondingly sacrificing power (@fig-pw1).
 
 Lastly, although setting $\Pr(\mathbf{H_0}) \in \{0.2, 0.3\}$ yields FWER and power trajectories distinct from the Bonferroni method, these priors still provide substantial error control. Specifically, they maintain a maximum FWER of roughly 10% (only 5% above the nominal level, with $m = 3$ and $\Pr(\mathbf{H_0}) =0.2$) while delivering a notable power increase of approximately +15%.
 
-## Accounting for correlation 
+## Accounting for correlation
 
 A limitation of the proposed procedure is that it allocates the global-null probability across $m$ hypotheses under an independence assumption. When hypotheses are correlated, for instance because parameters are estimated jointly within a single model or because measures share the same observations, independence-based multiplicity adjustments tend to be overly conservative [@Westfall1993; @Pesarin2010].
 
-One principled remedy is to replace the nominal number of tests $m$ with an effective number $m_{\text{eff}}$ that reflects the amount of unique information in the family. This requires estimating a correlation matrix $\mathbf{R}$ among the tests (e.g., among posterior distributions) and mapping it to $m_{\text{eff}}$ via an eigenvalue decomposition. Several methods for this mapping have been proposed, each resting on different assumptions [@Cheverud2001; @Li2005; see @Giudice2021 for a critical discussion]; here we adopt the eigenvalue-based formula of @Cheverud2001. This correction can be applied post hoc given only an estimated or assumed correlation matrix^[We also provide the option of supplying a single scalar representing the expected average correlation among tests.].
+One principled remedy is to replace the nominal number of tests $m$ with an effective number $m_{\text{eff}}$ that reflects the amount of unique information in the family. This requires estimating a correlation matrix $\mathbf{R}$ among the tests (e.g., among posterior distributions) and mapping it to $m_{\text{eff}}$ via an eigenvalue decomposition. Several methods for this mapping have been proposed, each resting on different assumptions [@Cheverud2001; @Li2005; see @Giudice2021 for a critical discussion]; here we adopt the eigenvalue-based formula of @Cheverud2001. This correction can be applied post hoc given only an estimated or assumed correlation matrix[^2].
+
+[^2]: We also provide the option of supplying a single scalar representing the expected average correlation among tests.
 
 ### Simulation Study 2
 
-To evaluate this approach in correlated settings, we extended the simulation study to account for dependence structures. Because the procedure relies on the estimated correlation, we varied the family size $m \in \{2, 4, 6, 10, 20, 30\}$ and the sample size $n \in \{50, 100\}$ to illustrate how estimation uncertainty in the correlation propagates into the correction. Each condition was replicated 100,000 times.
+To evaluate this approach in correlated settings, we extended the simulation study to account for dependence structures. Because the procedure relies on the estimated correlation, we varied the family size $m \in \{2, 4, 6, 10, 20\}$ and the sample size $n \in \{30, 50, 100\}$ to illustrate how estimation uncertainty in the correlation propagates into the correction. Each condition was replicated 100,000 times.
 
 In each replication, data were drawn from a multivariate normal distribution with an equicorrelation structure: $y_i \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$, where $\mu_1 = \cdots = \mu_{m/2} = 0$ (null hypotheses) and $\mu_{m/2+1} = \cdots = \mu_m = 0.3$ (non-null hypotheses), so that exactly half the hypotheses were true nulls. The off-diagonal entries of $\mathbf{R}$ were set to a common value $\rho \in \{0.2, 0.4, 0.6, 0.8\}$.
 
@@ -646,10 +637,9 @@ Posterior distributions were obtained using a multivariate normal conjugate mode
 
 We compared the $pd$-based multiplicity correction against the Holm procedure as a frequentist family-wise error rate benchmark [@Holm1979]. Holm was selected over Bonferroni because it provides strong FWER control while achieving greater power, and it is among the most widely implemented correction procedures in applied research.
 
+As shown in @fig-corr, independence-based corrections are overconservative when tests are correlated, as is well known, leading to a substantial loss of power that widens with increasing family size m. By contrast, the $m_{\text{eff}}$-based procedure maintained FWER near the nominal level while retaining greater power across most conditions, with the advantage growing as $\rho$ increased. An exception was observed at small sample sizes, where possible imprecise estimation of the correlation structure led to small FWER inflation, suggesting that the reliability of the $m_{\text{eff}}$ estimate is a key determinant of the procedure's calibration.
+
 \newpage
-
-As shown in @fig-corr, independence-based corrections are overconservative when tests are correlated, as is well known, leading to a substantial loss of power. By contrast, the $m_{\text{eff}}$-based procedure maintained nominal FWER control while retaining greater power, with the advantage growing as $\rho$ increased.
-
 
 ```{r}
 #| label: fig-corr
@@ -657,7 +647,7 @@ As shown in @fig-corr, independence-based corrections are overconservative when 
 #| fig-cap: >
 #|   Familywise error rate (top panels) and average power (bottom panels) for the adjusted probability of direction methods as a function of the number of tests ($m$) and correlation structure ($r$). The adjusted probabilit incorporates an effective number of tests correction to account for correlation structure. Each column represents a different correlation level.
 #| fig-width:  14     
-#| fig-height: 13   
+#| fig-height: 16   
 #| echo: false
 #| message: false
 #| warning: false
@@ -684,23 +674,24 @@ fw = sim_res2 |>
     )
   ) +
   scale_y_continuous(breaks = seq(0.02,.09,.02))+
-  scale_x_continuous(breaks = c(2,4,6,10,20,30))+
+  scale_x_continuous(breaks = c(2,4,6,10,20))+
   xlab("m")+
   geom_hline(yintercept = 0.05, linetype = "dashed")+
   labs(colour = " ")+
-  theme_clean(base_size = 24)+ theme(legend.position = "top")+
+  theme_clean(base_size = 20)+ theme(legend.position = "top")+
   facet_grid(n~ r, 
              labeller = 
                labeller( r = c(
-                               `0.2` = "r = 0.2",
-                               `0.4` = "r = 0.4",
-                               `0.6` = "r = 0.6",
-                               `0.8` = "r = 0.8"
-                               ),
-                         n = c(`50` = "n = 50",
-                               `100` = "n = 100"),
-                         name =c(`pd_meff` = "pd_meff",
-                                 `pval_holm` = "pval_holm")))
+                 `0.2` = "r = 0.2",
+                 `0.4` = "r = 0.4",
+                 `0.6` = "r = 0.6",
+                 `0.8` = "r = 0.8"
+               ),
+               n = c(`30` = "n = 30",
+                     `50` = "n = 50",
+                     `100` = "n = 100"),
+               name =c(`pd_meff` = "pd_meff",
+                       `pval_holm` = "pval_holm")))
 
 
 pw = sim_res2 |> 
@@ -711,7 +702,7 @@ pw = sim_res2 |>
   geom_line(aes(colour = name), linewidth = 1.5, show.legend = TRUE) +
   geom_point(aes(colour = name),
              size = 2.5, show.legend = TRUE)+
-  scale_x_continuous(breaks = c(2,4,6,10,20, 30))+
+  scale_x_continuous(breaks = c(2,4,6,10,20))+
   scale_colour_manual(
     values = c(
       pd_meff   = "deepskyblue3",
@@ -726,39 +717,42 @@ pw = sim_res2 |>
   #geom_hline(yintercept = 0.05, linetype = "dashed")+
   labs(colour = " ",
        y = "average power")+
-  theme_clean(base_size = 24)+ theme(legend.position = "top")+
-  facet_grid(n~ r, labeller = 
-               labeller( r = c(`0.2` = "r = 0.2",
-                               `0.4` = "r = 0.4",
-                               `0.6` = "r = 0.6",
-                               `0.8` = "r = 0.8"),
-                         n = c(`50` = "n = 50",
-                               `100` = "n = 100"),
-                         name =c(`pd_meff` = "pd_meff",
-                                 `pval_holm` = "pval_holm")))
+  theme_clean(base_size = 20)+ theme(legend.position = "top")+
+  facet_grid(n~ r, 
+             labeller = 
+               labeller( r = c(
+                 `0.2` = "r = 0.2",
+                 `0.4` = "r = 0.4",
+                 `0.6` = "r = 0.6",
+                 `0.8` = "r = 0.8"
+               ),
+               n = c(`30` = "n = 30",
+                     `50` = "n = 50",
+                     `100` = "n = 100"),
+               name =c(`pd_meff` = "pd_meff",
+                       `pval_holm` = "pval_holm")))
 
-(fw / pw)+
-  plot_layout(heights = c(1, 1.5))
+(fw / pw) + plot_layout(heights = c(1, 1.2))
 
 ```
 
 \newpage
 
-
 ## Application: Worked Example with the R Package `multibayes`
 
-The procedure is implemented in the multibayes R package, which provides functions for computing adjusted pd values from either raw posterior draws or a vector of unadjusted $pd$ values. The core function, `pd.adjust()`, accepts posterior draws directly and computes pd values internally when needed. The output returns the adjusted pd values alongside the implied global null probability and the number of tests ($m$). $m$ is reported as the effective number when the correlation structure among parameters is taken into account. Unadjusted values are also retained for direct comparison.
+The procedure is implemented in the `multibayes` R package, which provides functions for computing adjusted $pd$ values from either raw posterior draws or a vector of unadjusted $pd$ values. The core function, `pd.adjust()`, accepts posterior draws directly and computes pd values internally when needed. The output returns the adjusted $pd$ values alongside the implied global null probability and the number of tests ($m$; $m$ is reported as the effective number when the correlation structure among parameters is taken into account). Unadjusted values are also retained for direct comparison.
 
-```r
+``` r
 # install.packages("remotes")
 remotes::install_github("mar-cald/multibayes")
 library(multibayes)
 ```
 
-For this example, we use the openly available dataset from @Lin2020, who investigated, within-subjects, th effect of ego depletion on conflict resolution across four studies. In their paradigm, an initial high-demand (vs. low-demand) task was followed by a Stroop task. For simplicity, we focus on Study 1, which tested the effects of congruency and ego depletion in a sample of 253 participants (total observations: 91,080; nested within subjects). The dataset is readily accessible via the `afex` package and was chosen for this reason; this example is not intended as a critique of the original work.
+For this example, we use the openly available dataset from @Lin2020, who investigated the effect of ego depletion on conflict resolution across four studies. In their paradigm, an initial high-demand (vs. low-demand) task was followed by a Stroop task. For simplicity, we focus on Study 1, which tested the effects of congruency and ego depletion in a sample of 253 participants (total observations: 91,080; nested within subjects). The dataset is readily accessible via the `afex` package \[**REF**\] and was chosen for this reason; this example is not intended as a critique of the original work.
 
-```r
-library(afex); library(brms); library(dplyr)
+``` r
+# load libraries
+library(brms); library(dplyr)
 
 # Select Study 1 data; see ?afex::stroop
 data_stroop <- subset(afex::stroop, study == 1) |>
@@ -767,71 +761,71 @@ data_stroop <- subset(afex::stroop, study == 1) |>
   na.omit()
 ```
 
-Given the repeated-measures structure of the data and the large number of trials per participant, we fit multilevel generalized linear models using `brms`, estimating both population-level and participant-specific effects. We evaluated the effects of congruency (congruent vs. incongruent), condition (depletion vs. control), and their interaction on both reaction time (RT) and accuracy (ACC).^[We acknowledge that best practice would be to analyze all outcomes jointly, for example, via evidence accumulation modeling [**REF**]. We opted for two separate models as this reflects common practice, and to illustrate how $pd$ values can be combined across models.] A lognormal model was specified for RT data, and a binomial logistic regression for ACC.
+Given the repeated-measures structure of the data and the large number of trials per participant, we fit multilevel generalized linear models using `brms` \[**REF**\], estimating both population-level and participant-specific effects. We evaluated the effects of congruency (congruent vs. incongruent), condition (depletion vs. control), and their interaction on both reaction time (RT) and accuracy (ACC).[^3] A lognormal model was specified for RT data, and a binomial logistic regression for ACC. Default flat priors in `brms` were adopted not as a principled recommendation, but to illustrate the method's behavior under the most common applied scenario, which also represents the condition where the prior-odds adjustment is most appropriate. Categorical predictors were dummy coded: for demand condition, low demand was coded 0 and high demand 1; for Stroop congruency, congruent trials were coded 0 and incongruent trials 1. The six directional hypotheses under evaluation are reported in Table 1.
 
-Categorical predictors were sum-contrast coded prior to model fitting: condition (low demand = −0.5; high demand = 0.5) and Stroop congruency (congruent = −0.5; incongruent = 0.5). Default flat priors in `brms` were used, not because this is the recommended choice, but to illustrate the method's behavior under the most common scenario, which also represents the condition where the adjustment procedure is most needed.
+[^3]: We acknowledge that best practice would be to analyze all outcomes jointly, for example, via evidence accumulation modeling \[**REF**\]. We opted for two separate models as this reflects common practice, and to illustrate how $pd$ values can be combined across models.
 
-```r
-contrasts(data_stroop$condition)  <- -(contr.sum(2) / 2)
-contrasts(data_stroop$congruency) <- -(contr.sum(2) / 2)
-```
+| **Hypothesis** | **Effect** | **Outcom**e |
+|----------------------------------|------------------|-----------------|
+| $H_1$: Slower RT for incongruent trials | Congruency | Reaction Time |
+| $H_2$: Lower ACC for incongruent trials | Congruency | Accuracy |
+| $H_3$: Slower RT under depletion | Condition | Reaction Time |
+| $H_4$: Lower ACC under depletion | Condition | Accuracy |
+| $H_5$: Congruency effect amplified under depletion | Condition $\times$ Congruency | Reaction Time |
+| $H_6$: Congruency effect amplified under depletion | Condition $\times$  Congruency | Accuracy |
 
-The six directional hypotheses under evaluation are:
+: Tested hypotheses.
 
-**Congruency**:
-- $H_1$: Positive effect on reaction time (i.e., slower RT for incongruent trials)
-- $H_2$: Negative effect on accuracy (i.e., lower accuracy for incongruent trials)
+\newpage
 
-**Ego Depletion**:
-- $H_3$: Positive effect on reaction time (slower RT under depletion)
-- $H_4$: Negative effect on accuracy (lower accuracy under depletion)
-
-**Ego Depletion $\times$ Congruency**:
-- $H_5$: The congruency effect on reaction time is amplified under ego depletion
-- $H_6$: The congruency effect on accuracy is amplified under ego depletion
-
-Although one could debate whether $pd$ values should be corrected jointly across both models or separately within each, we adopt the joint approach, as the prior over the hypothesis space spans all six hypotheses [@Zeevi2025]. Subject-specific parameters are treated as nuisance, as no directional hypotheses are formulated about them [**REF**].
+Although one could debate whether $pd$ values should be corrected jointly across both models or separately within each, we adopt the joint approach, as the prior over the hypothesis space spans all six hypotheses [@Zeevi2025; **REF**]. Distribution specific (e.g., sigma for the Lognormal model), and subject-specific parameters are treated as nuisance, as they are not considered for inference \[**REF**\].
 
 For the RT analysis, we retained only correct trials preceded by a correct trial (i.e., error and post-error trials were excluded), yielding 76,397 observations. Three chains of 10,000 iterations each were run.
 
-```r
+``` r
 data_rt <- data_stroop |>
   group_by(id) |>
   # remove error and post error trials
   filter(acc == 1 & lag(acc) == 1) |>
   ungroup()
 
-mod_rt <- brm(rt ~ 1 + condition * congruency + 
-(1 + condition * congruency || id),
-              family = lognormal(),
-              cores = 3, chains = 3, iter = 10000,
-              data = data_rt)
-
+formula <- rt ~ 1 + condition*congruency + 
+  (1 + condition*congruency || id)
+  
+mod_rt <- brm(formula = formula,
+                family = lognormal(),
+                cores = 3, chains = 3, iter = 10000,
+                data = data_rt)
 ```
 
 For the ACC analysis, omission trials were already excluded during data loading via `na.omit()`. Data were aggregated to subject $\times$ condition $\times$ congruency cells prior to modeling, yielding 1,012 rows (253 subjects $\times$ 4 cells); the binomial likelihood accounts for the differing number of trials per cell via the `trials()` offset, so no statistical information is lost relative to trial-level modeling. Three chains of 10,000 iterations each were run.
 
-```r
+``` r
 data_acc_agg <- data_stroop |>
   group_by(id, condition, congruency) |>
   summarise(hits = sum(acc), n = n(), .groups = "drop")
 
-mod_acc <- brm(hits | trials(n) ~ 1 + condition * congruency + 
-(1 + condition * congruency || id),
+formula <- hits | trials(n) ~ 1 + condition*congruency + 
+  (1 + condition*congruency || id)
+  
+mod_acc <- brm(formula = formula,
                family = binomial(link = "logit"),
                cores = 3, chains = 3, iter = 10000,
                data = data_acc_agg)
 ```
 
-Since `pd.adjust()` computes $pd$ values automatically from a matrix of posterior draws, we extracted and combined the relevant fixed-effect draws from both models. 
+Since `pd.adjust()` computes $pd$ values automatically from a matrix of posterior draws, we extracted and combined the relevant fixed-effect draws from both models.
 
 ```{r, echo=TRUE, eval=TRUE}
 draws_rt  <- as.data.frame(mod_rt)
 draws_acc <- as.data.frame(mod_acc)
 
+# select relevant parameters
+par_names <- colnames(draws_rt)[2:4]
+
 # Select effects of interest
-draws_rt  <- draws_rt[,  c("b_congruency1", "b_condition1", "b_condition1:congruency1")]
-draws_acc <- draws_acc[, c("b_congruency1", "b_condition1", "b_condition1:congruency1")]
+draws_rt  <- draws_rt[, par_names]
+draws_acc <- draws_acc[, par_names]
 
 # Combine draws across models and label hypotheses
 draws <- cbind(draws_rt, draws_acc)
@@ -840,31 +834,29 @@ colnames(draws) <- c("condition_rt", "congruency_rt",
 "condition:congruency_acc")
 
 pd.adjust(draws = draws, q = 0.4, R = TRUE)
-
-# N.B. with R = TRUE the function estimate the correlations among
-# posterior draws, thus m is the number of effective tests/hypotheses.
 ```
+
+The function was called with `q = 0.4` and `R = TRUE`, yielding an effective number of hypotheses $m = 5.69$, reflecting the estimated correlations among posterior draws. Five out of six hypotheses remained strongly supported after adjustment: the congruency effects on both reaction time ($pd_\text{adj} = 1.000$) and accuracy ($pd_\text{adj} = 1.000$), the ego depletion effect on accuracy ($pd_\text{adj} = 1.000$), and both interaction effects ($pd_\text{adj} = 0.988$ and $pd_\text{adj} = 0.989$). The ego depletion effect on reaction time ($H_3$) was the only hypothesis substantially affected by the correction: starting from a unadjusted $pd = 0.527$, the adjusted value dropped to $pd_\text{adj} = 0.163$. [**NOTA** se il $pd$ è attorno allo 0.5 forse meglio restituirlo 0.5?]
 
 
 \newpage
 
 ## Discussion
 
-Although $pd$ is a descriptive posterior index, thresholding it into a decision rule and applying that rule repeatedly across many parameters induces a multiplicity problem. Without adjustment, researchers implicitly accept a prior probability for the global null hypothesis that may be far lower than intended. This concern is particularly acute when non-informative or weakly informative priors are used, or when sufficient data render the likelihood dominant. The procedure proposed here targets this decision-level problem by extending the foundational work of @Jeffreys1938 and @Westfall1997 to the $pd$ context, allowing researcher-specific knowledge to enter transparently through the prior-odds specification. Researchers can explicitly encode their expectations about the prevalence of true effects through the prior probability assigned to the global null hypothesis, separating within-model priors on parameters from prior assumptions over the hypothesis space. In this sense, the procedure is not merely a correction for multiple testing, but a transparent mechanism for connecting prior beliefs to decision-making under multiplicity. 
+Thresholding $pd$ into a decision rule and applying that rule repeatedly across many parameters induces a multiplicity problem. Without adjustment, researchers implicitly accept a prior probability for the global null hypothesis that may be far lower than intended. This concern is particularly acute when non-informative or weakly informative priors are used, or when sufficient data render the likelihood dominant. The procedure proposed here targets this decision-level problem by extending the foundational work of @Jeffreys1938 and @Westfall1997 to the $pd$ context, allowing researcher-specific knowledge to enter transparently through the prior-odds specification. Researchers can explicitly encode their expectations about the prevalence of true effects through the prior probability assigned to the global null hypothesis, separating within-model priors on parameters from prior assumptions over the hypothesis space. In this sense, the procedure is not merely a correction for multiple testing, but a transparent mechanism for connecting prior beliefs to decision-making under multiplicity. 
 
-Related corrections have been implemented for specific testing contexts, such as post-hoc tests in JASP [@Bergh2020; @deJong2019]. The present procedure extends this logic to $pd$, accounts for correlations among tested hypotheses, and provides a general-purpose implementation for applied use. Unlike existing tools tied to particular model types or software environments, it applies to $pd$ values arising from different modeling strategoes. While the most coherent approach analyzes all relevant parameters within a single joint model that explicitly represents their dependence [@Gelman2012; @GelmanBook; @Kruschke2011], this is not always feasible in practice. Researchers frequently report $pd$ values from multiple separate analyses within the same manuscript [**REF**], and the procedure is designed to remain applicable in this setting. The level of information required is flexible: when a joint model is available, its posterior draws can be passed directly to `pd.adjust()`, which computes the correlation structure automatically and uses it to derive the effective number of tests. When only separate models are available, draws from each can be combined into a single matrix and passed to the function, which then estimates the joint correlation structure across all parameters. When posterior draws are unavailable, the user can supply a precomputed correlation matrix, assumed correlations for specific parameter pairs, or a single scalar representing the expected mean correlation across tests. When no correlation information is provided, the adjustment proceeds under an independence assumption.
+[**NOTA**: vedi Bayesian design analysis paper].
 
-A practical consideration when applying the adjustment concerns the choice of $m$, that is, how many hypotheses to include in the correction. We recommend that $m$ reflect the number of hypotheses explicitly formulated prior to analysis, rather than the total number of parameters estimated by the model. Nuisance parameters, such as random effects or control covariates, should not inflate $m$, as no claims are made about them. This is consistent with the spirit of hypothesis-driven research and avoids overcorrection [**REF**]. Importantly, @Zeevi2025 document that the number of hypotheses tested per paper in psychology is typically small; most studies evaluate fewer than ten claims, suggesting that the correction proposed here operates in a practically relevant and computationally tractable regime.
+Related corrections have been implemented for specific testing contexts, such as post-hoc tests in JASP [@Bergh2020; @deJong2019]. The present procedure extends this logic to $pd$, accounts for correlations among tested hypotheses, and provides a general-purpose implementation for applied use. Unlike existing tools tied to particular model types or software environments, it applies to $pd$ values arising from different modeling strategoes. While the most coherent approach estimates all relevant parameters within a single joint model that explicitly represents their dependence [@Gelman2012; @GelmanBook; @Kruschke2011], this is not always feasible in practice. Researchers frequently report $pd$ values from multiple separate analyses within the same manuscript [**REF**], and the procedure is designed to remain applicable in this setting. The level of information required is flexible: when a joint model is available, its posterior draws can be passed directly to `pd.adjust()`, which computes the correlation structure automatically and uses it to derive the effective number of tests. When only separate models are available, draws from each can be combined into a single matrix and passed to the function, which then estimates the joint correlation structure across all parameters. When posterior draws are unavailable, the user can supply a precomputed correlation matrix, assumed correlations for specific parameter pairs, or a single scalar representing the expected mean correlation across tests. When no correlation information is provided, the adjustment proceeds under an independence assumption.
 
-An important caveat is that this framework does not provide evidence for a point null hypothesis, that is, it does not quantify posterior support for the null value itself. Instead, it evaluates directional claims based on inequalities (e.g., $\theta > \theta_\text{null}$ vs. $\theta \le \theta_\text{null}$). By construction, the complementary hypothesis includes the null value, but the framework does not assign it special status. When the null value falls outside the credible interval, one can infer its relative implausibility as a candidate value, but this differs fundamentally from quantifying evidence in its favor. Researchers whose primary interest lies in null evidence are better served by Bayes factor approaches that assign the null positive prior mass [@Heck2023; @Morey2011; @Ly2016; **REF**].
+A practical consideration when applying the adjustment concerns the choice of $m$, that is, how many hypotheses to include in the correction. We recommend that $m$ reflect the number of hypotheses explicitly formulated prior to analysis, rather than the total number of parameters estimated by the model. Nuisance parameters, such as random effects or control covariates, should not inflate $m$, as no claims are made about them. This is consistent with the spirit of hypothesis-driven research and avoids overcorrection [**REF**]. 
 
-Several further limitations should be noted. The formal correspondence between $pd$ and the frequentist $p$-value holds under specific conditions namely: continuous posteriors, sufficiently large samples, and diffuse priors, and may not generalize to small-sample settings or analyses with strongly informative priors. The $m_\text{eff}$ correction additionally requires estimating or assuming the correlation structure among tests; misspecification of this structure will propagate into the adjustment. Finally, the framework is developed specifically for $pd$, but extending the prior-odds logic to other posterior indices is a natural direction for future work. For example, the prior-odds logic could in principle be extended to Bayes factors comparing null and alternative intervals, in which case evidence for the null could be derived and subjected to an analogous multiplicity correction. We leave this as a direction for future work.
+An important caveat is that this framework does not provide evidence for a point null hypothesis, that is, it does not quantify posterior support for the null value itself. Instead, it evaluates directional claims based on inequalities (e.g., $\theta > \theta_\text{null}$ vs. $\theta \le \theta_\text{null}$). By construction, the complementary hypothesis includes the null value, but the framework does not assign it special status. When the null value falls outside the credible interval, one can infer its relative implausibility as a candidate value, but this differs fundamentally from quantifying evidence in its favor. Researchers whose primary interest lies in null evidence are better served by other Bayes factor approaches [@Heck2023; @Morey2011; @Ly2016; **REF** Dines].
 
-For applied reporting, we recommend stating the number of tests constituting the family and the implied prior probability under the chosen correction. The unadjusted $pd$ should be reported for each parameter alongside at least one multiplicity-adjusted measure based on the proposed prior-odds correction. In the worked example above, we report unadjusted $pd$ values alongside adjusted values for each of the six hypotheses, with $m_\text{eff}$ derived from the joint posterior correlation structure.
+Several further limitations should be noted. The formal correspondence between $pd$ and the frequentist $p$-value holds under specific conditions namely: continuous posteriors, sufficiently large samples, and diffuse priors, and may not generalize to small-sample settings or analyses with strongly informative priors. The $m_\text{eff}$ correction additionally requires estimating or assuming the correlation structure among tests; misspecification of this structure will propagate into the adjustment. Finally, the framework is developed specifically for $pd$, but extending the prior-odds logic to other posterior indices is a natural direction for future work. For example, the prior-odds logic could in principle be extended to Bayes factors comparing null and alternative intervals, in which case evidence for the null could be derived and subjected to an analogous multiplicity correction. 
+
+For applied reporting, we recommend stating the number of tests constituting the family and the implied prior probability under the chosen correction. The unadjusted $pd$ should be reported for each parameter alongside at least one multiplicity-adjusted measure based on the proposed prior-odds correction. 
 
 As Bayesian methods continue to be adopted in psychological research, often in pragmatic settings where default priors and conventional thresholds are the norm, tools that make the error consequences of such practices explicit become increasingly necessary. The procedure developed here provides a coherent and practical way to recalibrate $pd$-based decisions for multiple tests, making reported claims less likely to reflect chance patterns across many parameters.
 
 \newpage
-
-
-

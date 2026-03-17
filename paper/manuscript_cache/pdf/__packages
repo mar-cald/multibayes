@@ -4,9 +4,7 @@ tidyr
 shape
 ggplot2
 tibble
-future
-furrr
-purrr
+multibayes
 mvtnorm
 patchwork
 scales
