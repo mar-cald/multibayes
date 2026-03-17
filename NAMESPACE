@@ -2,5 +2,7 @@
 
 export(joint)
 export(pd.adjust)
+importFrom(matrixStats,colMeans2)
+importFrom(stats,cor)
 importFrom(stats,quantile)
 importFrom(stats,var)

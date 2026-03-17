@@ -14,12 +14,12 @@
 #' \deqn{
 #'    pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
 #' }
-#' If \eqn{P(H_0) \leq 0.5}, the prior is considered non-informative or 
-#' optimistic for the alternative; no adjustment is applied and original 
+#' If \eqn{P(H_0) \leq 0.5}, the prior is considered non-informative or
+#' optimistic for the alternative; no adjustment is applied and original
 #' values are returned with a warning.
 #'
 #' When `R` is supplied, the effective number of tests \eqn{m_{eff}}
-#' is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix 
+#' is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
 #' (Cheverud, 2001):
 #' \deqn{
 #'    m_{eff} = K \left( 1 - \frac{(K-1) \text{Var}(\lambda)}{K^2} \right)
@@ -29,23 +29,26 @@
 #' @param pd Numeric vector of *pd* values in \eqn{[0.5, 1]}.
 #' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
 #'   If provided, `pd` is calculated automatically.
-#' @param q Numeric scalar in \eqn{(0, 1)}: the prior probability that 
+#' @param q Numeric scalar in \eqn{(0, 1)}: the prior probability that
 #'   **all** hypotheses are null. Defaults to `0.4`.
-#' @param m Positive integer. The number of tested hypotheses. 
+#' @param m Positive integer. The number of tested hypotheses.
 #'   Defaults to `length(pd)`. Overridden if `R` is provided.
-#' @param R Optional correlation matrix of posterior draws. If provided, 
-#'   \eqn{m_{eff}} is calculated and used instead of `m`.
+#' @param R Optional correlation matrix of the posterior draws. Can be provided
+#' directly as a matrix or a single scalar, or computed automatically by the function
+#' when posterior draws are supplied (set R = TRUE).
+#' When provided, m_{\text{eff}} is calculated from the correlation structure and used in place of m.
 #'
-#' @return A `data.frame` containing original `pd`, `pd_adj`, and the 
+#' @return A `data.frame` containing original `pd`, `pd_adj`, and the
 #'   parameters `q` and `m` used for the correction.
 #'
 #' @references
-#' Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian Perspective on the Bonferroni Adjustment. 
+#' Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian Perspective on the Bonferroni Adjustment.
 #' Biometrika, 84(2), 419–427. <http://www.jstor.org/stable/2337467>
-#' 
+#'
 #' Cheverud, J. A simple correction for multiple comparisons in interval mapping genome scans. Heredity 87, 52–58 (2001). <https://doi.org/10.1046/j.1365-2540.2001.00901.x>
 #'
-#' @importFrom stats var
+#' @importFrom matrixStats colMeans2
+#' @importFrom stats var cor
 #'
 #' @export
 pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL) {
@@ -53,8 +56,10 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL) {
   # --- Input Handling & Validation -------------------------------------------
   if (!is.null(draws)) {
     draws <- as.matrix(draws)
-    pd <- matrixStats::colMeans2(draws > 0)
-    pd <- pmax(pd, 1 - pd)
+    pd <- pmax(
+      matrixStats::colMeans2(draws > 0),
+      matrixStats::colMeans2(draws < 0)
+    )
     if (is.null(m)) m <- ncol(draws)
   }
   
@@ -67,23 +72,30 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL) {
     "`m`: must be >= 1" = length(m) == 1L && m >= 1
   )
   
-  # --- Effective number of tests (Cheverud, 2001) -----------------------------
+  # --- Effective number of tests (Cheverud, 2001) ----------------------------
   if (!is.null(R)) {
-    # Handle scalar correlation input
-    if (length(R) == 1) {
+    
+    if (isTRUE(R) && is.null(draws)) {
+      stop("`R = TRUE` requires `draws` to be provided.")
+    }
+    
+    if (isTRUE(R) && !is.null(draws)) {
+      R <- cor(draws)
+    }
+    
+    if (is.numeric(R) && length(R) == 1L) {
       R_val <- R
       R <- matrix(R_val, nrow = length(pd), ncol = length(pd))
       diag(R) <- 1
     }
     
-    ev <- eigen(R, symmetric = TRUE, only.values = TRUE)$values
-    K  <- length(ev)
-    # Variance of eigenvalues
+    ev  <- eigen(R, symmetric = TRUE, only.values = TRUE)$values
+    K   <- length(ev)
     v_ev <- var(ev)
-    m    <- K * (1 - ((K - 1) * v_ev) / (K^2))
+    m   <- K * (1 - ((K - 1) * v_ev) / (K^2))
   }
   
-  # --- Prior-odds adjustment --------------------------------------------------
+  # --- Prior-odds adjustment -------------------------------------------------
   prior_H0 <- q^(1 / m)
   
   if (prior_H0 > 0.5) {

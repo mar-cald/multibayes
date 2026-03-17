@@ -18,8 +18,10 @@ If provided, \code{pd} is calculated automatically.}
 \item{m}{Positive integer. The number of tested hypotheses.
 Defaults to \code{length(pd)}. Overridden if \code{R} is provided.}
 
-\item{R}{Optional correlation matrix of posterior draws. If provided,
-\eqn{m_{eff}} is calculated and used instead of \code{m}.}
+\item{R}{Optional correlation matrix of the posterior draws. Can be provided
+directly as a matrix or a single scalar, or computed automatically by the function
+when posterior draws are supplied (set R = TRUE).
+When provided, m_{\text{eff}} is calculated from the correlation structure and used in place of m.}
 }
 \value{
 A \code{data.frame} containing original \code{pd}, \code{pd_adj}, and the

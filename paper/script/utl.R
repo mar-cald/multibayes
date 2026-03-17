@@ -36,8 +36,7 @@ bayes_posterior_multivariate <- function(X, tau0 = 2) {
   # extract pd and correlations
   pd = pnorm(abs(post_mean - 0) / post_sd)
   post_cor =  cov2cor(post_cov)
-  post_samp = rmvnorm(1e4,mean = post_mean, sigma = post_cov)
-  return(list(pd,post_cor,post_samp))
+  return(list(pd,post_cor))
 }
 
 ## Z test

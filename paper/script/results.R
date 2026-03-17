@@ -141,7 +141,8 @@ save(df_pw, file = "paper/script/output/df_pw_sim1.rda")
 
 
 # Results simulation 2--------------------------
-load(file = "script/output/sim2.rda")
+load(file = "paper/script/output/sim2.rda")
+
 
 sim2  <-  tibble(sim)
 
@@ -151,7 +152,7 @@ sign_err  <-  function(data){
     group_by(m,r,n,effsim,nsim) |> 
     reframe(sign = any(value))  
 }
-# Compute power
+# Compute power (avg)
 sign_pw  <-  function(data){
   data |> 
     filter(effsim != 0) |> 
@@ -159,14 +160,14 @@ sign_pw  <-  function(data){
     reframe(sign = mean(value)) 
 }
 
- 
+
 sim_res2  <-  sim2 |>
   unnest(res) |>
   group_by(m,r,n) |>
   mutate(nsim = 1:n()) |>
   ungroup() |>
   unnest(res) |>
-  pivot_longer(c("pd_meff","pd_m","pval_holm","pval_fdr")) |>
+  pivot_longer(c("pd_meff","pval_holm")) |>
   group_by(name) |>
   nest()
 
@@ -181,46 +182,4 @@ for(i in 1:nrow(sim_res2)){
 save(sim_res2, file = "paper/script/output/sim_res2.rda")
 
 
-
-
-# Results simulation 3--------------------------
-load(file = "script/output/sim3.rda")
-
-
-sim3  <-  tibble(sim)
-
-# Compute FWER
-sign_err  <-  function(data){
-  data |> 
-    group_by(m,r,n,effsim,nsim) |> 
-    reframe(sign = any(value))  
-}
-# Compute power
-sign_pw  <-  function(data){
-  data |> 
-    filter(effsim != 0) |> 
-    group_by(m, r,n, nsim) |> 
-    reframe(sign = mean(value)) 
-}
-
-
-sim_res3  <-  sim3 |>
-  unnest(res) |>
-  group_by(m,r,n) |>
-  mutate(nsim = 1:n()) |>
-  ungroup() |>
-  unnest(res) |>
-  pivot_longer(c("pd_meff","pd_sim","pval_holm","pval_fdr")) |>
-  group_by(name) |>
-  nest()
-
-sim_res3$fwer = vector(mode = "list", length = nrow(sim_res3))
-sim_res3$pw = vector(mode = "list", length = nrow(sim_res3))
-
-for(i in 1:nrow(sim_res3)){
-  sim_res3$fwer[[i]] = sign_err(sim_res3$data[[i]])
-  sim_res3$pw[[i]] = sign_pw(sim_res3$data[[i]])
-}
-
-save(sim_res3, file = "paper/script/output/sim_res3.rda")
 
