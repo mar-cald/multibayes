@@ -7,8 +7,8 @@
 #' @details
 #' Simultaneous coverage is calibrated by examining how extreme each draw is
 #' across all parameters jointly. For each draw, the minimum tail probability
-#' across all \eqn{K} parameters is computed. The simultaneous threshold
-#' is the \eqn{(1 - \text{prob})}-quantile of these minima: only
+#' across all parameters is computed. The simultaneous threshold
+#' is the \eqn{\alpha}-quantile of these minima: only
 #' \eqn{\alpha} of draws are more extreme than this value in at least one
 #' parameter simultaneously. See Goeman et al. (2026) for details.
 #'
@@ -27,10 +27,7 @@
 #'   \item{lower}{Lower bounds, one per parameter.}
 #'   \item{upper}{Upper bounds, one per parameter.}
 #'   \item{prob}{Requested joint coverage probability.}
-#'   \item{cq}{Simultaneous threshold: the
-#'     \eqn{(1 - \text{prob})}-quantile of the worst-case tail probability
-#'     distribution. Always smaller than \eqn{(1 - \text{prob}) / 2}, yielding
-#'     wider intervals than marginal credible intervals.}
+#'   \item{cq}{Critical value.}
 #'   \item{est}{Point estimates via \code{est.FUN}.}
 #'   \item{est.FUN}{The estimation function used.}
 #' }
