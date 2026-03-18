@@ -2,42 +2,72 @@
 % Please edit documentation in R/joint.R
 \name{joint}
 \alias{joint}
-\title{Simultaneous credible bands from joint posterior draws}
+\title{Simultaneous credible intervals from joint posterior draws}
 \usage{
-joint(draws, alpha = 0.05)
+joint(draws, prob = 0.95, est.FUN = median)
 }
 \arguments{
-\item{draws}{Numeric matrix or data frame of posterior draws (rows = draws, columns = parameters).}
+\item{draws}{Numeric matrix or data frame of posterior draws
+(rows = draws, columns = parameters).}
 
-\item{alpha}{Numeric scalar in \eqn{(0, 1)}. The joint error rate (default is \code{0.05} for 95\% bands).}
+\item{prob}{Numeric scalar in \eqn{(0, 1)}. Joint coverage probability
+(default \code{0.95}).}
+
+\item{est.FUN}{Function for point estimates (default \code{median}).}
 }
 \value{
-A matrix with two columns, \code{lower} and \code{upper}, and one row per parameter.
+A named list with:
+\describe{
+\item{lower}{Lower bounds, one per parameter.}
+\item{upper}{Upper bounds, one per parameter.}
+\item{prob}{Requested joint coverage probability.}
+\item{cq}{Simultaneous threshold: the
+\eqn{(1 - \text{prob})}-quantile of the worst-case tail probability
+distribution. Always smaller than \eqn{(1 - \text{prob}) / 2}, yielding
+wider intervals than marginal credible intervals.}
+\item{est}{Point estimates via \code{est.FUN}.}
+\item{est.FUN}{The estimation function used.}
+}
 }
 \description{
-Computes simultaneous (joint) credible bands for a set of parameters.
-Unlike marginal intervals, which guarantee \eqn{1-\alpha} coverage for
-each parameter individually, these bands guarantee that \strong{all} parameters
-stay within their respective bounds simultaneously with \eqn{1-\alpha} probability.
+Computes simultaneous equitailed credible intervals for a set of parameters,
+guaranteeing that \strong{all} parameters stay within their bounds simultaneously
+with probability \eqn{1 - \alpha}.
 }
 \details{
-The procedure utilizes a rank-based approach to find a common quantile
-level \eqn{W^*} that is more conservative than the marginal \eqn{\alpha/2}.
-For each draw \eqn{s}, we calculate the "extremeness" across all \eqn{K}
-parameters:
-\deqn{
-   WC_s = \min_{k=1 \dots K} \left( \min \left[ \frac{rank(x_{sk})}{S}, 1 - \frac{rank(x_{sk})-1}{S} \right] \right)
+Simultaneous coverage is calibrated by examining how extreme each draw is
+across all parameters jointly. For each draw, the minimum tail probability
+across all \eqn{K} parameters is computed. The simultaneous threshold
+is the \eqn{(1 - \text{prob})}-quantile of these minima: only
+\eqn{\alpha} of draws are more extreme than this value in at least one
+parameter simultaneously. See Goeman et al. (2026) for details.
+
+A closely related implementation is \code{\link[credsubs]{sim.cred.band}}
+in the \pkg{credsubs} package (Schnell et al., 2020), which applies the same
+procedure to function-valued parameters over a covariate space.
 }
-The simultaneous bands are then defined as the \eqn{W^*} and \eqn{1-W^*}
-marginal quantiles, where \eqn{W^*} is the \eqn{\alpha}-quantile of the
-vector \eqn{WC}.
+\note{
+If you use this function in published research, please cite:
+\itemize{
+\item Goeman, J., Calderan, M., & Solari, A. (2026). Bonferroni for
+Bayesian: Multiplicity correction based on joint credibility. \emph{(in press)}.
+\item The package: \url{https://github.com/yourusername/multibayes}.
+}
 }
 \examples{
-# 3 correlated parameters
-mu <- c(1, 2, 3)
+mu    <- c(4, 0, -2)
 Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 draws <- MASS::mvrnorm(2000, mu, Sigma)
 colnames(draws) <- c("theta1", "theta2", "theta3")
 
-joint(draws, alpha = 0.05)
+joint(draws, prob = 0.95)
+}
+\references{
+Goeman, J., Calderan, M., & Solari, A. (2026). Bonferroni for Bayesian:
+Multiplicity correction based on joint credibility. \emph{(in press)}.
+
+Schnell, P. M., Fiecas, M., & Carlin, B. P. (2020). credsubs:
+Multiplicity-adjusted subset identification.
+\emph{Journal of Statistical Software}, 94(7), 1--22.
+\doi{10.18637/jss.v094.i07}
 }

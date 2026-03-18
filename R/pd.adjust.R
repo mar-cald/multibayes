@@ -36,7 +36,7 @@
 #' @param R Optional correlation matrix of the posterior draws. Can be provided
 #' directly as a matrix or a single scalar, or computed automatically by the function
 #' when posterior draws are supplied (set R = TRUE).
-#' When provided, m_{\text{eff}} is calculated from the correlation structure and used in place of m.
+#' When provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure and used in place of m.
 #'
 #' @return A `data.frame` containing original `pd`, `pd_adj`, and the
 #'   parameters `q` and `m` used for the correction.

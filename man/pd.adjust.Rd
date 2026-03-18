@@ -21,7 +21,7 @@ Defaults to \code{length(pd)}. Overridden if \code{R} is provided.}
 \item{R}{Optional correlation matrix of the posterior draws. Can be provided
 directly as a matrix or a single scalar, or computed automatically by the function
 when posterior draws are supplied (set R = TRUE).
-When provided, m_{\text{eff}} is calculated from the correlation structure and used in place of m.}
+When provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure and used in place of m.}
 }
 \value{
 A \code{data.frame} containing original \code{pd}, \code{pd_adj}, and the

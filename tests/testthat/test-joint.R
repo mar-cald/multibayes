@@ -2,22 +2,24 @@ test_that("joint credible bands are wider than marginal", {
   set.seed(42)
   draws <- matrix(rnorm(3000), ncol = 3)
   
-  res_joint <- joint(draws, alpha = 0.05)
+  res_joint    <- joint(draws, prob = 0.95)
+  res_marginal <- apply(draws, 2, quantile, probs = c(0.025, 0.975))
   
-  # Marginal 95%
-  res_marginal <- t(apply(draws, 2, quantile, probs = c(0.025, 0.975)))
-  
-  # Joint must be wider (lower is lower, upper is higher)
-  expect_true(all(res_joint[, "lower"] <= res_marginal[, 1]))
-  expect_true(all(res_joint[, "upper"] >= res_marginal[, 2]))
+  # joint lower bounds must be at or below marginal lower bounds
+  expect_true(all(res_joint$lower <= res_marginal[1, ]))
+  # joint upper bounds must be at or above marginal upper bounds
+  expect_true(all(res_joint$upper >= res_marginal[2, ]))
 })
 
-test_that("joint handles the resolution warning", {
-  small_draws <- matrix(rnorm(20), ncol = 2) 
+test_that("joint returns correct structure", {
+  set.seed(42)
+  draws <- matrix(rnorm(1000), ncol = 4)
+  colnames(draws) <- paste0("theta", 1:4)
+  res <- joint(draws, prob = 0.95)
   
-  # This regex will catch the warning regardless of case or punctuation
-  expect_warning(
-    joint(small_draws, alpha = 0.001), 
-    regexp = "smaller than.*resolution"
-  )
+  expect_named(res, c("lower", "upper", "prob", "cq", "est", "est.FUN"))
+  expect_length(res$lower, 4)
+  expect_length(res$upper, 4)
+  expect_true(res$cq < 0.025)          #
+  expect_true(all(res$lower < res$upper))  # bounds are ordered
 })
