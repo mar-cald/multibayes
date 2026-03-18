@@ -1,6 +1,6 @@
 # multibayes
 
-**multibayes** provides tools for Bayesian inference and decision-making across multiple hypotheses simultaneously. 
+**multibayes** provides tools for Bayesian inference and decision-making across multiple parameters simultaneously. 
 The package offers two functions rooted in different but related principles: `pd.adjust()` addresses 
 the decision-level multiplicity problem that arises when the Probability of 
 Direction (*pd*) is used as a repeated decision rule, while `joint()` provides 
