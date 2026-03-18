@@ -88,11 +88,11 @@ joint <- function(draws, prob = 0.95, est.FUN = median) {
   # output
   nms <- colnames(draws)
   list(
-    lower   = setNames(out[, 1], nms),
-    upper   = setNames(out[, 2], nms),
-    prob    = prob,
+    lower = setNames(out[, 1], nms),
+    upper = setNames(out[, 2], nms),
+    prob = prob,
     cq = cq,
-    est     = setNames(apply(draws, 2, est.FUN), nms),
+    est = setNames(apply(draws, 2, est.FUN), nms),
     est.FUN = est.FUN
   )
 }
