@@ -54,14 +54,21 @@ adjustment.
 library(multibayes)
 
 # From a vector of pd values (independence assumed)
-pd.adjust(pd = c(0.99, 0.87, 0.76, 0.97, 0.83, 0.98), q = 0.4)
+pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, H5 = 0.891, H6 = 0.987)
+pd.adjust(pd = pd_values, q = 0.4)
 
-# From posterior draws, pd computed internally, correlation estimated automatically
-draws <- matrix(rnorm(6000), ncol = 6)
+# Simulate correlated posterior draws 
+Sigma <- matrix(0.4, nrow = 6, ncol = 6); diag(Sigma) <- 1
+mu    <- c(1, -0.1, 0.8, 0, 2, 3)
+draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
+colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
+
+# From posterior draws: pd and correlation estimated automatically
 pd.adjust(draws = draws, q = 0.4, R = TRUE)
 
-# Supplying a scalar correlation (e.g., assumed mean r = 0.3)
-pd.adjust(pd = c(0.92, 0.87, 0.76, 0.95, 0.83, 0.91), q = 0.4, R = 0.3)
+# When draws are unavailable, supply an assumed mean correlation
+pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
+
 ```
 
 ### Output
