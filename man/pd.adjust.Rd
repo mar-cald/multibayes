@@ -28,12 +28,13 @@ A \code{data.frame} containing original \code{pd}, \code{pd_adj}, and the
 parameters \code{q} and \code{m} used for the correction.
 }
 \description{
-Adjusts a vector of Probability of Direction (\emph{pd}) values using a global
-prior probability that \strong{all} tested hypotheses are null, \eqn{q}. The
-adjustment converts \eqn{q} into a per-hypothesis prior probability
-\eqn{\Pr(H_0) = q^{1/m}}, where \eqn{m} is the family size (or effective
-family size when correlation is accounted for), and reweights each \emph{pd}
-via a prior-odds correction.
+The function accepts either a vector of pre-computed \emph{pd} values or
+a matrix of posterior draws, from which \emph{pd} values are computed
+internally. The global prior probability that all tested hypotheses are
+null, \eqn{q}, is decomposed into a per-hypothesis prior
+\eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses or,
+when the correlation structure among parameters is taken into account,
+the effective number of tests \eqn{m_{\text{eff}}}.
 }
 \details{
 The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
@@ -42,9 +43,6 @@ the adjusted \emph{pd} is:
 \deqn{
    pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
 }
-If \eqn{P(H_0) \leq 0.5}, the prior is considered non-informative or
-optimistic for the alternative; no adjustment is applied and original
-values are returned with a warning.
 
 When \code{R} is supplied, the effective number of tests \eqn{m_{eff}}
 is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
