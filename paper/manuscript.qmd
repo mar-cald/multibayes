@@ -144,11 +144,11 @@ The probability of direction ($pd$) is a posterior index that quantifies how str
 
 ### Probability of Direction as test for existence
 
-A convenient starting point for calibration is the mapping between $pd$ and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), $pd$ is the posterior probability of the data-favored sign relative to $\theta_{null}$. This value corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987], yielding the two-sided approximation $p \approx 2(1 - pd)$. In practice, the $pd$ is often used to summarize both the direction and existence of an effect \[**REFs**\].
+A convenient starting point for calibration is the mapping between $pd$ and the frequentist *p*-value. Under flat (or sufficiently diffuse symmetric) priors in typical hypothesis-testing scenarios (e.g., testing means), $pd$ is the posterior probability of the data-favored sign relative to $\theta_{null}$. This value corresponds to the complement of the one-sided *p*-value [@Marsman2017; @Casella1987], yielding the two-sided approximation $p \approx 2(1 - pd)$. In practice, the $pd$ is often used to summarize both the direction and existence of an effect [**REFs**].
 
 This interpretation is clearest when phrased as a decision rule $pd>c$: the posterior must assign more than $c$ probability mass to the side of $\theta_{\text{null}}$ favored by the data. Setting $c=1-\alpha/2$ is convenient because it bounds the posterior mass in the opposite tail by $\alpha/2$. For concreteness, suppose the posterior favors a positive effect so that $pd=\Pr(\theta>0\mid y)$. An $\alpha=0.05$ implies $c=0.975$, therefore the rule $pd>c$ requires that $\Pr(\theta\le \theta_{\text{null}}\mid y)<0.025$, placing less than 2.5% of posterior mass at or below $0$.
 
-Put it differently, let $q_p$ denote the $p$-th posterior quantile, so the central $(1-\alpha)$ equi-tailed credible interval is $[q_{\alpha/2},\,q_{1-\alpha/2}]$, which leaves probability $\alpha/2$ in each tail. The condition $\Pr(\theta\le \theta_{\text{null}}\mid y)<\alpha/2$ holds if and only if $\theta_{\text{null}}$ falls below $q_{\alpha/2}$, that is, when $\theta_{\text{null}}\notin [q_{\alpha/2},\,q_{1-\alpha/2}]$. Thus, observing $pd>0.975$ is equivalent to excluding $\theta_{\text{null}}$ from the central 95% equi-tailed credible interval (see @fig-pd-ci). When the credible interval excludes the null value, one can infer that the null is relatively implausible \[@Box1992\].
+Put it differently, let $q_p$ denote the $p$-th posterior quantile, so the central $(1-\alpha)$ equi-tailed credible interval is $[q_{\alpha/2},\,q_{1-\alpha/2}]$, which leaves probability $\alpha/2$ in each tail. The condition $\Pr(\theta\le \theta_{\text{null}}\mid y)<\alpha/2$ holds if and only if $\theta_{\text{null}}$ falls below $q_{\alpha/2}$, that is, when $\theta_{\text{null}}\notin [q_{\alpha/2},\,q_{1-\alpha/2}]$. Thus, observing $pd>0.975$ is equivalent to excluding $\theta_{\text{null}}$ from the central 95% equi-tailed credible interval (see @fig-pd-ci). When the credible interval excludes the null value, one can infer that the null is relatively implausible [@Box1992].
 
 \newpage
 
@@ -235,7 +235,7 @@ label_txt = paste0(
   "Pr(θ > 0 | y) = ", round(p_pos, 3), "\n",
   "Pr(θ < 0 | y) = ", round(p_neg, 3), "\n",
   "pd = ", round(pd, 3), "\n",
-  ci_level*100, "% HDI = [", round(ci_low, 3), ", ", round(ci_high, 3), "]"
+  ci_level*100, "% CI = [", round(ci_low, 3), ", ", round(ci_high, 3), "]"
 )
 
 h0 = ggplot(df, aes(x = x, y = y)) +
@@ -740,7 +740,7 @@ pw = sim_res2 |>
 
 ## Application: Worked Example with the R Package `multibayes`
 
-The procedure is implemented in the `multibayes` R package, which provides functions for computing adjusted $pd$ values from either raw posterior draws or a vector of unadjusted $pd$ values. The core function, `pd.adjust()`, accepts posterior draws directly and computes pd values internally when needed. The output returns the adjusted $pd$ values alongside the implied global null probability and the number of tests ($m$; $m$ is reported as the effective number when the correlation structure among parameters is taken into account). Unadjusted values are also retained for direct comparison.
+The procedure is implemented in the `multibayes` R package, which provides functions for computing adjusted $pd$ values from either raw posterior draws or a vector of unadjusted $pd$ values. The function `pd.adjust()`, accepts posterior draws directly and computes pd values internally when needed. The output returns the adjusted $pd$ values alongside the implied global null probability and the number of tests ($m$; $m$ is reported as the effective number when the correlation structure among parameters is taken into account). Unadjusted values are also retained for direct comparison.
 
 ``` r
 # install.packages("remotes")
