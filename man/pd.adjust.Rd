@@ -53,6 +53,9 @@ is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
 where \eqn{K} is the number of hypotheses.
 }
 \references{
+Jeffreys, H. (1938). Significance tests when several degrees of freedom arise simultaneously.Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences,165(921), 161–198.
+\url{https://doi.org/10.1098/rspa.1938.0052}
+
 Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian Perspective on the Bonferroni Adjustment.
 Biometrika, 84(2), 419–427. \url{http://www.jstor.org/stable/2337467}
 
