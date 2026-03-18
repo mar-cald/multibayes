@@ -13,8 +13,7 @@
 #' parameter simultaneously. See Goeman et al. (2026) for details.
 #'
 #' A closely related implementation is \code{\link[credsubs]{sim.cred.band}}
-#' in the \pkg{credsubs} package (Schnell et al., 2020), which applies the same
-#' procedure to function-valued parameters over a covariate space.
+#' in the \pkg{credsubs} package (Schnell et al., 2020).
 #'
 #' @param draws Numeric matrix or data frame of posterior draws
 #'   (rows = draws, columns = parameters).
