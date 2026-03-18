@@ -40,8 +40,7 @@ is the \eqn{\alpha}-quantile of these minima: only
 parameter simultaneously. See Goeman et al. (2026) for details.
 
 A closely related implementation is \code{\link[credsubs]{sim.cred.band}}
-in the \pkg{credsubs} package (Schnell et al., 2020), which applies the same
-procedure to function-valued parameters over a covariate space.
+in the \pkg{credsubs} package (Schnell et al., 2020).
 }
 \note{
 If you use this function in published research, please cite:
@@ -62,9 +61,4 @@ joint(draws, prob = 0.95)
 \references{
 Goeman, J., Calderan, M., & Solari, A. (2026). Bonferroni for Bayesian:
 Multiplicity correction based on joint credibility. \emph{(in press)}.
-
-Schnell, P. M., Fiecas, M., & Carlin, B. P. (2020). credsubs:
-Multiplicity-adjusted subset identification.
-\emph{Journal of Statistical Software}, 94(7), 1--22.
-\doi{10.18637/jss.v094.i07}
 }

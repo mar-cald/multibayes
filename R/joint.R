@@ -43,11 +43,6 @@
 #' Goeman, J., Calderan, M., & Solari, A. (2026). Bonferroni for Bayesian:
 #' Multiplicity correction based on joint credibility. \emph{(in press)}.
 #'
-#' Schnell, P. M., Fiecas, M., & Carlin, B. P. (2020). credsubs:
-#' Multiplicity-adjusted subset identification.
-#' \emph{Journal of Statistical Software}, 94(7), 1--22.
-#' \doi{10.18637/jss.v094.i07}
-#'
 #' @importFrom stats quantile median setNames
 #' @importFrom matrixStats colRanks rowMins colQuantiles
 #' @export
@@ -64,29 +59,31 @@ joint <- function(draws, prob = 0.95, est.FUN = median) {
   
   stopifnot(
     "`draws`: must be a numeric matrix-like object" = is.numeric(draws),
-    "`draws`: must have at least 2 rows"            = nrow(draws) >= 2L,
-    "`draws`: must have at least 1 column"          = ncol(draws) >= 1L,
-    "`prob`: must be a single number in (0, 1)"     = length(prob) == 1L && prob > 0 && prob < 1,
-    "`est.FUN`: must be a function"                 = is.function(est.FUN)
+    "`draws`: must have at least 1000 rows" = nrow(draws) >= 1000L,
+    "`draws`: must have at least 2 column" = ncol(draws) >= 2L,
+    "`prob`: must be a single number in (0, 1)" = length(prob) == 1L && prob > 0 && prob < 1,
+    "`est.FUN`: must be a function" = is.function(est.FUN)
   )
   
   S <- nrow(draws)
-  
-  # Empirical CDF per parameter:
+
+  # Rank draws
   # "max", for lower tail; "min", for upper tail
   up <- matrixStats::colRanks(draws, ties.method = "max") / S
   lw <- matrixStats::colRanks(draws, ties.method = "min") / S
   
   # Worst-case tail probability for each draw across all parameters
   # pmin selects the nearer tail per draw per parameter, 
-  # rowMins takes the worst parameter
+  # rowMins takes the most extreme 
   tp <- matrixStats::rowMins(pmin(up, 1 - lw))
   
-  # (1 - prob)-quantile of tp; type = 1 for exact empirical CDF inversion
+  # Critical quantile
   cq <- quantile(tp, probs = 1 - prob, type = 1)
   
-  # Simultaneous equitailed bounds: cut cp from each tail 
-  out <- matrixStats::colQuantiles(draws, probs = c(cq, 1 - cq), type = 1)
+  # Simultaneous equitailed bounds
+  out <- matrixStats::colQuantiles(draws, 
+                                   probs = c(cq, 1 - cq), 
+                                   type = 1)
   
   # output
   nms <- colnames(draws)
