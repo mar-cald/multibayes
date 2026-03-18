@@ -21,14 +21,13 @@
 #'   (default \code{0.95}).
 #' @param est.FUN Function for point estimates (default \code{median}).
 #'
-#' @return A named list with:
+#' @return A dataframe list with:
 #' \describe{
 #'   \item{lower}{Lower bounds, one per parameter.}
+#'   \item{est}{Point estimates via \code{est.FUN}.}
 #'   \item{upper}{Upper bounds, one per parameter.}
 #'   \item{prob}{Requested joint coverage probability.}
 #'   \item{cq}{Critical value.}
-#'   \item{est}{Point estimates via \code{est.FUN}.}
-#'   \item{est.FUN}{The estimation function used.}
 #' }
 #'
 #' @note
@@ -69,8 +68,8 @@ joint <- function(draws, prob = 0.95, est.FUN = median) {
 
   # Rank draws
   # "max", for lower tail; "min", for upper tail
-  up <- matrixStats::colRanks(draws, ties.method = "max") / S
-  lw <- matrixStats::colRanks(draws, ties.method = "min") / S
+  up <- t(matrixStats::colRanks(draws, ties.method = "max") / S)
+  lw <- t(matrixStats::colRanks(draws, ties.method = "min") / S)
   
   # Worst-case tail probability for each draw across all parameters
   # pmin selects the nearer tail per draw per parameter, 
@@ -87,12 +86,11 @@ joint <- function(draws, prob = 0.95, est.FUN = median) {
   
   # output
   nms <- colnames(draws)
-  list(
+  data.frame(
     lower = setNames(out[, 1], nms),
+    est = setNames(apply(draws, 2, est.FUN), nms),
     upper = setNames(out[, 2], nms),
     prob = prob,
-    cq = cq,
-    est = setNames(apply(draws, 2, est.FUN), nms),
-    est.FUN = est.FUN
+    cq = cq
   )
 }
