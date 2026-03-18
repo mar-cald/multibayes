@@ -2,7 +2,7 @@
 #'
 #' Computes simultaneous equitailed credible intervals for a set of parameters,
 #' guaranteeing that **all** parameters stay within their bounds simultaneously
-#' with probability \eqn{1 - \alpha}.
+#' with a user specified probability.
 #'
 #' @details
 #' Simultaneous coverage is calibrated by examining how extreme each draw is
