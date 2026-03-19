@@ -4,7 +4,7 @@
 The package offers two functions rooted in different but related principles: `pd.adjust()` addresses 
 the decision-level multiplicity problem that arises when the Probability of 
 Direction (*pd*) is used as a repeated decision rule, while `joint()` provides 
-simultaneous credible intervals that are faithful to the joint posterior distribution, 
+simultaneous credible intervals given a joint posterior distribution, 
 enabling inference about several parameters at once.
 
 ## Installation
