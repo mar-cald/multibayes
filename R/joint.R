@@ -21,7 +21,7 @@
 #'   (default \code{0.95}).
 #' @param est.FUN Function for point estimates (default \code{median}).
 #'
-#' @return A dataframe list with:
+#' @return A dataframe with:
 #' \describe{
 #'   \item{lower}{Lower bounds, one per parameter.}
 #'   \item{est}{Point estimates via \code{est.FUN}.}

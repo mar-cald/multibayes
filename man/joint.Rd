@@ -16,14 +16,13 @@ joint(draws, prob = 0.95, est.FUN = median)
 \item{est.FUN}{Function for point estimates (default \code{median}).}
 }
 \value{
-A named list with:
+A dataframe with:
 \describe{
 \item{lower}{Lower bounds, one per parameter.}
+\item{est}{Point estimates via \code{est.FUN}.}
 \item{upper}{Upper bounds, one per parameter.}
 \item{prob}{Requested joint coverage probability.}
 \item{cq}{Critical value.}
-\item{est}{Point estimates via \code{est.FUN}.}
-\item{est.FUN}{The estimation function used.}
 }
 }
 \description{
