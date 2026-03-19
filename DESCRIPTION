@@ -14,7 +14,7 @@ Description: Implements Bayesian multiplicity adjustment by calibrating
     posterior odds while retaining interpretability. The package also provides
     an adjustment for probability of direction (pd) when users place priors for
     parameter estimates centered on the tested null value.
-License: MIT + file LICENSE
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

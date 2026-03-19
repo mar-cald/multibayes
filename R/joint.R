@@ -66,8 +66,7 @@ joint <- function(draws, prob = 0.95, est.FUN = median) {
   
   S <- nrow(draws)
 
-  # Rank draws
-  # "max", for lower tail; "min", for upper tail
+  # Conservative bounds: upper max and lower min.
   up <- t(matrixStats::colRanks(draws, ties.method = "max") / S)
   lw <- t(matrixStats::colRanks(draws, ties.method = "min") / S)
   
@@ -83,7 +82,6 @@ joint <- function(draws, prob = 0.95, est.FUN = median) {
   out <- matrixStats::colQuantiles(draws, 
                                    probs = c(cq, 1 - cq), 
                                    type = 1)
-  
   # output
   nms <- colnames(draws)
   data.frame(
