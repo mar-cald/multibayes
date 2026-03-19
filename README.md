@@ -122,13 +122,13 @@ joint(draws, prob = 0.95)
 
 ### Output
 
-A named list:
+A `data.frame` with:
 
 | Element | Description |
 |---|---|
 | `lower` | Lower bounds, one per parameter |
-| `upper` | Upper bounds, one per parameter |
 | `est` | Point estimates (default: median) |
+| `upper` | Upper bounds, one per parameter |
 | `prob` | Requested joint posterior probability |
 | `cq` | Critical quantile used for calibration |
 
