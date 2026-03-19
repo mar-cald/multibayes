@@ -3,3 +3,6 @@
 ^my-prior-odds\.Rproj$
 ^\.Rproj\.user$
 ^multibayes\.Rproj$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

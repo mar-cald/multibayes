@@ -1,19 +1,18 @@
 Package: multibayes
 Type: Package
-Title: Bayesian Multiplicity Adjustment via Prior Odds
+Title: Bayesian Multiplicity Adjustments
 Version: 0.1.0
 Authors@R: 
     person("Margherita", "Calderan", 
            email = "margherita.calderan@gmail.com", 
            role = c("aut", "cre"),
            comment = c(ORCID = "0009-0005-5668-5162"))
-Description: Implements Bayesian multiplicity adjustment by calibrating
-    hypothesis-specific prior odds from a global prior probability assigned to
-    the complete null across a family of tests. The resulting adjusted prior
-    odds can be combined with Bayes factors to produce multiplicity-adjusted
-    posterior odds while retaining interpretability. The package also provides
-    an adjustment for probability of direction (pd) when users place priors for
-    parameter estimates centered on the tested null value.
+Description: multibayes provides tools for Bayesian inference and decision-making across multiple parameters simultaneously. 
+        The package offers two functions rooted in different but related principles: `pd.adjust()` addresses 
+        the decision-level multiplicity problem that arises when the Probability of 
+        Direction (*pd*) is used as a repeated decision rule, while `joint()` provides 
+        simultaneous credible intervals that are faithful to the joint posterior distribution, 
+        enabling inference about several parameters at once..
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true

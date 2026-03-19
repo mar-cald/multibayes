@@ -157,3 +157,9 @@ For *joint()*:
 - Cheverud, J. A simple correction for multiple comparisons in interval mapping genome scans. Heredity 87, 52–58 (2001). <https://doi.org/10.1046/j.1365-2540.2001.00901.x>.
 
 
+---
+
+## License
+
+GNU GENERAL PUBLIC LICENSE, Version 3
+
