@@ -40,8 +40,10 @@
 #' when posterior draws are supplied (set R = TRUE).
 #' When provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure and used in place of m.
 #'
-#' @return A `data.frame` containing original `pd`, `pd_adj`, and the
-#'   parameters `q` and `m` used for the correction.
+#' @return A `data.frame` with one row per hypothesis, containing the following columns:
+#'   `pd` (original values), `pd_adj` (adjusted values), `q` (prior probability
+#'   of the global null), `m` (number of hypotheses or effective number of tests),
+#'   and `mu0` (null reference values, returned when `draws` are supplied).
 #'
 #' @references
 #' Jeffreys, H. (1938). Significance tests when several degrees of freedom arise simultaneously.Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences,165(921), 161–198.
@@ -59,8 +61,9 @@
 pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
                       m = NULL, R = NULL) {
   
-  # Input handling and validation 
-  if (!is.null(draws)) {
+  from_draws <- !is.null(draws)  # capture intent before draws is modified
+  
+  if (from_draws) {
     draws <- as.matrix(draws)
     p <- ncol(draws)
     
@@ -72,8 +75,8 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     
     centered <- sweep(draws, 2, mu0, "-")
     pd <- pmax(
-      matrixStats::colMeans2(centered > 0),
-      matrixStats::colMeans2(centered < 0)
+      matrixStats::colMeans2(centered > 0L),
+      matrixStats::colMeans2(centered < 0L)
     )
     if (is.null(m)) m <- p
   }
@@ -106,7 +109,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     
     ev  <- eigen(R, symmetric = TRUE, only.values = TRUE)$values
     K   <- length(ev)
-    v_ev <- var(ev)
+    v_ev <- if (K == 1L) 0 else var(ev)
     m   <- K * (1 - ((K - 1) * v_ev) / (K^2))
   }
   
@@ -123,6 +126,11 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   
   pd_adj <- ifelse(pd_adj < 0.50, 0.50, pd_adj)
   
-  data.frame(pd = pd, pd_adj = pd_adj, q = rep(q, length(pd)), 
-             m = rep(m, length(pd)))
+  if (from_draws) {
+    data.frame(mu0 = mu0, pd = pd, pd_adj = pd_adj,
+               q = rep(q, length(pd)), m = rep(m, length(pd)))
+  } else {
+    data.frame(pd = pd, pd_adj = pd_adj,
+               q = rep(q, length(pd)), m = rep(m, length(pd)))
+  }
 }

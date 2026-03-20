@@ -29,8 +29,10 @@ when posterior draws are supplied (set R = TRUE).
 When provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure and used in place of m.}
 }
 \value{
-A \code{data.frame} containing original \code{pd}, \code{pd_adj}, and the
-parameters \code{q} and \code{m} used for the correction.
+A \code{data.frame} with one row per hypothesis, containing the following columns:
+\code{pd} (original values), \code{pd_adj} (adjusted values), \code{q} (prior probability
+of the global null), \code{m} (number of hypotheses or effective number of tests),
+and \code{mu0} (null reference values, returned when \code{draws} are supplied).
 }
 \description{
 The function accepts either a vector of pre-computed \emph{pd} values or
