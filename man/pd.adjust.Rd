@@ -15,8 +15,10 @@ If provided, \code{pd} is calculated automatically.}
 \item{q}{Numeric scalar in \eqn{(0, 1)}: the prior probability that
 \strong{all} hypotheses are null. Defaults to \code{0.4}.}
 
-\item{mu0}{Numeric scalar. The null (reference) value against which the posterior is evaluated.
-Defaults to \code{0}.}
+\item{mu0}{Numeric scalar or vector. The null (reference) value against which
+the posterior is evaluated. A scalar applies the same null to all parameters;
+a vector of length equal to \code{ncol(draws)} allows a different null per
+parameter. Ignored if \code{pd} is supplied directly. Defaults to \code{0}.}
 
 \item{m}{Positive integer. The number of tested hypotheses.
 Defaults to \code{length(pd)}. Overridden if \code{R} is provided.}

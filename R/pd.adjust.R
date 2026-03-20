@@ -27,8 +27,10 @@
 #' @param pd Numeric vector of *pd* values in \eqn{[0.5, 1]}.
 #' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
 #'   If provided, `pd` is calculated automatically.
-#' @param mu0 Numeric scalar. The null (reference) value against which the posterior is evaluated. 
-#' Defaults to `0`.
+#' @param mu0 Numeric scalar or vector. The null (reference) value against which
+#'   the posterior is evaluated. A scalar applies the same null to all parameters;
+#'   a vector of length equal to `ncol(draws)` allows a different null per
+#'   parameter. Ignored if `pd` is supplied directly. Defaults to `0`.
 #' @param q Numeric scalar in \eqn{(0, 1)}: the prior probability that
 #'   **all** hypotheses are null. Defaults to `0.4`.
 #' @param m Positive integer. The number of tested hypotheses.
@@ -60,11 +62,20 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   # Input handling and validation 
   if (!is.null(draws)) {
     draws <- as.matrix(draws)
+    p <- ncol(draws)
+    
+    if (length(mu0) == 1L) {
+      mu0 <- rep(mu0, p)
+    } else if (length(mu0) != p) {
+      stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
+    }
+    
+    centered <- sweep(draws, 2, mu0, "-")
     pd <- pmax(
-      matrixStats::colMeans2(draws > mu0),
-      matrixStats::colMeans2(draws < mu0)
+      matrixStats::colMeans2(centered > 0),
+      matrixStats::colMeans2(centered < 0)
     )
-    if (is.null(m)) m <- ncol(draws)
+    if (is.null(m)) m <- p
   }
   
   if (is.null(pd)) stop("Either `pd` or `draws` must be provided.")
