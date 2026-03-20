@@ -832,10 +832,10 @@ colnames(draws) <- c("condition_rt", "congruency_rt",
 "condition:congruency_rt", "condition_acc", "congruency_acc", 
 "condition:congruency_acc")
 
-pd.adjust(draws = draws, q = 0.4, mu0 = 0, R = TRUE)
+pd.adjust(draws = draws, q = 0.4, mu0 = 0.1, R = TRUE)
 ```
 
-The function was called with `q = 0.4`, `mu0 = 0` and `R = TRUE`, yielding an effective number of hypotheses of $m = 5.69$, which reflects the estimated correlations among posterior draws. Here, `mu0 = 0` was applied uniformly across all parameters, though the function accepts a vector of null values when hypotheses involve variable-specific reference points. 
+The function was called with `q = 0.4`, `mu0 = 0` and `R = TRUE`, yielding an effective number of hypotheses of $m \approx 5.69$, which reflects the estimated correlations among posterior draws. Here, `mu0 = 0` was applied uniformly across all parameters, though the function accepts a vector of null values when hypotheses involve variable-specific reference points. 
 
 Five of the six hypotheses remained strongly supported after adjustment: the congruency effects on both reaction time ($pd_\text{adj} = 1.000$) and accuracy ($pd_\text{adj} = 1.000$), the ego depletion effect on accuracy ($pd_\text{adj} = 1.000$), and both interaction effects ($pd_\text{adj} = 0.988$ and$pd_\text{adj} = 0.989$). The ego depletion effect on reaction time ($H_3$) received no support from the data, either before or after correction.
 

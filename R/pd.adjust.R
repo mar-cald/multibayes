@@ -11,73 +11,99 @@
 #' @details
 #' The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
 #' \eqn{P(H_0) = q^{1/m}} and its complement \eqn{P(H_1) = 1 - P(H_0)},
-#' the adjusted *pd* is:
+#' the adjusted \emph{pd} is:
 #' \deqn{
 #'    pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
 #' }
 #'
-#' When `R` is supplied, the effective number of tests \eqn{m_{eff}}
+#' When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
 #' is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
 #' (Cheverud, 2001):
 #' \deqn{
-#'    m_{eff} = K \left( 1 - \frac{(K-1) \text{Var}(\lambda)}{K^2} \right)
+#'    m_{\text{eff}} = K \left( 1 - \frac{(K-1)\,\text{Var}(\lambda)}{K^2} \right)
 #' }
 #' where \eqn{K} is the number of hypotheses.
 #'
-#' @param pd Numeric vector of *pd* values in \eqn{[0.5, 1]}.
+#' @param pd Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}.
 #' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
-#'   If provided, `pd` is calculated automatically.
+#'   If provided, \code{pd} is calculated automatically.
 #' @param mu0 Numeric scalar or vector. The null (reference) value against which
 #'   the posterior is evaluated. A scalar applies the same null to all parameters;
-#'   a vector of length equal to `ncol(draws)` allows a different null per
-#'   parameter. Ignored if `pd` is supplied directly. Defaults to `0`.
-#' @param q Numeric scalar in \eqn{(0, 1)}: the prior probability that
-#'   **all** hypotheses are null. Defaults to `0.4`.
+#'   a vector of length equal to \code{ncol(draws)} allows a different null per
+#'   parameter. Ignored if \code{pd} is supplied directly. Defaults to \code{0}.
+#' @param direction Integer vector of \code{1}, \code{-1}, or \code{0} (or \code{NULL}).
+#'   Specifies the expected direction of each effect: \code{1} for positive
+#'   (tests \code{draws > mu0}), \code{-1} for negative (tests \code{draws < mu0}),
+#'   and \code{0} for direction-agnostic (takes the maximum over both sides).
+#'   Should be a vector of length \code{ncol(draws)} to specify a different
+#'   direction per parameter; a scalar is recycled across all parameters.
+#'   Should be specified when \code{mu0 != 0}. When a direction is declared,
+#'   posterior probabilities below \code{0.5} (indicating evidence against the
+#'   declared direction) are clamped to \code{0.5}, reflecting absence of support
+#'   rather than negative evidence. Defaults to \code{NULL} (direction-agnostic
+#'   for all parameters).
+#' @param q Numeric scalar in \eqn{(0, 1)}. The prior probability that
+#'   \strong{all} hypotheses are null. Defaults to \code{0.4}.
 #' @param m Positive integer. The number of tested hypotheses.
-#'   Defaults to `length(pd)`. Overridden if `R` is provided.
+#'   Defaults to \code{length(pd)}. Overridden if \code{R} is provided.
 #' @param R Optional correlation matrix of the posterior draws. Can be provided
-#' directly as a matrix or a single scalar, or computed automatically by the function
-#' when posterior draws are supplied (set R = TRUE).
-#' When provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure and used in place of m.
+#'   directly as a matrix or a single scalar, or computed automatically by the
+#'   function when posterior draws are supplied (set \code{R = TRUE}). When
+#'   provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure
+#'   and used in place of \code{m}.
 #'
-#' @return A `data.frame` with one row per hypothesis, containing the following columns:
-#'   `pd` (original values), `pd_adj` (adjusted values), `q` (prior probability
-#'   of the global null), `m` (number of hypotheses or effective number of tests),
-#'   and `mu0` (null reference values, returned when `draws` are supplied).
+#' @return A \code{data.frame} with one row per hypothesis, containing the
+#'   following columns: \code{pd} (original values), \code{pd_adj} (adjusted
+#'   values), \code{q} (prior probability of the global null), and \code{m}
+#'   (number of hypotheses or effective number of tests). When \code{draws} are
+#'   supplied, \code{mean_est} (posterior mean per parameter), \code{mu0} (null
+#'   reference values), and \code{direction} (declared direction per hypothesis;
+#'   \code{0} indicates direction-agnostic) are also returned.
 #'
 #' @references
-#' Jeffreys, H. (1938). Significance tests when several degrees of freedom arise simultaneously.Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences,165(921), 161–198.
+#' Jeffreys, H. (1938). Significance tests when several degrees of freedom arise
+#' simultaneously. \emph{Proceedings of the Royal Society of London. Series A.
+#' Mathematical and Physical Sciences, 165}(921), 161--198.
 #' <https://doi.org/10.1098/rspa.1938.0052>
-#' 
-#' Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian Perspective on the Bonferroni Adjustment.
-#' Biometrika, 84(2), 419–427. <http://www.jstor.org/stable/2337467>
 #'
-#' Cheverud, J. A simple correction for multiple comparisons in interval mapping genome scans. Heredity 87, 52–58 (2001). <https://doi.org/10.1046/j.1365-2540.2001.00901.x>
+#' Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian perspective
+#' on the Bonferroni adjustment. \emph{Biometrika, 84}(2), 419--427.
+#' <https://doi.org/10.2307/2337467>
 #'
-#' @importFrom matrixStats colMeans2
+#' Cheverud, J. (2001). A simple correction for multiple comparisons in interval
+#' mapping genome scans. \emph{Heredity, 87}, 52--58.
+#' <https://doi.org/10.1046/j.1365-2540.2001.00901.x>
+#'
 #' @importFrom stats var cor
 #'
 #' @export
 pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
-                      m = NULL, R = NULL) {
+                      direction = NULL, m = NULL, R = NULL) {
   
-  from_draws <- !is.null(draws)  # capture intent before draws is modified
+  from_draws <- !is.null(draws)
   
   if (from_draws) {
     draws <- as.matrix(draws)
     p <- ncol(draws)
     
-    if (length(mu0) == 1L) {
-      mu0 <- rep(mu0, p)
-    } else if (length(mu0) != p) {
-      stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
-    }
+    if (length(mu0) == 1L)       mu0       <- rep(mu0, p)
+    if (is.null(direction))      direction <- rep(0L, p)
+    if (length(direction) == 1L) direction <- rep(direction, p)
+    
+    if (length(mu0) != p)       stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
+    if (length(direction) != p) stop("`direction` must be a scalar or a vector of length `ncol(draws)`.")
+    if (!all(direction %in% c(-1L, 0L, 1L))) stop("`direction` must contain only -1, 0, or 1.")
     
     centered <- sweep(draws, 2, mu0, "-")
-    pd <- pmax(
-      matrixStats::colMeans2(centered > 0L),
-      matrixStats::colMeans2(centered < 0L)
-    )
+    
+    pd <- mapply(function(j, d) {
+      if      (d ==  1L) mean(centered[, j] > 0)
+      else if (d == -1L) mean(centered[, j] < 0)
+      else               max(mean(centered[, j] > 0), mean(centered[, j] < 0))
+    }, seq_len(p), direction)
+    
+    pd <- pmax(pd, 0.5)  # clamp: values < 0.5 indicate no support in declared direction
+    
     if (is.null(m)) m <- p
   }
   
@@ -90,7 +116,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     "`m`: must be >= 1" = length(m) == 1L && m >= 1
   )
   
-  # Effective number of tests (Cheverud, 2001) 
+  # Effective number of tests (Cheverud, 2001)
   if (!is.null(R)) {
     
     if (isTRUE(R) && is.null(draws)) {
@@ -107,13 +133,13 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
       diag(R) <- 1
     }
     
-    ev  <- eigen(R, symmetric = TRUE, only.values = TRUE)$values
-    K   <- length(ev)
+    ev   <- eigen(R, symmetric = TRUE, only.values = TRUE)$values
+    K    <- length(ev)
     v_ev <- if (K == 1L) 0 else var(ev)
-    m   <- K * (1 - ((K - 1) * v_ev) / (K^2))
+    m    <- K * (1 - ((K - 1) * v_ev) / (K^2))
   }
   
-  # Prior-odds adjustment 
+  # Prior-odds adjustment
   prior_H0 <- q^(1 / m)
   
   if (prior_H0 > 0.5) {
@@ -127,7 +153,8 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   pd_adj <- ifelse(pd_adj < 0.50, 0.50, pd_adj)
   
   if (from_draws) {
-    data.frame(mu0 = mu0, pd = pd, pd_adj = pd_adj,
+    data.frame(mean_est = colMeans(draws),
+               mu0 = mu0, direction = direction, pd = pd, pd_adj = pd_adj,
                q = rep(q, length(pd)), m = rep(m, length(pd)))
   } else {
     data.frame(pd = pd, pd_adj = pd_adj,

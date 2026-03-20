@@ -260,7 +260,7 @@ h0 = ggplot(df, aes(x = x, y = y)) +
 
 More formally, let $q_p$ denote the $p$-th posterior quantile, so the central $(1-\alpha)$ equi-tailed credible interval is $[q_{\alpha/2},\,q_{1-\alpha/2}]$, which leaves probability $\alpha/2$ in each tail. The condition $\Pr(\theta\le \theta_{\text{null}}\mid y)<\alpha/2$ holds if and only if $\theta_{\text{null}}$ falls below $q_{\alpha/2}$, that is, when $\theta_{\text{null}}\notin [q_{\alpha/2},\,q_{1-\alpha/2}]$. 
 
-Given these considerations, although $pd$ and the frequentist *p*-value target different quantities, it is expected that decision rules of the form $pd>c$ approximate the operating characteristics of familiar frequentist rules such as $p<\alpha$. Although we set $\theta_{null}=0$ throughout the manuscript for ease of exposition, the procedure presented below readily extends to non-zero nulls. This simply requires defining directional hypotheses relative to the target value.
+Given these considerations, although $pd$ and the frequentist *p*-value target different quantities, it is expected that decision rules of the form $pd>c$ approximate the operating characteristics of familiar frequentist rules such as $p<\alpha$. Although we set $\theta_{\text{null}} = 0$ throughout for ease of exposition, the procedure extends readily to non-zero nulls. This is relevant, for example, when hypotheses concern a minimum effect size of practical interest [**REF**]. In such cases, the direction of the effect must be specified explicitly, that is, whether the parameter is expected to exceed or fall below $\theta_{\text{null}}$, and the *pd* is computed as the posterior probability in that declared direction rather than taking the maximum over both sides.
 
 ## Multiplicity Problem
 
@@ -832,10 +832,11 @@ colnames(draws) <- c("condition_rt", "congruency_rt",
 "condition:congruency_rt", "condition_acc", "congruency_acc", 
 "condition:congruency_acc")
 
-pd.adjust(draws = draws, q = 0.4, mu0 = 0, R = TRUE)
+pd.adjust(draws = draws, q = 0.4, mu0 = 0, 
+          R = TRUE)
 ```
 
-The function was called with `q = 0.4`, `mu0 = 0` and `R = TRUE`, yielding an effective number of hypotheses of $m = 5.69$, which reflects the estimated correlations among posterior draws. Here, `mu0 = 0` was applied uniformly across all parameters, though the function accepts a vector of null values when hypotheses involve variable-specific reference points. 
+The function was called with `q = 0.4`, `mu0 = 0` and `R = TRUE`, yielding an effective number of hypotheses of $m \approx 5.69$, which reflects the estimated correlations among posterior draws. Here, `mu0 = 0` was applied uniformly across all parameters, though the function accepts a vector of null values when hypotheses involve variable-specific reference points. 
 
 Five of the six hypotheses remained strongly supported after adjustment: the congruency effects on both reaction time ($pd_\text{adj} = 1.000$) and accuracy ($pd_\text{adj} = 1.000$), the ego depletion effect on accuracy ($pd_\text{adj} = 1.000$), and both interaction effects ($pd_\text{adj} = 0.988$ and$pd_\text{adj} = 0.989$). The ego depletion effect on reaction time ($H_3$) received no support from the data, either before or after correction.
 

@@ -2,7 +2,6 @@
 
 export(joint)
 export(pd.adjust)
-importFrom(matrixStats,colMeans2)
 importFrom(matrixStats,colQuantiles)
 importFrom(matrixStats,colRanks)
 importFrom(matrixStats,rowMins)

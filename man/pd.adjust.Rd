@@ -4,7 +4,15 @@
 \alias{pd.adjust}
 \title{Prior-odds adjustment for Probability of Direction (pd)}
 \usage{
-pd.adjust(pd = NULL, draws = NULL, q = 0.4, mu0 = 0, m = NULL, R = NULL)
+pd.adjust(
+  pd = NULL,
+  draws = NULL,
+  q = 0.4,
+  mu0 = 0,
+  direction = NULL,
+  m = NULL,
+  R = NULL
+)
 }
 \arguments{
 \item{pd}{Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}.}
@@ -12,7 +20,7 @@ pd.adjust(pd = NULL, draws = NULL, q = 0.4, mu0 = 0, m = NULL, R = NULL)
 \item{draws}{Optional matrix or data frame of posterior draws (columns = parameters).
 If provided, \code{pd} is calculated automatically.}
 
-\item{q}{Numeric scalar in \eqn{(0, 1)}: the prior probability that
+\item{q}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
 \strong{all} hypotheses are null. Defaults to \code{0.4}.}
 
 \item{mu0}{Numeric scalar or vector. The null (reference) value against which
@@ -20,19 +28,35 @@ the posterior is evaluated. A scalar applies the same null to all parameters;
 a vector of length equal to \code{ncol(draws)} allows a different null per
 parameter. Ignored if \code{pd} is supplied directly. Defaults to \code{0}.}
 
+\item{direction}{Integer vector of \code{1}, \code{-1}, or \code{0} (or \code{NULL}).
+Specifies the expected direction of each effect: \code{1} for positive
+(tests \code{draws > mu0}), \code{-1} for negative (tests \code{draws < mu0}),
+and \code{0} for direction-agnostic (takes the maximum over both sides).
+Should be a vector of length \code{ncol(draws)} to specify a different
+direction per parameter; a scalar is recycled across all parameters.
+Should be specified when \code{mu0 != 0}. When a direction is declared,
+posterior probabilities below \code{0.5} (indicating evidence against the
+declared direction) are clamped to \code{0.5}, reflecting absence of support
+rather than negative evidence. Defaults to \code{NULL} (direction-agnostic
+for all parameters).}
+
 \item{m}{Positive integer. The number of tested hypotheses.
 Defaults to \code{length(pd)}. Overridden if \code{R} is provided.}
 
 \item{R}{Optional correlation matrix of the posterior draws. Can be provided
-directly as a matrix or a single scalar, or computed automatically by the function
-when posterior draws are supplied (set R = TRUE).
-When provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure and used in place of m.}
+directly as a matrix or a single scalar, or computed automatically by the
+function when posterior draws are supplied (set \code{R = TRUE}). When
+provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure
+and used in place of \code{m}.}
 }
 \value{
-A \code{data.frame} with one row per hypothesis, containing the following columns:
-\code{pd} (original values), \code{pd_adj} (adjusted values), \code{q} (prior probability
-of the global null), \code{m} (number of hypotheses or effective number of tests),
-and \code{mu0} (null reference values, returned when \code{draws} are supplied).
+A \code{data.frame} with one row per hypothesis, containing the
+following columns: \code{pd} (original values), \code{pd_adj} (adjusted
+values), \code{q} (prior probability of the global null), and \code{m}
+(number of hypotheses or effective number of tests). When \code{draws} are
+supplied, \code{mean_est} (posterior mean per parameter), \code{mu0} (null
+reference values), and \code{direction} (declared direction per hypothesis;
+\code{0} indicates direction-agnostic) are also returned.
 }
 \description{
 The function accepts either a vector of pre-computed \emph{pd} values or
@@ -51,20 +75,25 @@ the adjusted \emph{pd} is:
    pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
 }
 
-When \code{R} is supplied, the effective number of tests \eqn{m_{eff}}
+When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
 is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
 (Cheverud, 2001):
 \deqn{
-   m_{eff} = K \left( 1 - \frac{(K-1) \text{Var}(\lambda)}{K^2} \right)
+   m_{\text{eff}} = K \left( 1 - \frac{(K-1)\,\text{Var}(\lambda)}{K^2} \right)
 }
 where \eqn{K} is the number of hypotheses.
 }
 \references{
-Jeffreys, H. (1938). Significance tests when several degrees of freedom arise simultaneously.Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences,165(921), 161–198.
+Jeffreys, H. (1938). Significance tests when several degrees of freedom arise
+simultaneously. \emph{Proceedings of the Royal Society of London. Series A.
+Mathematical and Physical Sciences, 165}(921), 161--198.
 \url{https://doi.org/10.1098/rspa.1938.0052}
 
-Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian Perspective on the Bonferroni Adjustment.
-Biometrika, 84(2), 419–427. \url{http://www.jstor.org/stable/2337467}
+Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian perspective
+on the Bonferroni adjustment. \emph{Biometrika, 84}(2), 419--427.
+\url{https://doi.org/10.2307/2337467}
 
-Cheverud, J. A simple correction for multiple comparisons in interval mapping genome scans. Heredity 87, 52–58 (2001). \url{https://doi.org/10.1046/j.1365-2540.2001.00901.x}
+Cheverud, J. (2001). A simple correction for multiple comparisons in interval
+mapping genome scans. \emph{Heredity, 87}, 52--58.
+\url{https://doi.org/10.1046/j.1365-2540.2001.00901.x}
 }
