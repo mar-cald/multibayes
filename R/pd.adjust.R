@@ -107,5 +107,8 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL) {
     pd_adj <- pd
   }
   
-  data.frame(pd = pd, pd_adj = pd_adj, q = rep(q, length(pd)), m = rep(m, length(pd)))
+  pd_adj <- ifelse(pd_adj < 0.50, 0.50, pd_adj)
+  
+  data.frame(pd = pd, pd_adj = pd_adj, q = rep(q, length(pd)), 
+             m = rep(m, length(pd)))
 }
