@@ -27,6 +27,8 @@
 #' @param pd Numeric vector of *pd* values in \eqn{[0.5, 1]}.
 #' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
 #'   If provided, `pd` is calculated automatically.
+#' @param mu0 Numeric scalar. The null (reference) value against which the posterior is evaluated. 
+#' Defaults to `0`.
 #' @param q Numeric scalar in \eqn{(0, 1)}: the prior probability that
 #'   **all** hypotheses are null. Defaults to `0.4`.
 #' @param m Positive integer. The number of tested hypotheses.
@@ -52,14 +54,15 @@
 #' @importFrom stats var cor
 #'
 #' @export
-pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL) {
+pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
+                      m = NULL, R = NULL) {
   
   # Input handling and validation 
   if (!is.null(draws)) {
     draws <- as.matrix(draws)
     pd <- pmax(
-      matrixStats::colMeans2(draws > 0),
-      matrixStats::colMeans2(draws < 0)
+      matrixStats::colMeans2(draws > mu0),
+      matrixStats::colMeans2(draws < mu0)
     )
     if (is.null(m)) m <- ncol(draws)
   }

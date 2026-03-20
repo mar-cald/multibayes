@@ -4,7 +4,7 @@
 \alias{pd.adjust}
 \title{Prior-odds adjustment for Probability of Direction (pd)}
 \usage{
-pd.adjust(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL)
+pd.adjust(pd = NULL, draws = NULL, q = 0.4, mu0 = 0, m = NULL, R = NULL)
 }
 \arguments{
 \item{pd}{Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}.}
@@ -14,6 +14,9 @@ If provided, \code{pd} is calculated automatically.}
 
 \item{q}{Numeric scalar in \eqn{(0, 1)}: the prior probability that
 \strong{all} hypotheses are null. Defaults to \code{0.4}.}
+
+\item{mu0}{Numeric scalar. The null (reference) value against which the posterior is evaluated.
+Defaults to \code{0}.}
 
 \item{m}{Positive integer. The number of tested hypotheses.
 Defaults to \code{length(pd)}. Overridden if \code{R} is provided.}

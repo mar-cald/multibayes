@@ -64,7 +64,7 @@ draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
 # From posterior draws: pd and correlation estimated automatically
-pd.adjust(draws = draws, q = 0.4, R = TRUE)
+pd.adjust(draws = draws, q = 0.4, mu0 = 0, R = TRUE)
 
 # When draws are unavailable, supply an assumed mean correlation
 pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
