@@ -103,7 +103,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, m = NULL, R = NULL) {
     prior_H1 <- 1 - prior_H0
     pd_adj   <- (pd * prior_H1) / (pd * prior_H1 + (1 - pd) * prior_H0)
   } else {
-    warning("Pr(H0) <= 0.5 (Non-conservative prior); returning unadjusted pd.")
+    warning("Pr(H0_i) <= 0.5 (Non-conservative prior); returning unadjusted pd.")
     pd_adj <- pd
   }
   
