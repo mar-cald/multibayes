@@ -81,11 +81,11 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     draws <- as.matrix(draws)
     p <- ncol(draws)
     
-    if (length(mu0) == 1L)       mu0       <- rep(mu0, p)
+    if (length(mu0) == 1L)       mu0 <- rep(mu0, p)
     if (is.null(direction))      direction <- rep(0L, p)
     if (length(direction) == 1L) direction <- rep(direction, p)
     
-    if (length(mu0) != p)       stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
+    if (length(mu0) != p) stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
     if (length(direction) != p) stop("`direction` must be a scalar or a vector of length `ncol(draws)`.")
     if (!all(direction %in% c(-1L, 0L, 1L))) stop("`direction` must contain only -1, 0, or 1.")
     
@@ -94,7 +94,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     pd <- mapply(function(j, d) {
       if      (d ==  1L) mean(centered[, j] > 0)
       else if (d == -1L) mean(centered[, j] < 0)
-      else               max(mean(centered[, j] > 0), mean(centered[, j] < 0))
+      else    max(mean(centered[, j] > 0), mean(centered[, j] < 0))
     }, seq_len(p), direction)
   }
   
@@ -135,7 +135,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   
   if (prior_H0 > 0.5) {
     prior_H1 <- 1 - prior_H0
-    pd_adj   <- (pd * prior_H1) / (pd * prior_H1 + (1 - pd) * prior_H0)
+    pd_adj <- (pd * prior_H1) / (pd * prior_H1 + (1 - pd) * prior_H0)
   } else {
     warning("Pr(H0_i) <= 0.5 (Non-conservative prior); returning unadjusted pd.")
     pd_adj <- pd
