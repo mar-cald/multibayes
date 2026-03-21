@@ -37,10 +37,7 @@
 #'   and \code{0} for direction-agnostic (takes the maximum over both sides).
 #'   Should be a vector of length \code{ncol(draws)} to specify a different
 #'   direction per parameter; a scalar is recycled across all parameters.
-#'   Should be specified when \code{mu0 != 0}. When a direction is declared,
-#'   posterior probabilities below \code{0.5} (indicating evidence against the
-#'   declared direction) are clamped to \code{0.5}, reflecting absence of support
-#'   rather than negative evidence. Defaults to \code{NULL} (direction-agnostic
+#'   Should be specified when \code{mu0 != 0}. Defaults to \code{NULL} (direction-agnostic
 #'   for all parameters).
 #' @param q Numeric scalar in \eqn{(0, 1)}. The prior probability that
 #'   \strong{all} hypotheses are null. Defaults to \code{0.4}.
@@ -102,8 +99,6 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
       else               max(mean(centered[, j] > 0), mean(centered[, j] < 0))
     }, seq_len(p), direction)
     
-    pd <- pmax(pd, 0.5)  # clamp: values < 0.5 indicate no support in declared direction
-    
     if (is.null(m)) m <- p
   }
   
@@ -153,11 +148,13 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   pd_adj <- ifelse(pd_adj < 0.50, 0.50, pd_adj)
   
   if (from_draws) {
-    data.frame(mean_est = colMeans(draws),
-               mu0 = mu0, direction = direction, pd = pd, pd_adj = pd_adj,
-               q = rep(q, length(pd)), m = rep(m, length(pd)))
+    data.frame(mean_est = round(colMeans(draws),4),
+               mu0 = mu0, direction = direction, 
+               pd = round(pd,4), 
+               pd_adj = round(pd_adj, 4),
+               q = rep(q, length(pd)), m = round(rep(m, length(pd)),4))
   } else {
-    data.frame(pd = pd, pd_adj = pd_adj,
-               q = rep(q, length(pd)), m = rep(m, length(pd)))
+    data.frame(pd = round(pd,4), pd_adj =  round(pd_adj, 4),
+               q = rep(q, length(pd)), m = round(rep(m, length(pd)),4))
   }
 }

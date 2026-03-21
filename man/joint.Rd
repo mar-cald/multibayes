@@ -61,3 +61,4 @@ joint(draws, prob = 0.95)
 Goeman, J., Calderan, M., & Solari, A. (2026). Bonferroni for Bayesian:
 Multiplicity correction based on joint credibility.
 }
+\keyword{internal}

@@ -34,10 +34,7 @@ Specifies the expected direction of each effect: \code{1} for positive
 and \code{0} for direction-agnostic (takes the maximum over both sides).
 Should be a vector of length \code{ncol(draws)} to specify a different
 direction per parameter; a scalar is recycled across all parameters.
-Should be specified when \code{mu0 != 0}. When a direction is declared,
-posterior probabilities below \code{0.5} (indicating evidence against the
-declared direction) are clamped to \code{0.5}, reflecting absence of support
-rather than negative evidence. Defaults to \code{NULL} (direction-agnostic
+Should be specified when \code{mu0 != 0}. Defaults to \code{NULL} (direction-agnostic
 for all parameters).}
 
 \item{m}{Positive integer. The number of tested hypotheses.

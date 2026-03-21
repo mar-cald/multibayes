@@ -21,8 +21,8 @@ data_rt <- data_stroop |>
   filter(acc == 1 & lag(acc, default = 1) == 1) |>
   ungroup()
 
-formula <- rt ~ condition*congruency + 
-  (1 + condition*congruency || id)
+formula <- rt ~ congruency*condition + 
+  (1 + congruency*condition || id)
 
 mod_rt <- brm(formula = formula, 
            family = lognormal(),
@@ -40,8 +40,8 @@ data_acc_agg <- data_stroop |>
   group_by(id, condition, congruency) |>
   summarise(hits = sum(acc), n = n(), .groups = "drop")
 
-formula <- hits | trials(n) ~ 1 + condition*congruency + 
-  (1 + condition*congruency || id)
+formula <- hits | trials(n) ~ 1 + congruency*condition + 
+  (1 + congruency*condition || id)
 
 mod_acc <- brm(formula = formula, 
            family = binomial(link = "logit"),
@@ -52,32 +52,3 @@ mod_acc <- brm(formula = formula,
 save(mod_acc, file = "paper/script/example/mod_acc.rda")
 
 
-# Extract and combine draws ------------------------
-# Extract draws
-draws_rt  <- as.data.frame(mod_rt)
-draws_acc <- as.data.frame(mod_acc)
-
-# check colnames
-head(colnames(draws_rt), n = 4)
-par_names_rt <- colnames(draws_rt)[2:4]
-
-head(colnames(draws_acc), n = 4)
-par_names_acc <- colnames(draws_acc)[2:4]
-
-# Select fixed-effect columns of interest
-draws_rt  <- draws_rt[,  par_names_rt]
-draws_acc <- draws_acc[, par_names_acc]
-
-# Combine draws across models
-draws <- cbind(draws_rt, draws_acc)
-colnames(draws) <- c("condition_rt", "congruency_rt", 
-                     "condition:congruency_rt", "condition_acc", "congruency_acc", 
-                     "condition:congruency_acc")
-
-pd.adjust(draws = draws, q = 0.4, R = TRUE)
-
-cor(draws_acc)[lower.tri(cor(draws_acc))]
-cor(draws_rt)[lower.tri(cor(draws_rt))]
-cor(draws)[lower.tri(cor(draws))]
-
-df = cor(draws)

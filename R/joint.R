@@ -44,7 +44,7 @@
 #'
 #' @importFrom stats quantile median setNames
 #' @importFrom matrixStats colRanks rowMins colQuantiles
-#' @export
+#' @keywords internal
 #' @examples
 #' mu    <- c(4, 0, -2)
 #' Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
