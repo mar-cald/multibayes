@@ -2,11 +2,15 @@ Package: multibayes
 Type: Package
 Title: Bayesian Multiplicity Adjustments
 Version: 0.1.0
-Authors@R: 
+Authors@R: c(
     person("Margherita", "Calderan", 
-           email = "margherita.calderan@gmail.com", 
+           email = "margherita.calderan@unipd.it",
            role = c("aut", "cre"),
-           comment = c(ORCID = "0009-0005-5668-5162"))
+           comment = c(ORCID = "0009-0005-5668-5162")),
+    person("Filippo", "Gambarota",
+           role = "ctb",
+           comment = c(ORCID = "0000-0002-6666-1747"))
+  )
 Description: multibayes provides tools for Bayesian inference and decision-making across multiple parameters simultaneously. 
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
