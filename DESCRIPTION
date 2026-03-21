@@ -25,6 +25,6 @@ Imports:
 Suggests: 
     MASS,
     testthat (>= 3.0.0)
-URL: https://github.com/mar-cald/multibayes
+URL: https://github.com/mar-cald/multibayes, https://mar-cald.github.io/multibayes/
 BugReports: https://github.com/mar-cald/multibayes/issues
 Config/testthat/edition: 3
