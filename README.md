@@ -1,7 +1,6 @@
-
 # multibayes
 
-**multibayes** provides tools for Bayesian inference and decision-making across multiple parameters simultaneously. 
+**multibayes** provides tools for Bayesian multiple testing, currently centred on prior-odds adjustment of the Probability of Direction (*pd*).
 
 ## Installation
 
@@ -15,22 +14,14 @@ remotes::install_github("mar-cald/multibayes")
 | Function | Input | Correction type |
 |---|---|---|
 | `pd.adjust()` | Posterior draws or *pd* vector | Prior-odds adjustment for *pd* |
-| `joint()` | Posterior draws | Simultaneous credible intervals (coming soon) |
 
-
----
+***
 
 ## `pd.adjust()`: Prior-Odds Adjustment for *pd*
 
-The Probability of Direction (*pd*) is often used as a decision rule: a hypothesis 
-is accepted when *pd* exceeds a threshold. When this decision is made repeatedly 
-across several hypotheses, the family-wise error probability can be much higher 
-than intended. `pd.adjust()` addresses this decision-level problem by making the 
-implicit prior probability of the global null explicit, following the prior-odds 
-framework of Jeffreys (1938) and Westfall et al. (1997).
+The Probability of Direction (*pd*) is often used as a decision rule: a hypothesis is accepted when *pd* exceeds a threshold. When this decision is made repeatedly across several hypotheses, the family-wise error probability can be much higher than intended. `pd.adjust()` addresses this decision-level problem by making the implicit prior probability of the global null explicit, following the prior-odds framework of Jeffreys (1938) and Westfall et al. (1997).
 
-The global prior probability that **all** hypotheses are null, *q*, is
-decomposed into a per-hypothesis prior:
+The global prior probability that **all** hypotheses are null, *q*, is decomposed into a per-hypothesis prior:
 
 $$P(H_0) = q^{1/m}$$
 
@@ -38,9 +29,7 @@ Each *pd* is then reweighted by Bayes' theorem:
 
 $$pd_{\text{adj}} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}$$
 
-When parameters are correlated, the effective number of tests $m_\text{eff}$
-(Cheverud, 2001) is used in place of *m*, producing a less conservative
-adjustment.
+When parameters are correlated, the effective number of tests $m_\text{eff}$ (Cheverud, 2001) is used in place of *m*, producing a less conservative adjustment.
 
 ### Usage
 
@@ -84,31 +73,17 @@ When `draws` are supplied, the output is a `data.frame` with one row per hypothe
 
 When a `pd` vector is supplied directly, only `pd`, `pd_adj`, `q`, and `m` are returned.
 
-### Choosing *q*, *m*, and direction
+### Choosing *q*, *m0*, and direction
 
-- **`q`** encodes your prior belief that all tested hypotheses are
-  simultaneously null. A value of `0.4` is a moderately skeptical default.
-  Lower values are more lenient; higher values are more conservative.
-  The choice should be justified through prior elicitation — drawing on theory,
-  previous findings, or domain expertise — and ideally pre-registered.
-- **`m`** should reflect only the hypotheses for which directional claims
-  are made. Nuisance parameters (random effects, control covariates) should
-  not be counted.
-- **`mu0`** sets the null reference value for each parameter. A scalar applies
-  the same null to all parameters; a vector allows a different null per parameter,
-  for instance when testing against a minimum effect of practical interest.
-- **`direction`** specifies the expected sign of each effect (`1` for positive,
-  `-1` for negative, `0` for agnostic). It should be declared explicitly when
-  `mu0 != 0` or when theory supports a specific directional prediction.
-
+- **`q`** encodes your prior belief that all tested hypotheses are simultaneously null. A value of `0.4` is a skeptical default. 
+- **`mu0`** sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.
+- **`direction`** specifies the expected sign of each effect (`1` for positive, `-1` for negative, `0` for agnostic). It should be declared explicitly when `mu0 != 0` or when theory supports a specific directional prediction.
 
 ---
 
 ## Citation
 
 If you use **multibayes** in published research, please cite:
-
-For `pd.adjust()`:
 
 > Calderan, M., Gambarota, F., Toffalini, E., & Altoè, G. (2026). Adjusting the Probability of Direction for Multiple Testing.
 

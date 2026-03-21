@@ -41,13 +41,11 @@
 #'   for all parameters).
 #' @param q Numeric scalar in \eqn{(0, 1)}. The prior probability that
 #'   \strong{all} hypotheses are null. Defaults to \code{0.4}.
-#' @param m Positive integer. The number of tested hypotheses.
-#'   Defaults to \code{length(pd)}. Overridden if \code{R} is provided.
-#' @param R Optional correlation matrix of the posterior draws. Can be provided
-#'   directly as a matrix or a single scalar, or computed automatically by the
-#'   function when posterior draws are supplied (set \code{R = TRUE}). When
-#'   provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure
-#'   and used in place of \code{m}.
+#' @param R Optional correlation information for computing \eqn{m_{\text{eff}}}.
+#'   Accepts \code{TRUE} (correlation estimated from \code{draws}), a numeric
+#'   scalar (assumed uniform correlation applied to all parameter pairs), or a
+#'   full correlation matrix. When provided, \eqn{m_{\text{eff}}} replaces the
+#'   nominal \eqn{m}.
 #'
 #' @return A \code{data.frame} with one row per hypothesis, containing the
 #'   following columns: \code{pd} (original values), \code{pd_adj} (adjusted
@@ -75,7 +73,7 @@
 #'
 #' @export
 pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
-                      direction = NULL, m = NULL, R = NULL) {
+                      direction = NULL, R = NULL) {
   
   from_draws <- !is.null(draws)
   
@@ -98,17 +96,15 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
       else if (d == -1L) mean(centered[, j] < 0)
       else               max(mean(centered[, j] > 0), mean(centered[, j] < 0))
     }, seq_len(p), direction)
-    
-    if (is.null(m)) m <- p
   }
   
   if (is.null(pd)) stop("Either `pd` or `draws` must be provided.")
-  if (is.null(m))  m  <- length(pd)
+  
+  m <- length(pd)
   
   stopifnot(
     "`pd`: must be numeric in [0.5, 1]" = is.numeric(pd) && all(pd >= 0.5 & pd <= 1, na.rm = TRUE),
-    "`q`: must be a single number (0, 1)" = length(q) == 1L && q > 0 && q < 1,
-    "`m`: must be >= 1" = length(m) == 1L && m >= 1
+    "`q`: must be a single number (0, 1)" = length(q) == 1L && q > 0 && q < 1
   )
   
   # Effective number of tests (Cheverud, 2001)
@@ -148,13 +144,17 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   pd_adj <- ifelse(pd_adj < 0.50, 0.50, pd_adj)
   
   if (from_draws) {
-    data.frame(mean_est = round(colMeans(draws),4),
-               mu0 = mu0, direction = direction, 
-               pd = round(pd,4), 
-               pd_adj = round(pd_adj, 4),
-               q = rep(q, length(pd)), m = round(rep(m, length(pd)),4))
+    data.frame(mean_est  = round(colMeans(draws), 4),
+               mu0       = mu0,
+               direction = direction,
+               pd        = round(pd, 4),
+               pd_adj    = round(pd_adj, 4),
+               q         = rep(q, length(pd)),
+               m         = round(rep(m, length(pd)), 4))
   } else {
-    data.frame(pd = round(pd,4), pd_adj =  round(pd_adj, 4),
-               q = rep(q, length(pd)), m = round(rep(m, length(pd)),4))
+    data.frame(pd     = round(pd, 4),
+               pd_adj = round(pd_adj, 4),
+               q      = rep(q, length(pd)),
+               m      = round(rep(m, length(pd)), 4))
   }
 }

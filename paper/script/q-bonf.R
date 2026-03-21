@@ -22,7 +22,7 @@ for (i in 1:length(m_values)) {
   alpha_adj <- alpha_base / m
   pd_val <- 1 - alpha_adj 
   
-  # 2. Calculate q to EQUATE the decrease
+  # 2. Calculate q to equate the decrease
   # We solve for q such that the pd stays at 0.95
   # Formula derived from inverting the Bayesian update equation
   numerator <- pd_val * (1 - target_pd)

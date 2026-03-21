@@ -10,7 +10,6 @@ pd.adjust(
   q = 0.4,
   mu0 = 0,
   direction = NULL,
-  m = NULL,
   R = NULL
 )
 }
@@ -37,14 +36,11 @@ direction per parameter; a scalar is recycled across all parameters.
 Should be specified when \code{mu0 != 0}. Defaults to \code{NULL} (direction-agnostic
 for all parameters).}
 
-\item{m}{Positive integer. The number of tested hypotheses.
-Defaults to \code{length(pd)}. Overridden if \code{R} is provided.}
-
-\item{R}{Optional correlation matrix of the posterior draws. Can be provided
-directly as a matrix or a single scalar, or computed automatically by the
-function when posterior draws are supplied (set \code{R = TRUE}). When
-provided, \eqn{m_{\text{eff}}} is calculated from the correlation structure
-and used in place of \code{m}.}
+\item{R}{Optional correlation information for computing \eqn{m_{\text{eff}}}.
+Accepts \code{TRUE} (correlation estimated from \code{draws}), a numeric
+scalar (assumed uniform correlation applied to all parameter pairs), or a
+full correlation matrix. When provided, \eqn{m_{\text{eff}}} replaces the
+nominal \eqn{m}.}
 }
 \value{
 A \code{data.frame} with one row per hypothesis, containing the
