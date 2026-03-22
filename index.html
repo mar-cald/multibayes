@@ -114,10 +114,10 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"H1"</span>, <span class="st">"H2"</span>, <span class="st">"H3"</span>, <span class="st">"H4"</span>, <span class="st">"H5"</span>, <span class="st">"H6"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># From posterior draws: pd and correlation estimated automatically</span></span>
-<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, mu0 <span class="op">=</span> <span class="fl">0</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span>
-<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, mu0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
 <span>          direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># When draws are unavailable, supply an assumed mean correlation</span></span>
@@ -138,11 +138,11 @@
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code>mean_est</code></td>
+<td><code>mean.est</code></td>
 <td>Posterior mean per parameter</td>
 </tr>
 <tr class="even">
-<td><code>mu0</code></td>
+<td><code>null.value</code></td>
 <td>Null reference value used</td>
 </tr>
 <tr class="odd">
@@ -155,7 +155,7 @@
 <em>pd</em> used in the adjustment; in <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0.5</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.5, 1]</annotation></semantics></math> for agnostic tests, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math> for directional tests</td>
 </tr>
 <tr class="odd">
-<td><code>pd_adj</code></td>
+<td><code>pd.adj</code></td>
 <td>Adjusted <em>pd</em> after prior-odds correction; same bounds as <code>pd</code>
 </td>
 </tr>
@@ -169,19 +169,19 @@
 </tr>
 </tbody>
 </table>
-<p>When a <code>pd</code> vector is supplied directly, only <code>pd</code>, <code>pd_adj</code>, <code>q</code>, and <code>m</code> are returned.</p>
+<p>When a <code>pd</code> vector is supplied directly, only <code>pd</code>, <code>pd.adj</code>, <code>q</code>, and <code>m</code> are returned.</p>
 </div>
 <div class="section level3">
-<h3 id="choosing-q-mu0-and-direction">Choosing <em>q</em>, <em>mu0</em>, and <em>direction</em>
-<a class="anchor" aria-label="anchor" href="#choosing-q-mu0-and-direction"></a>
+<h3 id="choosing-q-nullvalue-and-direction">Choosing <em>q</em>, <em>null.value</em>, and <em>direction</em>
+<a class="anchor" aria-label="anchor" href="#choosing-q-nullvalue-and-direction"></a>
 </h3>
 <ul>
 <li>
 <strong><code>q</code></strong> encodes your prior belief that all tested hypotheses are simultaneously null. A value of <code>0.4</code> is a skeptical default.</li>
 <li>
-<strong><code>mu0</code></strong> sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.</li>
+<strong><code>null.value</code></strong> sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.</li>
 <li>
-<strong><code>direction</code></strong> selects the testing mode per hypothesis (<code>1</code> for positive, <code>-1</code> for negative, <code>0</code> for agnostic). A scalar is recycled; a mixed vector applies different modes across hypotheses within the same call. For directional tests, values of <code>pd</code> and <code>pd_adj</code> below <code>0.5</code> indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.</li>
+<strong><code>direction</code></strong> selects the testing mode per hypothesis (<code>1</code> for positive, <code>-1</code> for negative, <code>0</code> for agnostic). A scalar is recycled; a mixed vector applies different modes across hypotheses within the same call. For directional tests, values of <code>pd</code> and <code>pd.adj</code> below <code>0.5</code> indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.</li>
 </ul>
 <hr>
 </div>

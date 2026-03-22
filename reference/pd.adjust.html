@@ -66,7 +66,7 @@ the effective number of tests \(m_{\text{eff}}\).</p>
 <span>  pd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  draws <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  q <span class="op">=</span> <span class="fl">0.4</span>,</span>
-<span>  mu0 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  null.value <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  direction <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  R <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -86,7 +86,7 @@ supplied.</p></dd>
 <dt id="arg-draws">draws<a class="anchor" aria-label="anchor" href="#arg-draws"></a></dt>
 <dd><p>Optional matrix or data frame of posterior draws (columns = parameters).
 If provided, <em>pd</em> values are computed automatically from the draws
-according to <code>direction</code> and <code>mu0</code>.</p></dd>
+according to <code>direction</code> and <code>null.value</code>.</p></dd>
 
 
 <dt id="arg-q">q<a class="anchor" aria-label="anchor" href="#arg-q"></a></dt>
@@ -94,7 +94,7 @@ according to <code>direction</code> and <code>mu0</code>.</p></dd>
 <strong>all</strong> hypotheses are null simultaneously. Defaults to <code>0.4</code>.</p></dd>
 
 
-<dt id="arg-mu-">mu0<a class="anchor" aria-label="anchor" href="#arg-mu-"></a></dt>
+<dt id="arg-null-value">null.value<a class="anchor" aria-label="anchor" href="#arg-null-value"></a></dt>
 <dd><p>Numeric scalar or vector. The null (reference) value against which
 the posterior is evaluated. A scalar applies the same null to all parameters;
 a vector of length equal to <code>ncol(draws)</code> allows a different null per
@@ -123,14 +123,14 @@ nominal \(m\).</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>data.frame</code> with one row per hypothesis, containing:
-<code>pd</code> (values used in the adjustment), <code>pd_adj</code> (adjusted
+<code>pd</code> (values used in the adjustment), <code>pd.adj</code> (adjusted
 values), <code>q</code> (prior probability of the global null), and <code>m</code>
 (nominal or effective number of tests). For direction-agnostic tests,
-both <code>pd</code> and <code>pd_adj</code> are bounded in \([0.5, 1]\); for
+both <code>pd</code> and <code>pd.adj</code> are bounded in \([0.5, 1]\); for
 directional tests, both are on \([0, 1]\), with values below \(0.5\)
 indicating that the data (and the adjustment) favoured the opposite
 direction. When <code>draws</code> are supplied, the output additionally
-includes <code>mean_est</code> (posterior mean per parameter), <code>mu0</code>
+includes <code>mean.est</code> (posterior mean per parameter), <code>null.value</code>
 (null reference values), and <code>direction</code>.</p>
     </div>
     <div class="section level2">

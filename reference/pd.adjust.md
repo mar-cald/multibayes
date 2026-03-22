@@ -17,7 +17,7 @@ pd.adjust(
   pd = NULL,
   draws = NULL,
   q = 0.4,
-  mu0 = 0,
+  null.value = 0,
   direction = NULL,
   R = NULL
 )
@@ -36,14 +36,14 @@ pd.adjust(
 
   Optional matrix or data frame of posterior draws (columns =
   parameters). If provided, *pd* values are computed automatically from
-  the draws according to `direction` and `mu0`.
+  the draws according to `direction` and `null.value`.
 
 - q:
 
   Numeric scalar in \\(0, 1)\\. The prior probability that **all**
   hypotheses are null simultaneously. Defaults to `0.4`.
 
-- mu0:
+- null.value:
 
   Numeric scalar or vector. The null (reference) value against which the
   posterior is evaluated. A scalar applies the same null to all
@@ -73,14 +73,14 @@ pd.adjust(
 ## Value
 
 A `data.frame` with one row per hypothesis, containing: `pd` (values
-used in the adjustment), `pd_adj` (adjusted values), `q` (prior
+used in the adjustment), `pd.adj` (adjusted values), `q` (prior
 probability of the global null), and `m` (nominal or effective number of
-tests). For direction-agnostic tests, both `pd` and `pd_adj` are bounded
+tests). For direction-agnostic tests, both `pd` and `pd.adj` are bounded
 in \\\[0.5, 1\]\\; for directional tests, both are on \\\[0, 1\]\\, with
 values below \\0.5\\ indicating that the data (and the adjustment)
 favoured the opposite direction. When `draws` are supplied, the output
-additionally includes `mean_est` (posterior mean per parameter), `mu0`
-(null reference values), and `direction`.
+additionally includes `mean.est` (posterior mean per parameter),
+`null.value` (null reference values), and `direction`.
 
 ## Details
 
