@@ -31,8 +31,7 @@
 #' is the raw posterior probability mass on the predicted side,
 #' \eqn{\Pr(\hat\theta > \theta_\text{null})} or
 #' \eqn{\Pr(\hat\theta < \theta_\text{null})}, and is defined on \eqn{[0, 1]}.
-#' This follows directly from Westfall et al. (1997), who derived the
-#' prior-odds correction for one-sided hypotheses. Values of \emph{pd} below \eqn{0.5} indicate that the posterior is
+#' Values of \emph{pd} below \eqn{0.5} indicate that the posterior is
 #' concentrated opposite to the predicted direction; the adjustment will
 #' further shrink such values toward \eqn{0}, reflecting the combined weight
 #' of the data and the conservative prior against the hypothesis.

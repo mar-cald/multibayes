@@ -757,7 +757,7 @@ Given the repeated-measures structure of the data and the large number of trials
 
 Although one could debate whether $pd$ values should be corrected jointly across both models or separately within each, we adopt the joint approach, as the prior over the hypothesis space spans all six hypotheses. Distribution specific (e.g., sigma for the Lognormal model), and subject-specific parameters are treated as nuisance, as they are not considered for inference.
 
-Table 1 summarises the six hypotheses organised by outcome and predictor. Although the substantive predictions are directional, for instance, incongruent trials are expected to slow responses and reduce accuracy, $pd$ is computed uniformly as $\max\!\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$ for all hypotheses, consistent with the direction-agnostic framework developed in this paper.
+Table 1 summarises the six hypotheses organised by outcome and predictor. Although the substantive predictions are directional, for instance, incongruent trials are expected to slow responses and reduce accuracy, $pd$ is computed uniformly as $\max\!\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$ for all hypotheses.
 
 
 
@@ -773,7 +773,7 @@ Table 1 summarises the six hypotheses organised by outcome and predictor. Althou
 : Tested hypotheses. RT: Reaction Time; ACC: Accuracy
 
 
-For the RT analysis, we retained only correct trials preceded by a correct trial (i.e., error and post-error trials were excluded), yielding 76,397 observations. Three chains of 10,000 iterations each were run.
+For the RT analysis, we retained only correct trials preceded by a correct trial (i.e., error and post-error trials were excluded), yielding 76,397 observations. 
 
 ``` r
 data_rt <- data_stroop |>
@@ -783,12 +783,11 @@ data_rt <- data_stroop |>
 
 mod_rt <- brm(formula = rt ~ 1 + congruency*condition + 
                             (1 + congruency*condition || id),
-                family = lognormal(),
-                cores = 3, chains = 3, iter = 10000,
-                data = data_rt)
+                family = lognormal(), data = data_rt,
+                cores = 3, chains = 3, iter = 10000)
 ```
 
-For the ACC analysis, omission trials were already excluded during data loading via `na.omit()`. Data were aggregated to subject $\times$ condition $\times$ congruency cells prior to modeling, yielding 1,012 rows (253 subjects $\times$ 4 cells). Three chains of 10,000 iterations each were run.
+For the ACC analysis, omission trials were already excluded during data loading via `na.omit()`. Data were aggregated to subject $\times$ condition $\times$ congruency cells prior to modeling, yielding 1,012 rows (253 subjects $\times$ 4 cells). 
 
 ``` r
 data_acc_agg <- data_stroop |>
@@ -797,26 +796,21 @@ data_acc_agg <- data_stroop |>
   
 mod_acc <- brm(formula = hits | trials(n) ~ 1 + congruency*condition + 
                                           (1 + congruency*condition || id),
-               family = binomial(link = "logit"),
-               cores = 3, chains = 3, iter = 10000,
-               data = data_acc_agg)
+               family = binomial(link = "logit"), data = data_acc_agg,
+               cores = 3, chains = 3, iter = 10000)
 ```
 
 Since `pd.adjust()` computes $pd$ values automatically from a matrix of posterior draws, we extracted and combined the relevant fixed-effect draws from both models.
 
 ```{r, echo=TRUE, eval=TRUE}
-
 # Extract draws
 draws_rt  <- as.data.frame(mod_rt)
 draws_acc <- as.data.frame(mod_acc)
-
 # Select relevant parameters
 par_names <- colnames(draws_rt)[2:4]
-
 # Select effects of interest
 draws_rt  <- draws_rt[, par_names]
 draws_acc <- draws_acc[, par_names]
-
 # Combine draws across models and label hypotheses
 draws <- cbind(draws_rt, draws_acc)
 colnames(draws) <- c("congruency_rt", "condition_rt", "cong:cond_rt", 
@@ -826,9 +820,9 @@ pd.adjust(draws = draws, q = 0.4, R = TRUE,
           mu0 = c(0.05, 0.05, 0, -1, 0, 0))
 ```
 
-The function was called with `q = 0.4`, `mu0 = c(0.05, 0.05, 0, -1, 0, 0)`, and `R = TRUE`, yielding an effective number of hypotheses of $m \approx 5.70$, which reflects the estimated correlations among posterior draws. The `mu0` argument specifies hypothesis-specific null values ($\theta_\text{null} = 0.05$ for `congruency_rt` and `condition_rt`, $\theta_\text{null} = -1$ for `congruency_acc`, with zero elsewhere); for all hypotheses, $pd$ is computed as the maximum of the two one-sided posterior probabilities and is bounded in $[0.5, 1]$.
+The function was called with `q = 0.4`, `mu0 = c(0.05, 0.05, 0, -1, 0, 0)`, and `R = TRUE`, yielding an effective number of hypotheses of $m \approx 5.70$, which reflects the estimated correlations among posterior draws. The `mu0` argument specifies hypothesis-specific null values ($\theta_\text{null} = 0.05$ for `congruency_rt` and `condition_rt`, $\theta_\text{null} = -1$ for `congruency_acc`, with zero elsewhere).
 
-Five of the six hypotheses were strongly supported after adjustment: the congruency effects on both reaction time ($pd_\text{adj} = 1.000$) and accuracy ($pd_\text{adj} = 1.000$), the condition effect on accuracy ($pd_\text{adj} = 0.999$), and both interaction effects ($pd_\text{adj} = 0.986$ and $pd_\text{adj} = 0.992$, respectively). The condition effect on reaction time also yielded $pd = 1.000$ under the agnostic test, but this does not indicate support for a positive effect: with a posterior mean of $-0.0004$ and $\theta_\text{null} = 0.05$, virtually all posterior mass lies *below* the null, so the high $pd$ reflects distance from the null on the "wrong" side.
+Five of the six hypotheses were strongly supported after adjustment: the congruency effects on both reaction time ($pd_\text{adj} = 1.000$) and accuracy ($pd_\text{adj} = 1.000$), the condition effect on accuracy ($pd_\text{adj} = 0.999$), and both interaction effects ($pd_\text{adj} = 0.986$ and $pd_\text{adj} = 0.992$, respectively). The condition effect on reaction time also yielded $pd = 1.000$ under the agnostic test, but this does not indicate support for a positive effect: with a posterior mean of $-0.0004$ and $\theta_\text{null} = 0.05$, all posterior mass lies *below* the null, so the high $pd$ reflects distance from the null on the "wrong" side.
 
 To illustrate the directional testing option, we re-ran the adjustment specifying the predicted direction for each hypothesis: a positive effect for `congruency_rt` and `condition_rt` ($H_1$, $H_2$; `direction = 1`), a negative effect for `congruency_acc` and `condition_acc` ($H_4$, $H_5$; `direction = -1`), and agnostic tests for the two interactions ($H_3$, $H_6$; `direction = 0`). 
 
