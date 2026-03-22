@@ -2,7 +2,9 @@
 #'
 #' The function accepts either a vector of pre-computed \emph{pd} values or
 #' a matrix of posterior draws, from which \emph{pd} values are computed
-#' internally. The global prior probability that all tested hypotheses are
+#' internally. Both direction-agnostic and directional tests are supported:
+#' the \code{direction} argument controls which formulation is applied per
+#' hypothesis. The global prior probability that all tested hypotheses are
 #' null, \eqn{q}, is decomposed into a per-hypothesis prior
 #' \eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses or,
 #' when the correlation structure among parameters is taken into account,
@@ -17,20 +19,28 @@
 #' }
 #'
 #' Because the prior is conservative (\eqn{P(H_0) > P(H_1)}), the adjustment
-#' always moves \emph{pd} toward \eqn{0}. A floor at \eqn{0.5} is applied to
-#' \eqn{pd_{adj}}, so the effective result is a shrinkage toward \eqn{0.5}.
+#' always shrinks \emph{pd} toward its lower bound.
 #'
-#' For direction-agnostic tests (\code{direction = 0}), \emph{pd} is the
-#' maximum of the two tail probabilities and is bounded in \eqn{[0.5, 1]}.
-#' For directional tests (\code{direction = 1} or \code{-1}), \emph{pd} is
-#' the probability mass on the predicted side, \eqn{Pr(\hat\theta > \theta_{null})} or
-#' \eqn{Pr(\hat\theta < \theta_{null})}, and is floored at \eqn{0.5} before the adjustment
-#' is applied. A value of \eqn{pd = 0.5} should therefore be interpreted as
-#' absence of support for the predicted direction; the floor prevents the
-#' correction from amplifying contradictory evidence. The raw directional
-#' probability before flooring is returned in \code{pd_raw} for directional
-#' tests, allowing the researcher to assess whether the floor was triggered
-#' and how strongly the data contradicted the predicted direction.
+#' \strong{Direction-agnostic tests} (\code{direction = 0}): \emph{pd} is
+#' defined as \eqn{\max\!\big(\Pr(\hat\theta > \theta_\text{null}),\,
+#' \Pr(\hat\theta < \theta_\text{null})\big)} and is bounded in
+#' \eqn{[0.5, 1]} by construction. \eqn{pd_{adj}} is also floored at
+#' \eqn{0.5}, so the adjustment produces shrinkage toward \eqn{0.5}.
+#'
+#' \strong{Directional tests} (\code{direction = 1} or \code{-1}): \emph{pd}
+#' is the raw posterior probability mass on the predicted side,
+#' \eqn{\Pr(\hat\theta > \theta_\text{null})} or
+#' \eqn{\Pr(\hat\theta < \theta_\text{null})}, and is defined on \eqn{[0, 1]}.
+#' This follows directly from Westfall et al. (1997), who derived the
+#' prior-odds correction for one-sided hypotheses. Values of \emph{pd} below \eqn{0.5} indicate that the posterior is
+#' concentrated opposite to the predicted direction; the adjustment will
+#' further shrink such values toward \eqn{0}, reflecting the combined weight
+#' of the data and the conservative prior against the hypothesis.
+#'
+#' Mixed use of directional and direction-agnostic tests within the same call
+#' is supported: each element of \code{direction} is handled independently,
+#' and the same prior-odds adjustment is applied uniformly across all
+#' hypotheses regardless of their directionality.
 #'
 #' When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
 #' is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
@@ -40,25 +50,27 @@
 #' }
 #' where \eqn{K} is the number of hypotheses.
 #'
-#' @param pd Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}. For
-#'   direction-agnostic tests, this is the maximum of the two tail
-#'   probabilities. For directional tests, this is the probability mass
-#'   on the predicted side, floored at \eqn{0.5}.
+#' @param pd Numeric vector of \emph{pd} values. For direction-agnostic tests,
+#'   values must be in \eqn{[0.5, 1]}. For directional tests, values are raw
+#'   one-sided probabilities in \eqn{[0, 1]}. Ignored if \code{draws} is
+#'   supplied.
 #' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
-#'   If provided, \code{pd} is calculated automatically.
+#'   If provided, \emph{pd} values are computed automatically from the draws
+#'   according to \code{direction} and \code{mu0}.
 #' @param mu0 Numeric scalar or vector. The null (reference) value against which
 #'   the posterior is evaluated. A scalar applies the same null to all parameters;
 #'   a vector of length equal to \code{ncol(draws)} allows a different null per
 #'   parameter. Ignored if \code{pd} is supplied directly. Defaults to \code{0}.
 #' @param direction Integer vector of \code{1}, \code{-1}, or \code{0} (or \code{NULL}).
-#'   Specifies the predicted direction of each effect: \code{1} for positive
-#'   (tests \eqn{Pr(\theta > \theta_{null})}), \code{-1} for negative (tests
-#'   \eqn{Pr(\theta < \theta_{null}}), and \code{0} for direction-agnostic (takes the
-#'   maximum over both sides). Should be a vector of length \code{ncol(draws)};
-#'   a scalar is recycled. Defaults to \code{NULL} (direction-agnostic for all
-#'   parameters).
+#'   Specifies the testing mode for each hypothesis: \code{1} for a positive
+#'   directional test (\eqn{\Pr(\theta > \theta_\text{null})}), \code{-1} for a
+#'   negative directional test (\eqn{\Pr(\theta < \theta_\text{null})}), and
+#'   \code{0} for direction-agnostic testing (maximum over both sides). A scalar
+#'   is recycled to match the number of parameters; mixed vectors allow
+#'   different modes across hypotheses. Defaults to \code{NULL}
+#'   (direction-agnostic for all parameters).
 #' @param q Numeric scalar in \eqn{(0, 1)}. The prior probability that
-#'   \strong{all} hypotheses are null. Defaults to \code{0.4}.
+#'   \strong{all} hypotheses are null simultaneously. Defaults to \code{0.4}.
 #' @param R Optional correlation information for computing \eqn{m_{\text{eff}}}.
 #'   Accepts \code{TRUE} (correlation estimated from \code{draws}), a numeric
 #'   scalar (assumed uniform correlation applied to all parameter pairs), or a
@@ -66,15 +78,15 @@
 #'   nominal \eqn{m}.
 #'
 #' @return A \code{data.frame} with one row per hypothesis, containing:
-#'   \code{pd} (values used in the adjustment, floored at \eqn{0.5}),
-#'   \code{pd_adj} (adjusted values, also floored at \eqn{0.5}), \code{q}
-#'   (prior probability of the global null), and \code{m} (number of hypotheses
-#'   or effective number of tests). When \code{draws} are supplied,
-#'   \code{mean_est} (posterior mean per parameter), \code{mu0} (null reference
-#'   values), and \code{direction} are also returned. For directional tests,
-#'   \code{pd_raw} is additionally returned, reporting the raw directional
-#'   probability before flooring; values below \eqn{0.5} indicate that the
-#'   posterior was concentrated opposite to the predicted direction.
+#'   \code{pd} (values used in the adjustment), \code{pd_adj} (adjusted
+#'   values), \code{q} (prior probability of the global null), and \code{m}
+#'   (nominal or effective number of tests). For direction-agnostic tests,
+#'   both \code{pd} and \code{pd_adj} are bounded in \eqn{[0.5, 1]}; for
+#'   directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
+#'   indicating that the data (and the adjustment) favoured the opposite
+#'   direction. When \code{draws} are supplied, the output additionally
+#'   includes \code{mean_est} (posterior mean per parameter), \code{mu0}
+#'   (null reference values), and \code{direction}.
 #'
 #' @references
 #' Jeffreys, H. (1938). Significance tests when several degrees of freedom arise
@@ -106,39 +118,31 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     if (is.null(direction))      direction <- rep(0L, p)
     if (length(direction) == 1L) direction <- rep(direction, p)
     
-    if (length(mu0) != p)       stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
-    if (length(direction) != p) stop("`direction` must be a scalar or a vector of length `ncol(draws)`.")
+    if (length(mu0) != p)        stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
+    if (length(direction) != p)  stop("`direction` must be a scalar or a vector of length `ncol(draws)`.")
     if (!all(direction %in% c(-1L, 0L, 1L))) stop("`direction` must contain only -1, 0, or 1.")
     
     centered <- sweep(draws, 2, mu0, "-")
     
-    # Raw directional probability (before flooring)
-    pd_raw <- mapply(function(j, d) {
+    # pd: raw one-sided probability for directional tests, max for agnostic
+    pd <- mapply(function(j, d) {
       if      (d ==  1L) mean(centered[, j] > 0)
       else if (d == -1L) mean(centered[, j] < 0)
-      else    NA_real_
-    }, seq_len(p), direction)
-    
-    # pd used in adjustment: directional floored at 0.5, agnostic as max
-    pd <- mapply(function(j, d) {
-      if      (d ==  1L) max(mean(centered[, j] > 0), 0.5)
-      else if (d == -1L) max(mean(centered[, j] < 0), 0.5)
       else    max(mean(centered[, j] > 0), mean(centered[, j] < 0))
     }, seq_len(p), direction)
   }
   
   if (is.null(pd)) stop("Either `pd` or `draws` must be provided.")
   
-  m <- length(pd)
-  
   stopifnot(
-    "`pd`: must be numeric in [0.5, 1]" = is.numeric(pd) && all(pd >= 0.5 & pd <= 1, na.rm = TRUE),
+    "`pd` must be numeric in [0, 1]" = is.numeric(pd) && all(pd >= 0 & pd <= 1, na.rm = TRUE),
     "`q`: must be a single number in (0, 1)" = length(q) == 1L && q > 0 && q < 1
   )
   
+  m <- length(pd)
+  
   # Effective number of tests (Cheverud, 2001)
   if (!is.null(R)) {
-    
     if (isTRUE(R) && is.null(draws))
       stop("`R = TRUE` requires `draws` to be provided.")
     
@@ -168,23 +172,23 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     pd_adj <- pd
   }
   
-  # Floor at 0.50 for all tests
-  pd_adj <- pmax(pd_adj, 0.5)
+  # Floor pd_adj at 0.5 only for agnostic tests
+  if (from_draws) {
+    pd_adj[direction == 0L] <- pmax(pd_adj[direction == 0L], 0.5)
+  } else {
+    pd_adj <- pmax(pd_adj, 0.5)
+  }
   
   if (from_draws) {
-    out <- data.frame(
+    data.frame(
       mean_est  = round(colMeans(draws), 4),
       mu0       = mu0,
-      direction = direction,
       pd        = round(pd, 4),
       pd_adj    = round(pd_adj, 4),
       q         = rep(q, length(pd)),
-      m         = round(rep(m, length(pd)), 4)
+      m         = round(rep(m, length(pd)), 4),
+      direction = direction
     )
-    # Add pd_raw only when at least one directional test is present
-    if (any(direction != 0L))
-      out$pd_raw <- round(pd_raw, 4)
-    out
   } else {
     data.frame(
       pd     = round(pd, 4),

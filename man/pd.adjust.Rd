@@ -14,16 +14,17 @@ pd.adjust(
 )
 }
 \arguments{
-\item{pd}{Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}. For
-direction-agnostic tests, this is the maximum of the two tail
-probabilities. For directional tests, this is the probability mass
-on the predicted side, floored at \eqn{0.5}.}
+\item{pd}{Numeric vector of \emph{pd} values. For direction-agnostic tests,
+values must be in \eqn{[0.5, 1]}. For directional tests, values are raw
+one-sided probabilities in \eqn{[0, 1]}. Ignored if \code{draws} is
+supplied.}
 
 \item{draws}{Optional matrix or data frame of posterior draws (columns = parameters).
-If provided, \code{pd} is calculated automatically.}
+If provided, \emph{pd} values are computed automatically from the draws
+according to \code{direction} and \code{mu0}.}
 
 \item{q}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
-\strong{all} hypotheses are null. Defaults to \code{0.4}.}
+\strong{all} hypotheses are null simultaneously. Defaults to \code{0.4}.}
 
 \item{mu0}{Numeric scalar or vector. The null (reference) value against which
 the posterior is evaluated. A scalar applies the same null to all parameters;
@@ -31,12 +32,13 @@ a vector of length equal to \code{ncol(draws)} allows a different null per
 parameter. Ignored if \code{pd} is supplied directly. Defaults to \code{0}.}
 
 \item{direction}{Integer vector of \code{1}, \code{-1}, or \code{0} (or \code{NULL}).
-Specifies the predicted direction of each effect: \code{1} for positive
-(tests \eqn{Pr(\theta > \theta_{null})}), \code{-1} for negative (tests
-\eqn{Pr(\theta < \theta_{null}}), and \code{0} for direction-agnostic (takes the
-maximum over both sides). Should be a vector of length \code{ncol(draws)};
-a scalar is recycled. Defaults to \code{NULL} (direction-agnostic for all
-parameters).}
+Specifies the testing mode for each hypothesis: \code{1} for a positive
+directional test (\eqn{\Pr(\theta > \theta_\text{null})}), \code{-1} for a
+negative directional test (\eqn{\Pr(\theta < \theta_\text{null})}), and
+\code{0} for direction-agnostic testing (maximum over both sides). A scalar
+is recycled to match the number of parameters; mixed vectors allow
+different modes across hypotheses. Defaults to \code{NULL}
+(direction-agnostic for all parameters).}
 
 \item{R}{Optional correlation information for computing \eqn{m_{\text{eff}}}.
 Accepts \code{TRUE} (correlation estimated from \code{draws}), a numeric
@@ -46,20 +48,22 @@ nominal \eqn{m}.}
 }
 \value{
 A \code{data.frame} with one row per hypothesis, containing:
-\code{pd} (values used in the adjustment, floored at \eqn{0.5}),
-\code{pd_adj} (adjusted values, also floored at \eqn{0.5}), \code{q}
-(prior probability of the global null), and \code{m} (number of hypotheses
-or effective number of tests). When \code{draws} are supplied,
-\code{mean_est} (posterior mean per parameter), \code{mu0} (null reference
-values), and \code{direction} are also returned. For directional tests,
-\code{pd_raw} is additionally returned, reporting the raw directional
-probability before flooring; values below \eqn{0.5} indicate that the
-posterior was concentrated opposite to the predicted direction.
+\code{pd} (values used in the adjustment), \code{pd_adj} (adjusted
+values), \code{q} (prior probability of the global null), and \code{m}
+(nominal or effective number of tests). For direction-agnostic tests,
+both \code{pd} and \code{pd_adj} are bounded in \eqn{[0.5, 1]}; for
+directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
+indicating that the data (and the adjustment) favoured the opposite
+direction. When \code{draws} are supplied, the output additionally
+includes \code{mean_est} (posterior mean per parameter), \code{mu0}
+(null reference values), and \code{direction}.
 }
 \description{
 The function accepts either a vector of pre-computed \emph{pd} values or
 a matrix of posterior draws, from which \emph{pd} values are computed
-internally. The global prior probability that all tested hypotheses are
+internally. Both direction-agnostic and directional tests are supported:
+the \code{direction} argument controls which formulation is applied per
+hypothesis. The global prior probability that all tested hypotheses are
 null, \eqn{q}, is decomposed into a per-hypothesis prior
 \eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses or,
 when the correlation structure among parameters is taken into account,
@@ -74,20 +78,28 @@ the adjusted \emph{pd} is:
 }
 
 Because the prior is conservative (\eqn{P(H_0) > P(H_1)}), the adjustment
-always moves \emph{pd} toward \eqn{0}. A floor at \eqn{0.5} is applied to
-\eqn{pd_{adj}}, so the effective result is a shrinkage toward \eqn{0.5}.
+always shrinks \emph{pd} toward its lower bound.
 
-For direction-agnostic tests (\code{direction = 0}), \emph{pd} is the
-maximum of the two tail probabilities and is bounded in \eqn{[0.5, 1]}.
-For directional tests (\code{direction = 1} or \code{-1}), \emph{pd} is
-the probability mass on the predicted side, \eqn{Pr(\hat\theta > \theta_{null})} or
-\eqn{Pr(\hat\theta < \theta_{null})}, and is floored at \eqn{0.5} before the adjustment
-is applied. A value of \eqn{pd = 0.5} should therefore be interpreted as
-absence of support for the predicted direction; the floor prevents the
-correction from amplifying contradictory evidence. The raw directional
-probability before flooring is returned in \code{pd_raw} for directional
-tests, allowing the researcher to assess whether the floor was triggered
-and how strongly the data contradicted the predicted direction.
+\strong{Direction-agnostic tests} (\code{direction = 0}): \emph{pd} is
+defined as \eqn{\max\!\big(\Pr(\hat\theta > \theta_\text{null}),\,
+\Pr(\hat\theta < \theta_\text{null})\big)} and is bounded in
+\eqn{[0.5, 1]} by construction. \eqn{pd_{adj}} is also floored at
+\eqn{0.5}, so the adjustment produces shrinkage toward \eqn{0.5}.
+
+\strong{Directional tests} (\code{direction = 1} or \code{-1}): \emph{pd}
+is the raw posterior probability mass on the predicted side,
+\eqn{\Pr(\hat\theta > \theta_\text{null})} or
+\eqn{\Pr(\hat\theta < \theta_\text{null})}, and is defined on \eqn{[0, 1]}.
+This follows directly from Westfall et al. (1997), who derived the
+prior-odds correction for one-sided hypotheses. Values of \emph{pd} below \eqn{0.5} indicate that the posterior is
+concentrated opposite to the predicted direction; the adjustment will
+further shrink such values toward \eqn{0}, reflecting the combined weight
+of the data and the conservative prior against the hypothesis.
+
+Mixed use of directional and direction-agnostic tests within the same call
+is supported: each element of \code{direction} is handled independently,
+and the same prior-odds adjustment is applied uniformly across all
+hypotheses regardless of their directionality.
 
 When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
 is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
