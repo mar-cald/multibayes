@@ -753,12 +753,11 @@ data_stroop <- subset(afex::stroop, study == 1) |>
   na.omit()
 ```
 
-Given the repeated-measures structure of the data and the large number of trials per participant, we fit multilevel generalized linear models using `brms` [@Paul2017], estimating both population-level and participant-specific effects. We evaluated the effects of congruency (congruent vs. incongruent), condition (depletion vs. control), and their interaction on both reaction time (RT) and accuracy (ACC).[^3] A lognormal model was specified for RT data, and a binomial logistic regression for ACC. Default flat priors in `brms` were adopted not as a principled recommendation, but to illustrate the method's behavior under the most common applied scenario, which also represents the condition where the prior-odds adjustment is most appropriate. 
+Given the repeated-measures structure of the data and the large number of trials per participant, we fit multilevel generalized linear models using `brms` [@Paul2017], estimating both population-level and participant-specific effects. We evaluated the effects of congruency (congruent vs. incongruent), condition (depletion vs. control), and their interaction on both reaction time (RT) and accuracy (ACC).[^2] A lognormal model was specified for RT data, and a binomial logistic regression for ACC. Default flat priors in `brms` were adopted not as a principled recommendation, but to illustrate the method's behavior under the most common applied scenario, which also represents the condition where the prior-odds adjustment is most appropriate. 
 
-Although one could debate whether $pd$ values should be corrected jointly across both models or separately within each, we adopt the joint approach, as the prior over the hypothesis space spans all six hypotheses. Distribution specific (e.g., sigma for the Lognormal model), and subject-specific parameters are treated as nuisance, as they are not considered for inference.
+[^2]: We acknowledge that best practice would be to analyze all outcomes jointly, for example, via evidence accumulation modeling [@Evans2020]. We opted for two separate models as this reflects common practice, and to illustrate how $pd$ values can be combined across models.
 
-Table 1 summarises the six hypotheses organised by outcome and predictor. Although the substantive predictions are directional, for instance, incongruent trials are expected to slow responses and reduce accuracy, $pd$ is computed uniformly as $\max\!\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$ for all hypotheses.
-
+Although one could reasonably debate whether *pd* values should be adjusted jointly across both models or separately within each, we adopt the joint approach because the prior over the hypothesis space is defined across all six hypotheses (Table 1). Importantly, although the theoretical hypotheses are directional, for instance, incongruent trials are expected to slow responses and reduce accuracy, *pd* is computed uniformly as $\max\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$ for all hypotheses, so the resulting tests address whether the null value lies inside or outside the credible interval, irrespective of the predicted direction.
 
 
 | **Outcome** | **Hypothesis** | **Null value** |
@@ -833,7 +832,7 @@ pd.adjust(draws = draws, q = 0.4, R = TRUE,
           direction = c(1, 1, 0, -1, -1, 0))
 ```
 
-All other hypotheses remained stable; for `condition_rt`, however, the directional analysis returned $pd_\text{raw} = 0.000$, indicating that the posterior was concentrated entirely opposite to the predicted positive direction. This illustrates a key subtlety of direction-agnostic testing: a high $pd$ relative can arise from posterior mass on either side, and the `direction` argument provides a principled way to restrict inference to the predicted side when hypotheses are directional.
+All other hypotheses remained stable; for `condition_rt`, however, the directional analysis returned $pd = 0.000$, indicating that the posterior was concentrated entirely opposite to the predicted positive direction. This illustrates a key subtlety of direction-agnostic testing: a high $pd$ relative can arise from posterior mass on either side, and the `direction` argument provides a principled way to restrict inference to the predicted side when hypotheses are directional.
 
 \newpage
 
