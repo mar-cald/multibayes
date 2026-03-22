@@ -34,8 +34,8 @@ Because the prior is conservative ($P(H_0) > P(H_1)$), the adjustment always shr
 
 The function supports two testing modes, which can be mixed across hypotheses within the same call:
 
-- **Direction-agnostic** (`direction = 0`): *pd* = $\max\!\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$, bounded in $[0.5, 1]$ by construction; $pd_\text{adj}$ is also floored at $0.5$.
-- **Directional** (`direction = 1` or `-1`): *pd* is the raw one-sided posterior probability on the predicted side, on $[0, 1]$, following Westfall et al. (1997). Values below $0.5$ indicate that the posterior is concentrated opposite to the predicted direction; the adjustment will further shrink such values, reflecting the combined weight of the data and the conservative prior against the hypothesis.
+- **Direction-agnostic** (`direction = 0`): *pd* = $\max\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$, bounded in $[0.5, 1]$ by construction; $pd_\text{adj}$ is also floored at $0.5$.
+- **Directional** (`direction = 1` or `-1`): *pd* is the raw one-sided posterior probability on the predicted side, on $[0, 1]$. Values below $0.5$ indicate that the posterior is concentrated opposite to the predicted direction; the adjustment will further shrink such values, reflecting the combined weight of the data and the conservative prior against the hypothesis.
 
 ### Usage
 
