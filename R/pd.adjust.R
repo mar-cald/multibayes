@@ -16,6 +16,17 @@
 #'    pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
 #' }
 #'
+#' Because the prior is conservative (\eqn{P(H_0) > P(H_1)}), the adjustment
+#' always moves \emph{pd} toward \eqn{H_0}. For direction-agnostic tests
+#' (\code{direction = 0}), \emph{pd} is defined as the maximum of the two
+#' tail probabilities and is bounded in \eqn{[0.5, 1]}; a floor at \eqn{0.5}
+#' is therefore applied to \eqn{pd_{adj}}, so the effective result is a
+#' shrinkage toward \eqn{0.5}. For directional tests (\code{direction = 1}
+#' or \code{-1}), \emph{pd} is the probability mass on the predicted side
+#' and lives on \eqn{[0, 1]}; no floor is applied. If \eqn{pd < 0.5}, the
+#' posterior is concentrated opposite to the predicted direction, and
+#' \eqn{pd_{adj}} will be pushed even further toward \eqn{0}.
+#'
 #' When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
 #' is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
 #' (Cheverud, 2001):
@@ -24,7 +35,11 @@
 #' }
 #' where \eqn{K} is the number of hypotheses.
 #'
-#' @param pd Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}.
+#' @param pd Numeric vector of \emph{pd} values. For direction-agnostic tests,
+#'   values must be in \eqn{[0.5, 1]}. For directional tests (\code{direction =
+#'   1} or \code{-1}), values may be in \eqn{[0, 1]}, where values below
+#'   \eqn{0.5} indicate that the posterior is concentrated opposite to the
+#'   predicted direction.
 #' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
 #'   If provided, \code{pd} is calculated automatically.
 #' @param mu0 Numeric scalar or vector. The null (reference) value against which
@@ -37,8 +52,8 @@
 #'   and \code{0} for direction-agnostic (takes the maximum over both sides).
 #'   Should be a vector of length \code{ncol(draws)} to specify a different
 #'   direction per parameter; a scalar is recycled across all parameters.
-#'   Should be specified when \code{mu0 != 0}. Defaults to \code{NULL} (direction-agnostic
-#'   for all parameters).
+#'   Should be specified when \code{mu0 != 0}. Defaults to \code{NULL}
+#'   (direction-agnostic for all parameters).
 #' @param q Numeric scalar in \eqn{(0, 1)}. The prior probability that
 #'   \strong{all} hypotheses are null. Defaults to \code{0.4}.
 #' @param R Optional correlation information for computing \eqn{m_{\text{eff}}}.
@@ -47,13 +62,16 @@
 #'   full correlation matrix. When provided, \eqn{m_{\text{eff}}} replaces the
 #'   nominal \eqn{m}.
 #'
-#' @return A \code{data.frame} with one row per hypothesis, containing the
-#'   following columns: \code{pd} (original values), \code{pd_adj} (adjusted
-#'   values), \code{q} (prior probability of the global null), and \code{m}
-#'   (number of hypotheses or effective number of tests). When \code{draws} are
-#'   supplied, \code{mean_est} (posterior mean per parameter), \code{mu0} (null
-#'   reference values), and \code{direction} (declared direction per hypothesis;
-#'   \code{0} indicates direction-agnostic) are also returned.
+#' @return A \code{data.frame} with one row per hypothesis, containing:
+#'   \code{pd} (original values), \code{pd_adj} (adjusted values), \code{q}
+#'   (prior probability of the global null), and \code{m} (number of hypotheses
+#'   or effective number of tests). For direction-agnostic tests, \code{pd_adj}
+#'   is floored at \eqn{0.5}. For directional tests, \code{pd_adj} may fall
+#'   below \eqn{0.5}, indicating that the posterior is concentrated opposite
+#'   to the predicted direction. When \code{draws} are supplied, \code{mean_est}
+#'   (posterior mean per parameter), \code{mu0} (null reference values), and
+#'   \code{direction} (declared direction per hypothesis; \code{0} indicates
+#'   direction-agnostic) are also returned.
 #'
 #' @references
 #' Jeffreys, H. (1938). Significance tests when several degrees of freedom arise
@@ -85,7 +103,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     if (is.null(direction))      direction <- rep(0L, p)
     if (length(direction) == 1L) direction <- rep(direction, p)
     
-    if (length(mu0) != p) stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
+    if (length(mu0) != p)       stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
     if (length(direction) != p) stop("`direction` must be a scalar or a vector of length `ncol(draws)`.")
     if (!all(direction %in% c(-1L, 0L, 1L))) stop("`direction` must contain only -1, 0, or 1.")
     
@@ -102,21 +120,25 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   
   m <- length(pd)
   
+  if (!is.numeric(pd) || any(pd < 0 | pd > 1, na.rm = TRUE))
+    stop("`pd` must be numeric in [0, 1].")
+  if (from_draws) {
+    if (any(direction == 0L & pd < 0.5, na.rm = TRUE))
+      stop("pd values for direction-agnostic tests must be in [0.5, 1].")
+  }
+  
   stopifnot(
-    "`pd`: must be numeric in [0.5, 1]" = is.numeric(pd) && all(pd >= 0.5 & pd <= 1, na.rm = TRUE),
-    "`q`: must be a single number (0, 1)" = length(q) == 1L && q > 0 && q < 1
+    "`q`: must be a single number in (0, 1)" = length(q) == 1L && q > 0 && q < 1
   )
   
   # Effective number of tests (Cheverud, 2001)
   if (!is.null(R)) {
     
-    if (isTRUE(R) && is.null(draws)) {
+    if (isTRUE(R) && is.null(draws))
       stop("`R = TRUE` requires `draws` to be provided.")
-    }
     
-    if (isTRUE(R) && !is.null(draws)) {
+    if (isTRUE(R) && !is.null(draws))
       R <- cor(draws)
-    }
     
     if (is.numeric(R) && length(R) == 1L) {
       R_val <- R
@@ -137,11 +159,17 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     prior_H1 <- 1 - prior_H0
     pd_adj <- (pd * prior_H1) / (pd * prior_H1 + (1 - pd) * prior_H0)
   } else {
-    warning("Pr(H0_i) <= 0.5 (Non-conservative prior); returning unadjusted pd.")
+    warning("Pr(H0_i) <= 0.5 (non-conservative prior); returning unadjusted pd.")
     pd_adj <- pd
   }
   
-  pd_adj <- ifelse(pd_adj < 0.50, 0.50, pd_adj)
+  # Floor at 0.50 only for direction-agnostic tests;
+  # for directional tests pd_adj may go below 0.50
+  if (from_draws) {
+    pd_adj <- ifelse(direction == 0L & pd_adj < 0.50, 0.50, pd_adj)
+  } else {
+    pd_adj <- ifelse(pd_adj < 0.50, 0.50, pd_adj)
+  }
   
   if (from_draws) {
     data.frame(mean_est  = round(colMeans(draws), 4),

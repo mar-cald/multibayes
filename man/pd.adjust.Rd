@@ -14,7 +14,11 @@ pd.adjust(
 )
 }
 \arguments{
-\item{pd}{Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}.}
+\item{pd}{Numeric vector of \emph{pd} values. For direction-agnostic tests,
+values must be in \eqn{[0.5, 1]}. For directional tests (\code{direction =
+  1} or \code{-1}), values may be in \eqn{[0, 1]}, where values below
+\eqn{0.5} indicate that the posterior is concentrated opposite to the
+predicted direction.}
 
 \item{draws}{Optional matrix or data frame of posterior draws (columns = parameters).
 If provided, \code{pd} is calculated automatically.}
@@ -33,8 +37,8 @@ Specifies the expected direction of each effect: \code{1} for positive
 and \code{0} for direction-agnostic (takes the maximum over both sides).
 Should be a vector of length \code{ncol(draws)} to specify a different
 direction per parameter; a scalar is recycled across all parameters.
-Should be specified when \code{mu0 != 0}. Defaults to \code{NULL} (direction-agnostic
-for all parameters).}
+Should be specified when \code{mu0 != 0}. Defaults to \code{NULL}
+(direction-agnostic for all parameters).}
 
 \item{R}{Optional correlation information for computing \eqn{m_{\text{eff}}}.
 Accepts \code{TRUE} (correlation estimated from \code{draws}), a numeric
@@ -43,13 +47,16 @@ full correlation matrix. When provided, \eqn{m_{\text{eff}}} replaces the
 nominal \eqn{m}.}
 }
 \value{
-A \code{data.frame} with one row per hypothesis, containing the
-following columns: \code{pd} (original values), \code{pd_adj} (adjusted
-values), \code{q} (prior probability of the global null), and \code{m}
-(number of hypotheses or effective number of tests). When \code{draws} are
-supplied, \code{mean_est} (posterior mean per parameter), \code{mu0} (null
-reference values), and \code{direction} (declared direction per hypothesis;
-\code{0} indicates direction-agnostic) are also returned.
+A \code{data.frame} with one row per hypothesis, containing:
+\code{pd} (original values), \code{pd_adj} (adjusted values), \code{q}
+(prior probability of the global null), and \code{m} (number of hypotheses
+or effective number of tests). For direction-agnostic tests, \code{pd_adj}
+is floored at \eqn{0.5}. For directional tests, \code{pd_adj} may fall
+below \eqn{0.5}, indicating that the posterior is concentrated opposite
+to the predicted direction. When \code{draws} are supplied, \code{mean_est}
+(posterior mean per parameter), \code{mu0} (null reference values), and
+\code{direction} (declared direction per hypothesis; \code{0} indicates
+direction-agnostic) are also returned.
 }
 \description{
 The function accepts either a vector of pre-computed \emph{pd} values or
@@ -67,6 +74,17 @@ the adjusted \emph{pd} is:
 \deqn{
    pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
 }
+
+Because the prior is conservative (\eqn{P(H_0) > P(H_1)}), the adjustment
+always moves \emph{pd} toward \eqn{H_0}. For direction-agnostic tests
+(\code{direction = 0}), \emph{pd} is defined as the maximum of the two
+tail probabilities and is bounded in \eqn{[0.5, 1]}; a floor at \eqn{0.5}
+is therefore applied to \eqn{pd_{adj}}, so the effective result is a
+shrinkage toward \eqn{0.5}. For directional tests (\code{direction = 1}
+or \code{-1}), \emph{pd} is the probability mass on the predicted side
+and lives on \eqn{[0, 1]}; no floor is applied. If \eqn{pd < 0.5}, the
+posterior is concentrated opposite to the predicted direction, and
+\eqn{pd_{adj}} will be pushed even further toward \eqn{0}.
 
 When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
 is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
