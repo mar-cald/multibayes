@@ -55,8 +55,8 @@
 #'   supplied.
 #' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
 #'   If provided, \emph{pd} values are computed automatically from the draws
-#'   according to \code{direction} and \code{mu0}.
-#' @param mu0 Numeric scalar or vector. The null (reference) value against which
+#'   according to \code{direction} and \code{null.value}.
+#' @param null.value Numeric scalar or vector. The null (reference) value against which
 #'   the posterior is evaluated. A scalar applies the same null to all parameters;
 #'   a vector of length equal to \code{ncol(draws)} allows a different null per
 #'   parameter. Ignored if \code{pd} is supplied directly. Defaults to \code{0}.
@@ -77,14 +77,14 @@
 #'   nominal \eqn{m}.
 #'
 #' @return A \code{data.frame} with one row per hypothesis, containing:
-#'   \code{pd} (values used in the adjustment), \code{pd_adj} (adjusted
+#'   \code{pd} (values used in the adjustment), \code{pd.adj} (adjusted
 #'   values), \code{q} (prior probability of the global null), and \code{m}
 #'   (nominal or effective number of tests). For direction-agnostic tests,
-#'   both \code{pd} and \code{pd_adj} are bounded in \eqn{[0.5, 1]}; for
+#'   both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
 #'   directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
 #'   indicating that the data (and the adjustment) favoured the opposite
 #'   direction. When \code{draws} are supplied, the output additionally
-#'   includes \code{mean_est} (posterior mean per parameter), \code{mu0}
+#'   includes \code{mean.est} (posterior mean per parameter), \code{null.value}
 #'   (null reference values), and \code{direction}.
 #'
 #' @references
@@ -104,7 +104,7 @@
 #' @importFrom stats var cor
 #'
 #' @export
-pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
+pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, null.value = 0,
                       direction = NULL, R = NULL) {
   
   from_draws <- !is.null(draws)
@@ -113,15 +113,15 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
     draws <- as.matrix(draws)
     p <- ncol(draws)
     
-    if (length(mu0) == 1L)       mu0 <- rep(mu0, p)
+    if (length(null.value) == 1L)       null.value <- rep(null.value, p)
     if (is.null(direction))      direction <- rep(0L, p)
     if (length(direction) == 1L) direction <- rep(direction, p)
     
-    if (length(mu0) != p)        stop("`mu0` must be a scalar or a vector of length `ncol(draws)`.")
+    if (length(null.value) != p)        stop("`null.value` must be a scalar or a vector of length `ncol(draws)`.")
     if (length(direction) != p)  stop("`direction` must be a scalar or a vector of length `ncol(draws)`.")
     if (!all(direction %in% c(-1L, 0L, 1L))) stop("`direction` must contain only -1, 0, or 1.")
     
-    centered <- sweep(draws, 2, mu0, "-")
+    centered <- sweep(draws, 2, null.value, "-")
     
     # pd: raw one-sided probability for directional tests, max for agnostic
     pd <- mapply(function(j, d) {
@@ -165,25 +165,25 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   
   if (prior_H0 > 0.5) {
     prior_H1 <- 1 - prior_H0
-    pd_adj <- (pd * prior_H1) / (pd * prior_H1 + (1 - pd) * prior_H0)
+    pd.adj <- (pd * prior_H1) / (pd * prior_H1 + (1 - pd) * prior_H0)
   } else {
     warning("Pr(H0_i) <= 0.5 (non-conservative prior); returning unadjusted pd.")
-    pd_adj <- pd
+    pd.adj <- pd
   }
   
-  # Floor pd_adj at 0.5 only for agnostic tests
+  # Floor pd.adj at 0.5 only for agnostic tests
   if (from_draws) {
-    pd_adj[direction == 0L] <- pmax(pd_adj[direction == 0L], 0.5)
+    pd.adj[direction == 0L] <- pmax(pd.adj[direction == 0L], 0.5)
   } else {
-    pd_adj <- pmax(pd_adj, 0.5)
+    pd.adj <- pmax(pd.adj, 0.5)
   }
   
   if (from_draws) {
     data.frame(
-      mean_est  = round(colMeans(draws), 4),
-      mu0       = mu0,
+      mean.est  = round(colMeans(draws), 4),
+      null.value       = null.value,
       pd        = round(pd, 4),
-      pd_adj    = round(pd_adj, 4),
+      pd.adj    = round(pd.adj, 4),
       q         = rep(q, length(pd)),
       m         = round(rep(m, length(pd)), 4),
       direction = direction
@@ -191,7 +191,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, mu0 = 0,
   } else {
     data.frame(
       pd     = round(pd, 4),
-      pd_adj = round(pd_adj, 4),
+      pd.adj = round(pd.adj, 4),
       q      = rep(q, length(pd)),
       m      = round(rep(m, length(pd)), 4)
     )

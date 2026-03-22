@@ -816,10 +816,10 @@ colnames(draws) <- c("congruency_rt", "condition_rt", "cong:cond_rt",
                      "congruency_acc", "condition_acc", "cong:cond_acc")
 
 pd.adjust(draws = draws, q = 0.4, R = TRUE,
-          mu0 = c(0.05, 0.05, 0, -1, 0, 0))
+          null.value = c(0.05, 0.05, 0, -1, 0, 0))
 ```
 
-The function was called with `q = 0.4`, `mu0 = c(0.05, 0.05, 0, -1, 0, 0)`, and `R = TRUE`, yielding an effective number of hypotheses of $m \approx 5.70$, which reflects the estimated correlations among posterior draws. The `mu0` argument specifies hypothesis-specific null values ($\theta_\text{null} = 0.05$ for `congruency_rt` and `condition_rt`, $\theta_\text{null} = -1$ for `congruency_acc`, with zero elsewhere).
+The function was called with `q = 0.4`, `mu0 = c(0.05, 0.05, 0, -1, 0, 0)`, and `R = TRUE`, yielding an effective number of hypotheses of $m \approx 5.70$, which reflects the estimated correlations among posterior draws. The `null.value` argument specifies hypothesis-specific null values ($\theta_\text{null} = 0.05$ for `congruency_rt` and `condition_rt`, $\theta_\text{null} = -1$ for `congruency_acc`, with zero elsewhere).
 
 Five of the six hypotheses were strongly supported after adjustment: the congruency effects on both reaction time ($pd_\text{adj} = 1.000$) and accuracy ($pd_\text{adj} = 1.000$), the condition effect on accuracy ($pd_\text{adj} = 0.999$), and both interaction effects ($pd_\text{adj} = 0.986$ and $pd_\text{adj} = 0.992$, respectively). The condition effect on reaction time also yielded $pd = 1.000$ under the agnostic test, but this does not indicate support for a positive effect: with a posterior mean of $-0.0004$ and $\theta_\text{null} = 0.05$, all posterior mass lies *below* the null, so the high $pd$ reflects distance from the null on the "wrong" side.
 
@@ -828,7 +828,7 @@ To illustrate the directional testing option, we re-ran the adjustment specifyin
 
 ```{r, echo=TRUE, eval=TRUE}
 pd.adjust(draws = draws, q = 0.4, R = TRUE,
-          mu0 = c(0.05, 0.05, 0, -1, 0, 0),
+          null.value = c(0.05, 0.05, 0, -1, 0, 0),
           direction = c(1, 1, 0, -1, -1, 0))
 ```
 

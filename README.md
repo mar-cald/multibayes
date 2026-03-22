@@ -53,10 +53,10 @@ draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
 # From posterior draws: pd and correlation estimated automatically
-pd.adjust(draws = draws, q = 0.4, mu0 = 0, R = TRUE)
+pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
-pd.adjust(draws = draws, q = 0.4, mu0 = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c(1, 0, 1, 0, 1, 1), R = TRUE)
 
 # When draws are unavailable, supply an assumed mean correlation
@@ -69,21 +69,21 @@ When `draws` are supplied, the output is a `data.frame` with one row per hypothe
 
 | Column | Description |
 |---|---|
-| `mean_est` | Posterior mean per parameter |
-| `mu0` | Null reference value used |
+| `mean.est` | Posterior mean per parameter |
+| `null.value` | Null reference value used |
 | `direction` | Testing mode: `1` (positive), `-1` (negative), `0` (agnostic) |
 | `pd` | *pd* used in the adjustment; in $[0.5, 1]$ for agnostic tests, $[0, 1]$ for directional tests |
-| `pd_adj` | Adjusted *pd* after prior-odds correction; same bounds as `pd` |
+| `pd.adj` | Adjusted *pd* after prior-odds correction; same bounds as `pd` |
 | `q` | Global null probability used |
 | `m` | Family size used (*m* or $m_\text{eff}$) |
 
-When a `pd` vector is supplied directly, only `pd`, `pd_adj`, `q`, and `m` are returned.
+When a `pd` vector is supplied directly, only `pd`, `pd.adj`, `q`, and `m` are returned.
 
-### Choosing *q*, *mu0*, and *direction*
+### Choosing *q*, *null.value*, and *direction*
 
 - **`q`** encodes your prior belief that all tested hypotheses are simultaneously null. A value of `0.4` is a skeptical default.
-- **`mu0`** sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.
-- **`direction`** selects the testing mode per hypothesis (`1` for positive, `-1` for negative, `0` for agnostic). A scalar is recycled; a mixed vector applies different modes across hypotheses within the same call. For directional tests, values of `pd` and `pd_adj` below `0.5` indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.
+- **`null.value`** sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.
+- **`direction`** selects the testing mode per hypothesis (`1` for positive, `-1` for negative, `0` for agnostic). A scalar is recycled; a mixed vector applies different modes across hypotheses within the same call. For directional tests, values of `pd` and `pd.adj` below `0.5` indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.
 
 ---
 

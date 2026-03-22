@@ -8,7 +8,7 @@ pd.adjust(
   pd = NULL,
   draws = NULL,
   q = 0.4,
-  mu0 = 0,
+  null.value = 0,
   direction = NULL,
   R = NULL
 )
@@ -21,12 +21,12 @@ supplied.}
 
 \item{draws}{Optional matrix or data frame of posterior draws (columns = parameters).
 If provided, \emph{pd} values are computed automatically from the draws
-according to \code{direction} and \code{mu0}.}
+according to \code{direction} and \code{null.value}.}
 
 \item{q}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
 \strong{all} hypotheses are null simultaneously. Defaults to \code{0.4}.}
 
-\item{mu0}{Numeric scalar or vector. The null (reference) value against which
+\item{null.value}{Numeric scalar or vector. The null (reference) value against which
 the posterior is evaluated. A scalar applies the same null to all parameters;
 a vector of length equal to \code{ncol(draws)} allows a different null per
 parameter. Ignored if \code{pd} is supplied directly. Defaults to \code{0}.}
@@ -48,14 +48,14 @@ nominal \eqn{m}.}
 }
 \value{
 A \code{data.frame} with one row per hypothesis, containing:
-\code{pd} (values used in the adjustment), \code{pd_adj} (adjusted
+\code{pd} (values used in the adjustment), \code{pd.adj} (adjusted
 values), \code{q} (prior probability of the global null), and \code{m}
 (nominal or effective number of tests). For direction-agnostic tests,
-both \code{pd} and \code{pd_adj} are bounded in \eqn{[0.5, 1]}; for
+both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
 directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
 indicating that the data (and the adjustment) favoured the opposite
 direction. When \code{draws} are supplied, the output additionally
-includes \code{mean_est} (posterior mean per parameter), \code{mu0}
+includes \code{mean.est} (posterior mean per parameter), \code{null.value}
 (null reference values), and \code{direction}.
 }
 \description{
