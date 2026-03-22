@@ -50,15 +50,15 @@ The function supports two testing modes, which can be mixed across
 hypotheses within the same call:
 
 - **Direction-agnostic** (`direction = 0`): *pd* =
-  $\max\!(\Pr\left( \widehat{\theta} > \theta_{\text{null}} \right),\,\Pr\left( \widehat{\theta} < \theta_{\text{null}} \right))$,
+  $\max(\Pr\left( \widehat{\theta} > \theta_{\text{null}} \right),\,\Pr\left( \widehat{\theta} < \theta_{\text{null}} \right))$,
   bounded in $\lbrack 0.5,1\rbrack$ by construction; $pd_{\text{adj}}$
   is also floored at $0.5$.
 - **Directional** (`direction = 1` or `-1`): *pd* is the raw one-sided
-  posterior probability on the predicted side, on $\lbrack 0,1\rbrack$,
-  following Westfall et al. (1997). Values below $0.5$ indicate that the
-  posterior is concentrated opposite to the predicted direction; the
-  adjustment will further shrink such values, reflecting the combined
-  weight of the data and the conservative prior against the hypothesis.
+  posterior probability on the predicted side, on $\lbrack 0,1\rbrack$.
+  Values below $0.5$ indicate that the posterior is concentrated
+  opposite to the predicted direction; the adjustment will further
+  shrink such values, reflecting the combined weight of the data and the
+  conservative prior against the hypothesis.
 
 ### Usage
 
