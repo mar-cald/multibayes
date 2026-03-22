@@ -40,7 +40,7 @@ the effective number of tests \(m_{\text{eff}}\)."><script src="https://cdn.jsde
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Prior-odds adjustment for Probability of Direction (pd)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/mar-cald/multibayes/blob/HEAD/R/pd.adjust.R" class="external-link"><code>R/pd.adjust.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mar-cald/multibayes/blob/main/R/pd.adjust.R" class="external-link"><code>R/pd.adjust.R</code></a></small>
       <div class="d-none name"><code>pd.adjust.Rd</code></div>
     </div>
 
@@ -71,7 +71,11 @@ the effective number of tests \(m_{\text{eff}}\).</p>
 
 
 <dl><dt id="arg-pd">pd<a class="anchor" aria-label="anchor" href="#arg-pd"></a></dt>
-<dd><p>Numeric vector of <em>pd</em> values in \([0.5, 1]\).</p></dd>
+<dd><p>Numeric vector of <em>pd</em> values. For direction-agnostic tests,
+values must be in \([0.5, 1]\). For directional tests (<code>direction =
+  1</code> or <code>-1</code>), values may be in \([0, 1]\), where values below
+\(0.5\) indicate that the posterior is concentrated opposite to the
+predicted direction.</p></dd>
 
 
 <dt id="arg-draws">draws<a class="anchor" aria-label="anchor" href="#arg-draws"></a></dt>
@@ -98,8 +102,8 @@ Specifies the expected direction of each effect: <code>1</code> for positive
 and <code>0</code> for direction-agnostic (takes the maximum over both sides).
 Should be a vector of length <code>ncol(draws)</code> to specify a different
 direction per parameter; a scalar is recycled across all parameters.
-Should be specified when <code>mu0 != 0</code>. Defaults to <code>NULL</code> (direction-agnostic
-for all parameters).</p></dd>
+Should be specified when <code>mu0 != 0</code>. Defaults to <code>NULL</code>
+(direction-agnostic for all parameters).</p></dd>
 
 
 <dt id="arg-r">R<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
@@ -112,13 +116,16 @@ nominal \(m\).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>data.frame</code> with one row per hypothesis, containing the
-following columns: <code>pd</code> (original values), <code>pd_adj</code> (adjusted
-values), <code>q</code> (prior probability of the global null), and <code>m</code>
-(number of hypotheses or effective number of tests). When <code>draws</code> are
-supplied, <code>mean_est</code> (posterior mean per parameter), <code>mu0</code> (null
-reference values), and <code>direction</code> (declared direction per hypothesis;
-<code>0</code> indicates direction-agnostic) are also returned.</p>
+    <p>A <code>data.frame</code> with one row per hypothesis, containing:
+<code>pd</code> (original values), <code>pd_adj</code> (adjusted values), <code>q</code>
+(prior probability of the global null), and <code>m</code> (number of hypotheses
+or effective number of tests). For direction-agnostic tests, <code>pd_adj</code>
+is floored at \(0.5\). For directional tests, <code>pd_adj</code> may fall
+below \(0.5\), indicating that the posterior is concentrated opposite
+to the predicted direction. When <code>draws</code> are supplied, <code>mean_est</code>
+(posterior mean per parameter), <code>mu0</code> (null reference values), and
+<code>direction</code> (declared direction per hypothesis; <code>0</code> indicates
+direction-agnostic) are also returned.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -128,6 +135,16 @@ the adjusted <em>pd</em> is:
 $$
    pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
 $$</p>
+<p>Because the prior is conservative (\(P(H_0) &gt; P(H_1)\)), the adjustment
+always moves <em>pd</em> toward \(H_0\). For direction-agnostic tests
+(<code>direction = 0</code>), <em>pd</em> is defined as the maximum of the two
+tail probabilities and is bounded in \([0.5, 1]\); a floor at \(0.5\)
+is therefore applied to \(pd_{adj}\), so the effective result is a
+shrinkage toward \(0.5\). For directional tests (<code>direction = 1</code>
+or <code>-1</code>), <em>pd</em> is the probability mass on the predicted side
+and lives on \([0, 1]\); no floor is applied. If \(pd &lt; 0.5\), the
+posterior is concentrated opposite to the predicted direction, and
+\(pd_{adj}\) will be pushed even further toward \(0\).</p>
 <p>When <code>R</code> is supplied, the effective number of tests \(m_{\text{eff}}\)
 is estimated from the eigenvalues \(\lambda\) of the correlation matrix
 (Cheverud, 2001):
@@ -159,7 +176,7 @@ mapping genome scans. <em>Heredity, 87</em>, 52–58.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
