@@ -25,11 +25,10 @@ pd.adjust(
 
 - pd:
 
-  Numeric vector of *pd* values. For direction-agnostic tests, values
-  must be in \\\[0.5, 1\]\\. For directional tests (`direction = 1` or
-  `-1`), values may be in \\\[0, 1\]\\, where values below \\0.5\\
-  indicate that the posterior is concentrated opposite to the predicted
-  direction.
+  Numeric vector of *pd* values in \\\[0.5, 1\]\\. For
+  direction-agnostic tests, this is the maximum of the two tail
+  probabilities. For directional tests, this is the probability mass on
+  the predicted side, floored at \\0.5\\.
 
 - draws:
 
@@ -52,13 +51,12 @@ pd.adjust(
 - direction:
 
   Integer vector of `1`, `-1`, or `0` (or `NULL`). Specifies the
-  expected direction of each effect: `1` for positive (tests
-  `draws > mu0`), `-1` for negative (tests `draws < mu0`), and `0` for
-  direction-agnostic (takes the maximum over both sides). Should be a
-  vector of length `ncol(draws)` to specify a different direction per
-  parameter; a scalar is recycled across all parameters. Should be
-  specified when `mu0 != 0`. Defaults to `NULL` (direction-agnostic for
-  all parameters).
+  predicted direction of each effect: `1` for positive (tests
+  \\Pr(\theta \> \theta\_{null})\\), `-1` for negative (tests
+  \\Pr(\theta \< \theta\_{null}\\), and `0` for direction-agnostic
+  (takes the maximum over both sides). Should be a vector of length
+  `ncol(draws)`; a scalar is recycled. Defaults to `NULL`
+  (direction-agnostic for all parameters).
 
 - R:
 
@@ -70,15 +68,15 @@ pd.adjust(
 
 ## Value
 
-A `data.frame` with one row per hypothesis, containing: `pd` (original
-values), `pd_adj` (adjusted values), `q` (prior probability of the
-global null), and `m` (number of hypotheses or effective number of
-tests). For direction-agnostic tests, `pd_adj` is floored at \\0.5\\.
-For directional tests, `pd_adj` may fall below \\0.5\\, indicating that
-the posterior is concentrated opposite to the predicted direction. When
+A `data.frame` with one row per hypothesis, containing: `pd` (values
+used in the adjustment, floored at \\0.5\\), `pd_adj` (adjusted values,
+also floored at \\0.5\\), `q` (prior probability of the global null),
+and `m` (number of hypotheses or effective number of tests). When
 `draws` are supplied, `mean_est` (posterior mean per parameter), `mu0`
-(null reference values), and `direction` (declared direction per
-hypothesis; `0` indicates direction-agnostic) are also returned.
+(null reference values), and `direction` are also returned. For
+directional tests, `pd_raw` is additionally returned, reporting the raw
+directional probability before flooring; values below \\0.5\\ indicate
+that the posterior was concentrated opposite to the predicted direction.
 
 ## Details
 
@@ -88,15 +86,21 @@ adjusted *pd* is: \$\$ pd\_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot
 P(H_1) + (1 - pd) \cdot P(H_0)} \$\$
 
 Because the prior is conservative (\\P(H_0) \> P(H_1)\\), the adjustment
-always moves *pd* toward \\H_0\\. For direction-agnostic tests
-(`direction = 0`), *pd* is defined as the maximum of the two tail
-probabilities and is bounded in \\\[0.5, 1\]\\; a floor at \\0.5\\ is
-therefore applied to \\pd\_{adj}\\, so the effective result is a
-shrinkage toward \\0.5\\. For directional tests (`direction = 1` or
-`-1`), *pd* is the probability mass on the predicted side and lives on
-\\\[0, 1\]\\; no floor is applied. If \\pd \< 0.5\\, the posterior is
-concentrated opposite to the predicted direction, and \\pd\_{adj}\\ will
-be pushed even further toward \\0\\.
+always moves *pd* toward \\0\\. A floor at \\0.5\\ is applied to
+\\pd\_{adj}\\, so the effective result is a shrinkage toward \\0.5\\.
+
+For direction-agnostic tests (`direction = 0`), *pd* is the maximum of
+the two tail probabilities and is bounded in \\\[0.5, 1\]\\. For
+directional tests (`direction = 1` or `-1`), *pd* is the probability
+mass on the predicted side, \\Pr(\hat\theta \> \theta\_{null})\\ or
+\\Pr(\hat\theta \< \theta\_{null})\\, and is floored at \\0.5\\ before
+the adjustment is applied. A value of \\pd = 0.5\\ should therefore be
+interpreted as absence of support for the predicted direction; the floor
+prevents the correction from amplifying contradictory evidence. The raw
+directional probability before flooring is returned in `pd_raw` for
+directional tests, allowing the researcher to assess whether the floor
+was triggered and how strongly the data contradicted the predicted
+direction.
 
 When `R` is supplied, the effective number of tests \\m\_{\text{eff}}\\
 is estimated from the eigenvalues \\\lambda\\ of the correlation matrix
