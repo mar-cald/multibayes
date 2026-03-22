@@ -49,7 +49,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="multibayes">multibayes<a class="anchor" aria-label="anchor" href="#multibayes"></a>
 </h1></div>
-<p><strong>multibayes</strong> provides tools for Bayesian multiple testing, currently centred on prior-odds adjustment of the Probability of Direction (<em>pd</em>).</p>
+<p><strong>multibayes</strong> provides tools for Bayesian multiple testing, currently centred on prior-odds adjustment of the Probability of Direction (<em>pd</em>). Both direction-agnostic and directional tests are supported, and can be mixed freely within a single call.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -74,8 +74,7 @@
 <tbody><tr class="odd">
 <td><code><a href="reference/pd.adjust.html">pd.adjust()</a></code></td>
 <td>Posterior draws or <em>pd</em> vector</td>
-<td>Prior-odds adjustment for <em>pd</em>
-</td>
+<td>Prior-odds adjustment for <em>pd</em> (agnostic or directional)</td>
 </tr></tbody>
 </table>
 <hr>
@@ -85,19 +84,26 @@
 <code>pd.adjust()</code>: Prior-Odds Adjustment for <em>pd</em>
 <a class="anchor" aria-label="anchor" href="#pdadjust-prior-odds-adjustment-for-pd"></a>
 </h2>
-<p>The Probability of Direction (<em>pd</em>) is often used as a decision rule: a hypothesis is accepted when <em>pd</em> exceeds a threshold. When this decision is made repeatedly across several hypotheses, the family-wise error probability can be much higher than intended. <code><a href="reference/pd.adjust.html">pd.adjust()</a></code> addresses this decision-level problem by making the implicit prior probability of the global null explicit, following the prior-odds framework of Jeffreys (1938) and Westfall et al. (1997).</p>
+<p>The Probability of Direction (<em>pd</em>) is often used as a decision rule: a hypothesis is accepted when <em>pd</em> exceeds a threshold. When this decision is made repeatedly across several hypotheses, the family-wise error probability can be much higher than intended. <code><a href="reference/pd.adjust.html">pd.adjust()</a></code> addresses this problem by making the implicit prior probability of the global null explicit, following the prior-odds framework of Jeffreys (1938) and Westfall et al. (1997).</p>
 <p>The global prior probability that <strong>all</strong> hypotheses are null, <em>q</em>, is decomposed into a per-hypothesis prior:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msup><mi>q</mi><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup></mrow><annotation encoding="application/x-tex">P(H_0) = q^{1/m}</annotation></semantics></math></p>
 <p>Each <em>pd</em> is then reweighted by Bayes’ theorem:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><msub><mi>d</mi><mtext mathvariant="normal">adj</mtext></msub><mo>=</mo><mfrac><mrow><mi>p</mi><mi>d</mi><mo>⋅</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mi>p</mi><mi>d</mi><mo>⋅</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mi>d</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">pd_{\text{adj}} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}</annotation></semantics></math></p>
-<p>Because the prior is conservative (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>&gt;</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(H_0) &gt; P(H_1)</annotation></semantics></math>), the adjustment always moves <em>pd</em> toward 0; a floor at 0.5 is applied so the effective result is shrinkage toward 0.5. When parameters are correlated, the effective number of tests <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mtext mathvariant="normal">eff</mtext></msub><annotation encoding="application/x-tex">m_\text{eff}</annotation></semantics></math> (Cheverud, 2001) is used in place of <em>m</em>, producing a less conservative adjustment.</p>
+<p>Because the prior is conservative (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>&gt;</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(H_0) &gt; P(H_1)</annotation></semantics></math>), the adjustment always shrinks <em>pd</em> toward its lower bound. When parameters are correlated, the effective number of tests <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mtext mathvariant="normal">eff</mtext></msub><annotation encoding="application/x-tex">m_\text{eff}</annotation></semantics></math> (Cheverud, 2001) is used in place of <em>m</em>, producing a less conservative adjustment.</p>
+<p>The function supports two testing modes, which can be mixed across hypotheses within the same call:</p>
+<ul>
+<li>
+<strong>Direction-agnostic</strong> (<code>direction = 0</code>): <em>pd</em> = <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>max</mo><mspace width="-0.167em"></mspace><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>&gt;</mo><msub><mi>θ</mi><mtext mathvariant="normal">null</mtext></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mspace width="0.167em"></mspace><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>&lt;</mo><msub><mi>θ</mi><mtext mathvariant="normal">null</mtext></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\max\!\big(\Pr(\hat\theta &gt; \theta_\text{null}),\, \Pr(\hat\theta &lt; \theta_\text{null})\big)</annotation></semantics></math>, bounded in <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0.5</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.5, 1]</annotation></semantics></math> by construction; <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><msub><mi>d</mi><mtext mathvariant="normal">adj</mtext></msub></mrow><annotation encoding="application/x-tex">pd_\text{adj}</annotation></semantics></math> is also floored at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math>.</li>
+<li>
+<strong>Directional</strong> (<code>direction = 1</code> or <code>-1</code>): <em>pd</em> is the raw one-sided posterior probability on the predicted side, on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>, following Westfall et al. (1997). Values below <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math> indicate that the posterior is concentrated opposite to the predicted direction; the adjustment will further shrink such values, reflecting the combined weight of the data and the conservative prior against the hypothesis.</li>
+</ul>
 <div class="section level3">
 <h3 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mar-cald/multibayes" class="external-link">multibayes</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># From a vector of pd values (independence assumed)</span></span>
+<span><span class="co"># From a vector of pd values (independence assumed, direction-agnostic)</span></span>
 <span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>, H5 <span class="op">=</span> <span class="fl">0.891</span>, H6 <span class="op">=</span> <span class="fl">0.987</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, q <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
 <span></span>
@@ -110,7 +116,7 @@
 <span><span class="co"># From posterior draws: pd and correlation estimated automatically</span></span>
 <span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, mu0 <span class="op">=</span> <span class="fl">0</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Different null value per parameter (e.g., minimum effect of practical interest)</span></span>
+<span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span>
 <span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, mu0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
 <span>          direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -141,26 +147,23 @@
 </tr>
 <tr class="odd">
 <td><code>direction</code></td>
-<td>Declared direction (<code>1</code>, <code>-1</code>, or <code>0</code> for agnostic)</td>
+<td>Testing mode: <code>1</code> (positive), <code>-1</code> (negative), <code>0</code> (agnostic)</td>
 </tr>
 <tr class="even">
 <td><code>pd</code></td>
 <td>
-<em>pd</em> used in the adjustment, floored at 0.5</td>
+<em>pd</em> used in the adjustment; in <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0.5</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.5, 1]</annotation></semantics></math> for agnostic tests, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math> for directional tests</td>
 </tr>
 <tr class="odd">
 <td><code>pd_adj</code></td>
-<td>Adjusted <em>pd</em> after prior-odds correction, floored at 0.5</td>
+<td>Adjusted <em>pd</em> after prior-odds correction; same bounds as <code>pd</code>
+</td>
 </tr>
 <tr class="even">
-<td><code>pd_raw</code></td>
-<td>Raw directional probability before flooring (only for directional tests; <code>NA</code> for agnostic tests); values below 0.5 indicate the posterior is concentrated opposite to the predicted direction</td>
-</tr>
-<tr class="odd">
 <td><code>q</code></td>
 <td>Global null probability used</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>m</code></td>
 <td>Family size used (<em>m</em> or <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mtext mathvariant="normal">eff</mtext></msub><annotation encoding="application/x-tex">m_\text{eff}</annotation></semantics></math>)</td>
 </tr>
@@ -178,7 +181,7 @@
 <li>
 <strong><code>mu0</code></strong> sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.</li>
 <li>
-<strong><code>direction</code></strong> specifies the expected sign of each effect (<code>1</code> for positive, <code>-1</code> for negative, <code>0</code> for agnostic). When specified, <em>pd</em> is the probability mass on the predicted side and is floored at 0.5; the raw probability before flooring is returned in <code>pd_raw</code>. A value of <code>pd = 0.5</code> indicates absence of support for the predicted direction; <code>pd_raw</code> allows the researcher to assess whether the floor was triggered and how strongly the data contradicted the prediction.</li>
+<strong><code>direction</code></strong> selects the testing mode per hypothesis (<code>1</code> for positive, <code>-1</code> for negative, <code>0</code> for agnostic). A scalar is recycled; a mixed vector applies different modes across hypotheses within the same call. For directional tests, values of <code>pd</code> and <code>pd_adj</code> below <code>0.5</code> indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.</li>
 </ul>
 <hr>
 </div>
