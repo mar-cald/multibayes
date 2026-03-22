@@ -38,9 +38,12 @@ Each *pd* is then reweighted by Bayes’ theorem:
 
 $$pd_{\text{adj}} = \frac{pd \cdot P\left( H_{1} \right)}{pd \cdot P\left( H_{1} \right) + (1 - pd) \cdot P\left( H_{0} \right)}$$
 
-When parameters are correlated, the effective number of tests
-$m_{\text{eff}}$ (Cheverud, 2001) is used in place of *m*, producing a
-less conservative adjustment.
+Because the prior is conservative
+($P\left( H_{0} \right) > P\left( H_{1} \right)$), the adjustment always
+moves *pd* toward 0; a floor at 0.5 is applied so the effective result
+is shrinkage toward 0.5. When parameters are correlated, the effective
+number of tests $m_{\text{eff}}$ (Cheverud, 2001) is used in place of
+*m*, producing a less conservative adjustment.
 
 ### Usage
 
@@ -73,20 +76,21 @@ pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
 When `draws` are supplied, the output is a `data.frame` with one row per
 hypothesis:
 
-| Column      | Description                                         |
-|-------------|-----------------------------------------------------|
-| `mean_est`  | Posterior mean per parameter                        |
-| `mu0`       | Null reference value used                           |
-| `direction` | Declared direction (`1`, `-1`, or `0` for agnostic) |
-| `pd`        | Original unadjusted *pd*                            |
-| `pd_adj`    | Adjusted *pd* after prior-odds correction           |
-| `q`         | Global null probability used                        |
-| `m`         | Family size used (*m* or $m_{\text{eff}}$)          |
+| Column      | Description                                                                                                                                                                                    |
+|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `mean_est`  | Posterior mean per parameter                                                                                                                                                                   |
+| `mu0`       | Null reference value used                                                                                                                                                                      |
+| `direction` | Declared direction (`1`, `-1`, or `0` for agnostic)                                                                                                                                            |
+| `pd`        | *pd* used in the adjustment, floored at 0.5                                                                                                                                                    |
+| `pd_adj`    | Adjusted *pd* after prior-odds correction, floored at 0.5                                                                                                                                      |
+| `pd_raw`    | Raw directional probability before flooring (only for directional tests; `NA` for agnostic tests); values below 0.5 indicate the posterior is concentrated opposite to the predicted direction |
+| `q`         | Global null probability used                                                                                                                                                                   |
+| `m`         | Family size used (*m* or $m_{\text{eff}}$)                                                                                                                                                     |
 
 When a `pd` vector is supplied directly, only `pd`, `pd_adj`, `q`, and
 `m` are returned.
 
-### Choosing *q*, *m0*, and direction
+### Choosing *q*, *mu0*, and *direction*
 
 - **`q`** encodes your prior belief that all tested hypotheses are
   simultaneously null. A value of `0.4` is a skeptical default.
@@ -95,9 +99,12 @@ When a `pd` vector is supplied directly, only `pd`, `pd_adj`, `q`, and
   null per parameter, for instance when testing against a minimum effect
   of practical interest.
 - **`direction`** specifies the expected sign of each effect (`1` for
-  positive, `-1` for negative, `0` for agnostic). It should be declared
-  explicitly when `mu0 != 0` or when theory supports a specific
-  directional prediction.
+  positive, `-1` for negative, `0` for agnostic). When specified, *pd*
+  is the probability mass on the predicted side and is floored at 0.5;
+  the raw probability before flooring is returned in `pd_raw`. A value
+  of `pd = 0.5` indicates absence of support for the predicted
+  direction; `pd_raw` allows the researcher to assess whether the floor
+  was triggered and how strongly the data contradicted the prediction.
 
 ------------------------------------------------------------------------
 

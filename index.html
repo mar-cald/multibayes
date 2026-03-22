@@ -90,7 +90,7 @@
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msup><mi>q</mi><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup></mrow><annotation encoding="application/x-tex">P(H_0) = q^{1/m}</annotation></semantics></math></p>
 <p>Each <em>pd</em> is then reweighted by Bayes’ theorem:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><msub><mi>d</mi><mtext mathvariant="normal">adj</mtext></msub><mo>=</mo><mfrac><mrow><mi>p</mi><mi>d</mi><mo>⋅</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mi>p</mi><mi>d</mi><mo>⋅</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mi>d</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">pd_{\text{adj}} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}</annotation></semantics></math></p>
-<p>When parameters are correlated, the effective number of tests <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mtext mathvariant="normal">eff</mtext></msub><annotation encoding="application/x-tex">m_\text{eff}</annotation></semantics></math> (Cheverud, 2001) is used in place of <em>m</em>, producing a less conservative adjustment.</p>
+<p>Because the prior is conservative (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>&gt;</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(H_0) &gt; P(H_1)</annotation></semantics></math>), the adjustment always moves <em>pd</em> toward 0; a floor at 0.5 is applied so the effective result is shrinkage toward 0.5. When parameters are correlated, the effective number of tests <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mtext mathvariant="normal">eff</mtext></msub><annotation encoding="application/x-tex">m_\text{eff}</annotation></semantics></math> (Cheverud, 2001) is used in place of <em>m</em>, producing a less conservative adjustment.</p>
 <div class="section level3">
 <h3 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h3>
@@ -122,6 +122,10 @@
 </h3>
 <p>When <code>draws</code> are supplied, the output is a <code>data.frame</code> with one row per hypothesis:</p>
 <table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
 <thead><tr class="header">
 <th>Column</th>
 <th>Description</th>
@@ -141,18 +145,22 @@
 </tr>
 <tr class="even">
 <td><code>pd</code></td>
-<td>Original unadjusted <em>pd</em>
-</td>
+<td>
+<em>pd</em> used in the adjustment, floored at 0.5</td>
 </tr>
 <tr class="odd">
 <td><code>pd_adj</code></td>
-<td>Adjusted <em>pd</em> after prior-odds correction</td>
+<td>Adjusted <em>pd</em> after prior-odds correction, floored at 0.5</td>
 </tr>
 <tr class="even">
+<td><code>pd_raw</code></td>
+<td>Raw directional probability before flooring (only for directional tests; <code>NA</code> for agnostic tests); values below 0.5 indicate the posterior is concentrated opposite to the predicted direction</td>
+</tr>
+<tr class="odd">
 <td><code>q</code></td>
 <td>Global null probability used</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>m</code></td>
 <td>Family size used (<em>m</em> or <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mtext mathvariant="normal">eff</mtext></msub><annotation encoding="application/x-tex">m_\text{eff}</annotation></semantics></math>)</td>
 </tr>
@@ -161,7 +169,8 @@
 <p>When a <code>pd</code> vector is supplied directly, only <code>pd</code>, <code>pd_adj</code>, <code>q</code>, and <code>m</code> are returned.</p>
 </div>
 <div class="section level3">
-<h3 id="choosing-q-m0-and-direction">Choosing <em>q</em>, <em>m0</em>, and direction<a class="anchor" aria-label="anchor" href="#choosing-q-m0-and-direction"></a>
+<h3 id="choosing-q-mu0-and-direction">Choosing <em>q</em>, <em>mu0</em>, and <em>direction</em>
+<a class="anchor" aria-label="anchor" href="#choosing-q-mu0-and-direction"></a>
 </h3>
 <ul>
 <li>
@@ -169,7 +178,7 @@
 <li>
 <strong><code>mu0</code></strong> sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.</li>
 <li>
-<strong><code>direction</code></strong> specifies the expected sign of each effect (<code>1</code> for positive, <code>-1</code> for negative, <code>0</code> for agnostic). It should be declared explicitly when <code>mu0 != 0</code> or when theory supports a specific directional prediction.</li>
+<strong><code>direction</code></strong> specifies the expected sign of each effect (<code>1</code> for positive, <code>-1</code> for negative, <code>0</code> for agnostic). When specified, <em>pd</em> is the probability mass on the predicted side and is floored at 0.5; the raw probability before flooring is returned in <code>pd_raw</code>. A value of <code>pd = 0.5</code> indicates absence of support for the predicted direction; <code>pd_raw</code> allows the researcher to assess whether the floor was triggered and how strongly the data contradicted the prediction.</li>
 </ul>
 <hr>
 </div>
