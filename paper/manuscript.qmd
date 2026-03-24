@@ -628,7 +628,7 @@ One principled remedy is to replace the nominal number of tests $m$ with an effe
 
 To evaluate this approach in correlated settings, we extended the simulation study to account for dependence structures. Because the procedure relies on the estimated correlation, we varied the family size $m \in \{2, 4, 6, 10, 20\}$ and the sample size $n \in \{30, 50, 100\}$ to illustrate how estimation uncertainty in the correlation propagates into the correction. Each condition was replicated 100,000 times.
 
-In each replication, data were drawn from a multivariate normal distribution with an equicorrelation structure: $y_i \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$, where $\mu_1 = \cdots = \mu_{m/2} = 0$ (null hypotheses) and $\mu_{m/2+1} = \cdots = \mu_m = 0.3$ (non-null hypotheses), so that exactly half the hypotheses were true nulls. The off-diagonal entries of $\mathbf{R}$ were set to a common value $\rho \in \{0.2, 0.4, 0.6, 0.8\}$.
+In each replication, data were drawn from a multivariate normal distribution, $y_i \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$, where $\mu_1 = \cdots = \mu_{m/2} = 0$ (null hypotheses) and $\mu_{m/2+1} = \cdots = \mu_m = 0.3$ (non-null hypotheses), so that exactly half the hypotheses were true nulls. The covariance matrix $\boldsymbol{\Sigma}$ followed a compound symmetry structure with unit variances, and with all off-diagonal entries set to $\rho \in {0.2, 0.4, 0.6, 0.8}$.
 
 Posterior distributions were obtained using a multivariate normal conjugate model with prior mean $\mu = 0$ and prior standard deviation $\tau = 1.5$, a specification under which Bayesian and frequentist inference coincide. The prior weight on the global null was fixed at $\Pr(\mathbf{H_0}) = 0.4$, consistent with earlier results. Performance was evaluated in terms of FWER within the null subset and average power, defined as the proportion of correctly identified non-null hypotheses [@Benjamini1995; @Grant2025].
 
@@ -757,7 +757,7 @@ Given the repeated-measures structure of the data and the large number of trials
 
 [^2]: We acknowledge that best practice would be to analyze all outcomes jointly, for example, via evidence accumulation modeling [@Evans2020]. We opted for two separate models as this reflects common practice, and to illustrate how $pd$ values can be combined across models.
 
-Although one could reasonably debate whether *pd* values should be adjusted jointly across both models or separately within each, we adopt the joint approach because the prior over the hypothesis space is defined across all six hypotheses (Table 1). Importantly, although the theoretical hypotheses are directional, for instance, incongruent trials are expected to slow responses and reduce accuracy, *pd* is computed uniformly as $\max\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$ for all hypotheses, so the resulting tests address whether the null value lies inside or outside the credible interval, irrespective of the predicted direction.
+Although one could reasonably debate whether pd values should be adjusted jointly across both models or separately within each, we adopt the joint approach because the prior over the hypothesis space is defined across all six hypotheses (Table 1). Note that hypotheses are tested on the scale of the posterior, log for RT and logit for ACC. Additionally, although the theoretical hypotheses are directional (e.g., incongruent trials are expected to slow responses and reduce accuracy), $pd$ is computed uniformly as $\max\big(\Pr(\hat\theta > \theta_\text{null}),, \Pr(\hat\theta < \theta_\text{null})\big)$ for all hypotheses. This direction-agnostic formulation tests whether the null value falls inside or outside the posterior credible region, without assuming a predicted direction.
 
 
 | **Outcome** | **Hypothesis** | **Null value** |
@@ -767,9 +767,9 @@ Although one could reasonably debate whether *pd* values should be adjusted join
 | RT | $H_3$: interaction effect | 0 |
 | ACC | $H_4$: congruency effect | -1 |
 | ACC | $H_5$: depletion effect | 0 |
-| ACC |  $H_6$: interaction effect | 0 |
+| ACC | $H_6$: interaction effect | 0 |
 
-: Tested hypotheses. RT: Reaction Time; ACC: Accuracy
+: Tested hypotheses. Note that hypotheses are tested on the scale of the posterior, log for RT and logit for ACC. RT: Reaction Time; ACC: Accuracy
 
 
 For the RT analysis, we retained only correct trials preceded by a correct trial (i.e., error and post-error trials were excluded), yielding 76,397 observations. 

@@ -28,7 +28,7 @@ $$P(H_0) = q^{1/m}$$
 
 Each *pd* is then reweighted by Bayes' theorem:
 
-$$pd_{\text{adj}} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}$$
+$$pd_{\text{adj}} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd) P(H_0)}$$
 
 Because the prior is conservative ($P(H_0) > P(H_1)$), the adjustment always shrinks *pd* toward its lower bound. When parameters are correlated, the effective number of tests $m_\text{eff}$ (Cheverud, 2001) is used in place of *m*, producing a less conservative adjustment.
 
@@ -57,7 +57,8 @@ pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
-          direction = c(1, 0, 1, 0, 1, 1), R = TRUE)
+           direction = c("greater", "two.sided", "greater", "two.sided", 
+           "greater", "greater"), R = TRUE)
 
 # When draws are unavailable, supply an assumed mean correlation
 pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
@@ -71,7 +72,7 @@ When `draws` are supplied, the output is a `data.frame` with one row per hypothe
 |---|---|
 | `mean.est` | Posterior mean per parameter |
 | `null.value` | Null reference value used |
-| `direction` | Testing mode: `1` (positive), `-1` (negative), `0` (agnostic) |
+| `direction` | Testing mode: `greater`, `less`, `two.sided` |
 | `pd` | *pd* used in the adjustment; in $[0.5, 1]$ for agnostic tests, $[0, 1]$ for directional tests |
 | `pd.adj` | Adjusted *pd* after prior-odds correction; same bounds as `pd` |
 | `q` | Global null probability used |
@@ -83,7 +84,7 @@ When a `pd` vector is supplied directly, only `pd`, `pd.adj`, `q`, and `m` are r
 
 - **`q`** encodes your prior belief that all tested hypotheses are simultaneously null. A value of `0.4` is a skeptical default.
 - **`null.value`** sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.
-- **`direction`** selects the testing mode per hypothesis (`1` for positive, `-1` for negative, `0` for agnostic). A scalar is recycled; a mixed vector applies different modes across hypotheses within the same call. For directional tests, values of `pd` and `pd.adj` below `0.5` indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.
+- **`direction`** selects the testing mode per hypothesis (`greater`, `less`, `two.sided`). A scalar is recycled; a mixed vector applies different modes across hypotheses within the same call. For directional tests, values of `pd` and `pd.adj` below `0.5` indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.
 
 ---
 
