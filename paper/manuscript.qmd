@@ -628,13 +628,13 @@ One principled remedy is to replace the nominal number of tests $m$ with an effe
 
 To evaluate this approach in correlated settings, we extended the simulation study to account for dependence structures. Because the procedure relies on the estimated correlation, we varied the family size $m \in \{2, 4, 6, 10, 20\}$ and the sample size $n \in \{30, 50, 100\}$ to illustrate how estimation uncertainty in the correlation propagates into the correction. Each condition was replicated 100,000 times.
 
-In each replication, data were drawn from a multivariate normal distribution, $y_i \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$, where $\mu_1 = \cdots = \mu_{m/2} = 0$ (null hypotheses) and $\mu_{m/2+1} = \cdots = \mu_m = 0.3$ (non-null hypotheses), so that exactly half the hypotheses were true nulls. The covariance matrix $\boldsymbol{\Sigma}$ followed a compound symmetry structure with unit variances, and with all off-diagonal entries set to $\rho \in {0.2, 0.4, 0.6, 0.8}$.
+In each replication, data were drawn from a multivariate normal distribution, $y_i \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$, where $\mu_1 = \cdots = \mu_{m/2} = 0$ (null hypotheses) and $\mu_{m/2+1} = \cdots = \mu_m = 0.3$ (non-null hypotheses), so that exactly half the hypotheses were true nulls. The covariance matrix $\boldsymbol{\Sigma}$ followed a compound symmetry structure with unit variances, and with all off-diagonal entries set to $\rho \in \{0.2, 0.4, 0.6, 0.8\}$.
 
 Posterior distributions were obtained using a multivariate normal conjugate model with prior mean $\mu = 0$ and prior standard deviation $\tau = 1.5$, a specification under which Bayesian and frequentist inference coincide. The prior weight on the global null was fixed at $\Pr(\mathbf{H_0}) = 0.4$, consistent with earlier results. Performance was evaluated in terms of FWER within the null subset and average power, defined as the proportion of correctly identified non-null hypotheses [@Benjamini1995; @Grant2025].
 
 We compared the $pd$-based multiplicity correction against the Holm procedure as a frequentist family-wise error rate benchmark [@Holm1979]. Holm was selected over Bonferroni because it provides strong FWER control while achieving greater power, and it is among the most widely implemented correction procedures in applied research.
 
-As shown in @fig-corr, independence-based corrections are overconservative when tests are correlated, as is well known, leading to a substantial loss of power that widens with increasing family size m. By contrast, the $m_{\text{eff}}$-based procedure maintained FWER near the nominal level while retaining greater power across most conditions, with the advantage growing as $\rho$ increased. An exception was observed at small sample sizes, where possible imprecise estimation of the correlation structure led to small FWER inflation, suggesting that the reliability of the $m_{\text{eff}}$ estimate is a key determinant of the procedure's calibration.
+As shown in @fig-corr, independence-based corrections are overconservative when tests are correlated, as is well known, leading to a substantial loss of power that widens with increasing family size $m$. By contrast, the $m_{\text{eff}}$-based procedure maintained FWER near the nominal level while retaining greater power as $\rho$ increased. An exception was observed at small sample sizes, where possible imprecise estimation of the correlation structure led to small FWER inflation, suggesting that the reliability of the $m_{\text{eff}}$ estimate is a key determinant of the procedure's calibration.
 
 \newpage
 
@@ -757,13 +757,13 @@ Given the repeated-measures structure of the data and the large number of trials
 
 [^2]: We acknowledge that best practice would be to analyze all outcomes jointly, for example, via evidence accumulation modeling [@Evans2020]. We opted for two separate models as this reflects common practice, and to illustrate how $pd$ values can be combined across models.
 
-Although one could reasonably debate whether pd values should be adjusted jointly across both models or separately within each, we adopt the joint approach because the prior over the hypothesis space is defined across all six hypotheses (Table 1). Note that hypotheses are tested on the scale of the posterior, log for RT and logit for ACC. Additionally, although the theoretical hypotheses are directional (e.g., incongruent trials are expected to slow responses and reduce accuracy), $pd$ is computed uniformly as $\max\big(\Pr(\hat\theta > \theta_\text{null}),, \Pr(\hat\theta < \theta_\text{null})\big)$ for all hypotheses. This direction-agnostic formulation tests whether the null value falls inside or outside the posterior credible region, without assuming a predicted direction.
+Although one could reasonably debate whether $pd$ values should be adjusted jointly across both models or separately within each, we adopt the joint approach because the prior over the hypothesis space is defined across all six hypotheses (Table 1). Note that hypotheses are tested on the scale of the posterior, log for RT and logit for ACC. Additionally, although the theoretical hypotheses are directional (e.g., incongruent trials are expected to slow responses and reduce accuracy), $pd$ is computed uniformly as $\max\big(\Pr(\hat\theta > \theta_\text{null}),, \Pr(\hat\theta < \theta_\text{null})\big)$ for all hypotheses. This direction-agnostic formulation tests whether the null value falls inside or outside the posterior credible region, without assuming a predicted direction.
 
 
 | **Outcome** | **Hypothesis** | **Null value** |
 |:----:|---------|:----:|
 | RT | $H_1$: congruency effect | 0.05 |
-| RT | $H_2$: depletion effect  | 0 |
+| RT | $H_2$: depletion effect  | 0.05 |
 | RT | $H_3$: interaction effect | 0 |
 | ACC | $H_4$: congruency effect | -1 |
 | ACC | $H_5$: depletion effect | 0 |
@@ -823,13 +823,14 @@ The function was called with `q = 0.4`, `mu0 = c(0.05, 0.05, 0, -1, 0, 0)`, and 
 
 Five of the six hypotheses were strongly supported after adjustment: the congruency effects on both reaction time ($pd_\text{adj} = 1.000$) and accuracy ($pd_\text{adj} = 1.000$), the condition effect on accuracy ($pd_\text{adj} = 0.999$), and both interaction effects ($pd_\text{adj} = 0.986$ and $pd_\text{adj} = 0.992$, respectively). The condition effect on reaction time also yielded $pd = 1.000$ under the agnostic test, but this does not indicate support for a positive effect: with a posterior mean of $-0.0004$ and $\theta_\text{null} = 0.05$, all posterior mass lies *below* the null, so the high $pd$ reflects distance from the null on the "wrong" side.
 
-To illustrate the directional testing option, we re-ran the adjustment specifying the predicted direction for each hypothesis: a positive effect for `congruency_rt` and `condition_rt` ($H_1$, $H_2$; `direction = 1`), a negative effect for `congruency_acc` and `condition_acc` ($H_4$, $H_5$; `direction = -1`), and agnostic tests for the two interactions ($H_3$, $H_6$; `direction = 0`). 
+To illustrate the directional testing option, we re-ran the adjustment specifying the predicted direction for each hypothesis: a positive effect for `congruency_rt` and `condition_rt` ($H_1$, $H_2$; `direction = "greater"`), a negative effect for `congruency_acc` and `condition_acc` ($H_4$, $H_5$; `direction = "less"`), and agnostic tests for the two interactions ($H_3$, $H_6$; `direction = "two.sided"`). 
 
 
 ```{r, echo=TRUE, eval=TRUE}
 pd.adjust(draws = draws, q = 0.4, R = TRUE,
           null.value = c(0.05, 0.05, 0, -1, 0, 0),
-          direction = c(1, 1, 0, -1, -1, 0))
+          direction = c("greater", "greater", "two.sided", 
+                        "less", "less", "two.sided"))
 ```
 
 All other hypotheses remained stable; for `condition_rt`, however, the directional analysis returned $pd = 0.000$, indicating that the posterior was concentrated entirely opposite to the predicted positive direction. 

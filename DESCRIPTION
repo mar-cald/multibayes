@@ -9,10 +9,11 @@ Authors@R: c(
            comment = c(ORCID = "0009-0005-5668-5162")),
     person("Filippo", "Gambarota",
            role = c("aut","ctb"),
-           comment = c(ORCID = "0000-0002-6666-1747"))
+           comment = c(ORCID = "0000-0002-6666-1747")),
     person("Enrico", "Toffalini",
            role = c("aut","ctb"),
            comment = c(ORCID = "0000-0002-1404-5133"))
+           )
 Description: multibayes provides tools for Bayesian inference and decision-making across multiple parameters simultaneously. 
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
