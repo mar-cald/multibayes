@@ -189,7 +189,8 @@ mapping genome scans. <em>Heredity, 87</em>, 52–58.
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># From a vector of pd values (independence assumed, direction-agnostic)</span></span></span>
-<span class="r-in"><span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>, H5 <span class="op">=</span> <span class="fl">0.891</span>, H6 <span class="op">=</span> <span class="fl">0.987</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>, </span></span>
+<span class="r-in"><span>H5 <span class="op">=</span> <span class="fl">0.891</span>, H6 <span class="op">=</span> <span class="fl">0.987</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, q <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate correlated posterior draws</span></span></span>
@@ -203,7 +204,8 @@ mapping genome scans. <em>Heredity, 87</em>, 52–58.
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span></span>
 <span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>          direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>          direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, </span></span>
+<span class="r-in"><span>          <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># When draws are unavailable, supply an assumed mean correlation</span></span></span>
 <span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, q <span class="op">=</span> <span class="fl">0.4</span>, R <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
@@ -216,7 +218,7 @@ mapping genome scans. <em>Heredity, 87</em>, 52–58.
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Margherita Calderan, Filippo Gambarota, Enrico Toffalini.</p>
+  <p>Developed by Margherita Calderan, Enrico Toffalini, Filippo Gambarota.</p>
 </div>
 
 <div class="pkgdown-footer-right">
