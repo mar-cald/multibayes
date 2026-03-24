@@ -114,7 +114,8 @@ where \eqn{K} is the number of hypotheses.
 \examples{
 \dontrun{
 # From a vector of pd values (independence assumed, direction-agnostic)
-pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, H5 = 0.891, H6 = 0.987)
+pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
+H5 = 0.891, H6 = 0.987)
 pd.adjust(pd = pd_values, q = 0.4)
 
 # Simulate correlated posterior draws
@@ -128,7 +129,8 @@ pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
-          direction = c("greater", "two.sided", "greater", "two.sided", "greater", "greater"), R = TRUE)
+          direction = c("greater", "two.sided", "greater", 
+          "two.sided", "greater", "greater"), R = TRUE)
 
 # When draws are unavailable, supply an assumed mean correlation
 pd.adjust(pd = pd_values, q = 0.4, R = 0.4)

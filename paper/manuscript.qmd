@@ -835,7 +835,6 @@ pd.adjust(draws = draws, q = 0.4, R = TRUE,
 
 All other hypotheses remained stable; for `condition_rt`, however, the directional analysis returned $pd = 0.000$, indicating that the posterior was concentrated entirely opposite to the predicted positive direction. 
 
-\newpage
 
 # Discussion
 
