@@ -30,12 +30,12 @@ Each *pd* is then reweighted by Bayes' theorem:
 
 $$pd_{\text{adj}} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd) P(H_0)}$$
 
-Because the prior is conservative ($P(H_0) > P(H_1)$), the adjustment always shrinks *pd* toward its lower bound. When parameters are correlated, the effective number of tests $m_\text{eff}$ (Cheverud, 2001) is used in place of *m*, producing a less conservative adjustment.
+Because the prior is conservative ( $P(H_0) > P(H_1)$ ), the adjustment always shrinks *pd* toward its lower bound. When parameters are correlated, the effective number of tests $m_\text{eff}$ (Cheverud, 2001) is used in place of *m*, producing a less conservative adjustment.
 
 The function supports two testing modes, which can be mixed across hypotheses within the same call:
 
-- **Direction-agnostic** (`direction = 0`): *pd* = $\max\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$, bounded in $[0.5, 1]$ by construction; $pd_\text{adj}$ is also floored at $0.5$.
-- **Directional** (`direction = 1` or `-1`): *pd* is the raw one-sided posterior probability on the predicted side, on $[0, 1]$. Values below $0.5$ indicate that the posterior is concentrated opposite to the predicted direction; the adjustment will further shrink such values, reflecting the combined weight of the data and the conservative prior against the hypothesis.
+- **Direction-agnostic** (`direction = "two.sided"`): *pd* = $\max\big(\Pr(\hat\theta > \theta_\text{null}),\, \Pr(\hat\theta < \theta_\text{null})\big)$, bounded in $[0.5, 1]$ by construction; $pd_\text{adj}$ is also floored at $0.5$.
+- **Directional** (`direction = "greater"` or `"less"`): *pd* is the raw one-sided posterior probability on the predicted side, on $[0, 1]$. Values below $0.5$ indicate that the posterior is concentrated opposite to the predicted direction; the adjustment will further shrink such values, reflecting the combined weight of the data and the conservative prior against the hypothesis.
 
 ### Usage
 
