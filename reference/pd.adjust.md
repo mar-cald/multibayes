@@ -46,19 +46,20 @@ pd.adjust(
 - null.value:
 
   Numeric scalar or vector. The null (reference) value against which the
-  posterior is evaluated. A scalar applies the same null to all
-  parameters; a vector of length equal to `ncol(draws)` allows a
-  different null per parameter. Ignored if `pd` is supplied directly.
-  Defaults to `0`.
+  posterior is evaluated, specified on the scale of the posterior. A
+  single scalar applies the same null to all parameters; a vector of
+  length `ncol(draws)` assigns a distinct null to each parameter.
+  Ignored when `pd` is supplied directly. Defaults to `0`.
 
 - direction:
 
-  Integer vector of `1`, `-1`, or `0` (or `NULL`). Specifies the testing
-  mode for each hypothesis: `1` for a positive directional test
-  (\\\Pr(\theta \> \theta\_\text{null})\\), `-1` for a negative
-  directional test (\\\Pr(\theta \< \theta\_\text{null})\\), and `0` for
+  Character vector of `"greater"`, `"less"`, or `"two.sided"` (or
+  `NULL`). Specifies the testing mode for each hypothesis: `"greater"`
+  for a positive directional test (\\\Pr(\theta \>
+  \theta\_\text{null})\\), `"less"` for a negative directional test
+  (\\\Pr(\theta \< \theta\_\text{null})\\), and `"two.sided"` for
   direction-agnostic testing (maximum over both sides). A scalar is
-  recycled to match the number of parameters; mixed vectors allow
+  recycled to match the number of parameters; a mixed vector allows
   different modes across hypotheses. Defaults to `NULL`
   (direction-agnostic for all parameters).
 
@@ -86,19 +87,19 @@ additionally includes `mean.est` (posterior mean per parameter),
 
 The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
 \\P(H_0) = q^{1/m}\\ and its complement \\P(H_1) = 1 - P(H_0)\\, the
-adjusted *pd* is: \$\$ pd\_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot
-P(H_1) + (1 - pd) \cdot P(H_0)} \$\$
+adjusted *pd* is: \$\$ pd\_{adj} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd)
+P(H_0)} \$\$
 
 Because the prior is conservative (\\P(H_0) \> P(H_1)\\), the adjustment
 always shrinks *pd* toward its lower bound.
 
-**Direction-agnostic tests** (`direction = 0`): *pd* is defined as
+**Direction-agnostic tests** (`"two.sided"`): *pd* is defined as
 \\\max\\\big(\Pr(\hat\theta \> \theta\_\text{null}),\\ \Pr(\hat\theta \<
 \theta\_\text{null})\big)\\ and is bounded in \\\[0.5, 1\]\\ by
 construction. \\pd\_{adj}\\ is also floored at \\0.5\\, so the
 adjustment produces shrinkage toward \\0.5\\.
 
-**Directional tests** (`direction = 1` or `-1`): *pd* is the raw
+**Directional tests** (`"greater"` or `"less"`): *pd* is the raw
 posterior probability mass on the predicted side, \\\Pr(\hat\theta \>
 \theta\_\text{null})\\ or \\\Pr(\hat\theta \< \theta\_\text{null})\\,
 and is defined on \\\[0, 1\]\\. Values of *pd* below \\0.5\\ indicate
@@ -132,3 +133,29 @@ perspective on the Bonferroni adjustment. *Biometrika, 84*(2), 419–427.
 Cheverud, J. (2001). A simple correction for multiple comparisons in
 interval mapping genome scans. *Heredity, 87*, 52–58.
 <https://doi.org/10.1046/j.1365-2540.2001.00901.x>
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# From a vector of pd values (independence assumed, direction-agnostic)
+pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, H5 = 0.891, H6 = 0.987)
+pd.adjust(pd = pd_values, q = 0.4)
+
+# Simulate correlated posterior draws
+Sigma <- matrix(0.4, nrow = 6, ncol = 6); diag(Sigma) <- 1
+mu    <- c(1, -0.1, 0.8, 0, 2, 3)
+draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
+colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
+
+# From posterior draws: pd and correlation estimated automatically
+pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
+
+# Mix of directional and agnostic tests with parameter-specific nulls
+pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+          direction = c("greater", "two.sided", "greater", "two.sided", "greater", "greater"), R = TRUE)
+
+# When draws are unavailable, supply an assumed mean correlation
+pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
+} # }
+```

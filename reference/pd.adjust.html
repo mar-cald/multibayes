@@ -95,21 +95,24 @@ according to <code>direction</code> and <code>null.value</code>.</p></dd>
 
 
 <dt id="arg-null-value">null.value<a class="anchor" aria-label="anchor" href="#arg-null-value"></a></dt>
-<dd><p>Numeric scalar or vector. The null (reference) value against which
-the posterior is evaluated. A scalar applies the same null to all parameters;
-a vector of length equal to <code>ncol(draws)</code> allows a different null per
-parameter. Ignored if <code>pd</code> is supplied directly. Defaults to <code>0</code>.</p></dd>
+<dd><p>Numeric scalar or vector. The null (reference) value against
+which the posterior is evaluated, specified on the scale of the posterior.
+A single scalar applies the same null to all parameters; a vector of length <code>ncol(draws)</code>
+assigns a distinct null to each parameter. Ignored when <code>pd</code> is supplied directly.
+Defaults to <code>0</code>.</p></dd>
 
 
 <dt id="arg-direction">direction<a class="anchor" aria-label="anchor" href="#arg-direction"></a></dt>
-<dd><p>Integer vector of <code>1</code>, <code>-1</code>, or <code>0</code> (or <code>NULL</code>).
-Specifies the testing mode for each hypothesis: <code>1</code> for a positive
-directional test (\(\Pr(\theta &gt; \theta_\text{null})\)), <code>-1</code> for a
-negative directional test (\(\Pr(\theta &lt; \theta_\text{null})\)), and
-<code>0</code> for direction-agnostic testing (maximum over both sides). A scalar
-is recycled to match the number of parameters; mixed vectors allow
-different modes across hypotheses. Defaults to <code>NULL</code>
-(direction-agnostic for all parameters).</p></dd>
+<dd><p>Character vector of <code>"greater"</code>, <code>"less"</code>, or
+<code>"two.sided"</code> (or <code>NULL</code>).
+Specifies the testing mode for each hypothesis: <code>"greater"</code> for a
+positive directional test (\(\Pr(\theta &gt; \theta_\text{null})\)),
+<code>"less"</code> for a negative directional test
+(\(\Pr(\theta &lt; \theta_\text{null})\)), and <code>"two.sided"</code> for
+direction-agnostic testing (maximum over both sides). A scalar is recycled
+to match the number of parameters; a mixed vector allows different modes
+across hypotheses. Defaults to <code>NULL</code> (direction-agnostic for all
+parameters).</p></dd>
 
 
 <dt id="arg-r">R<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
@@ -139,16 +142,16 @@ includes <code>mean.est</code> (posterior mean per parameter), <code>null.value<
 \(P(H_0) = q^{1/m}\) and its complement \(P(H_1) = 1 - P(H_0)\),
 the adjusted <em>pd</em> is:
 $$
-   pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
+   pd_{adj} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd) P(H_0)}
 $$</p>
 <p>Because the prior is conservative (\(P(H_0) &gt; P(H_1)\)), the adjustment
 always shrinks <em>pd</em> toward its lower bound.</p>
-<p><strong>Direction-agnostic tests</strong> (<code>direction = 0</code>): <em>pd</em> is
+<p><strong>Direction-agnostic tests</strong> (<code>"two.sided"</code>): <em>pd</em> is
 defined as \(\max\!\big(\Pr(\hat\theta &gt; \theta_\text{null}),\,
 \Pr(\hat\theta &lt; \theta_\text{null})\big)\) and is bounded in
 \([0.5, 1]\) by construction. \(pd_{adj}\) is also floored at
 \(0.5\), so the adjustment produces shrinkage toward \(0.5\).</p>
-<p><strong>Directional tests</strong> (<code>direction = 1</code> or <code>-1</code>): <em>pd</em>
+<p><strong>Directional tests</strong> (<code>"greater"</code> or <code>"less"</code>): <em>pd</em>
 is the raw posterior probability mass on the predicted side,
 \(\Pr(\hat\theta &gt; \theta_\text{null})\) or
 \(\Pr(\hat\theta &lt; \theta_\text{null})\), and is defined on \([0, 1]\).
@@ -182,12 +185,38 @@ mapping genome scans. <em>Heredity, 87</em>, 52–58.
 <a href="https://doi.org/10.1046/j.1365-2540.2001.00901.x" class="external-link">https://doi.org/10.1046/j.1365-2540.2001.00901.x</a></p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># From a vector of pd values (independence assumed, direction-agnostic)</span></span></span>
+<span class="r-in"><span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>, H5 <span class="op">=</span> <span class="fl">0.891</span>, H6 <span class="op">=</span> <span class="fl">0.987</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, q <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Simulate correlated posterior draws</span></span></span>
+<span class="r-in"><span><span class="va">Sigma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0.4</span>, nrow <span class="op">=</span> <span class="fl">6</span>, ncol <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="va">mu</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.8</span>, <span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MASS/man/mvrnorm.html" class="external-link">mvrnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4000</span>, mu <span class="op">=</span> <span class="va">mu</span>, Sigma <span class="op">=</span> <span class="va">Sigma</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"H1"</span>, <span class="st">"H2"</span>, <span class="st">"H3"</span>, <span class="st">"H4"</span>, <span class="st">"H5"</span>, <span class="st">"H6"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># From posterior draws: pd and correlation estimated automatically</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>          direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># When draws are unavailable, supply an assumed mean correlation</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, q <span class="op">=</span> <span class="fl">0.4</span>, R <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Margherita Calderan.</p>
+  <p>Developed by Margherita Calderan, Filippo Gambarota, Enrico Toffalini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

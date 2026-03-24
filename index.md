@@ -38,10 +38,10 @@ $$P\left( H_{0} \right) = q^{1/m}$$
 
 Each *pd* is then reweighted by Bayes’ theorem:
 
-$$pd_{\text{adj}} = \frac{pd \cdot P\left( H_{1} \right)}{pd \cdot P\left( H_{1} \right) + (1 - pd) \cdot P\left( H_{0} \right)}$$
+$$pd_{\text{adj}} = \frac{pdP\left( H_{1} \right)}{pdP\left( H_{1} \right) + (1 - pd)P\left( H_{0} \right)}$$
 
-Because the prior is conservative
-($P\left( H_{0} \right) > P\left( H_{1} \right)$), the adjustment always
+Because the prior is conservative (
+$P\left( H_{0} \right) > P\left( H_{1} \right)$ ), the adjustment always
 shrinks *pd* toward its lower bound. When parameters are correlated, the
 effective number of tests $m_{\text{eff}}$ (Cheverud, 2001) is used in
 place of *m*, producing a less conservative adjustment.
@@ -49,16 +49,16 @@ place of *m*, producing a less conservative adjustment.
 The function supports two testing modes, which can be mixed across
 hypotheses within the same call:
 
-- **Direction-agnostic** (`direction = 0`): *pd* =
+- **Direction-agnostic** (`direction = "two.sided"`): *pd* =
   $\max(\Pr\left( \widehat{\theta} > \theta_{\text{null}} \right),\,\Pr\left( \widehat{\theta} < \theta_{\text{null}} \right))$,
   bounded in $\lbrack 0.5,1\rbrack$ by construction; $pd_{\text{adj}}$
   is also floored at $0.5$.
-- **Directional** (`direction = 1` or `-1`): *pd* is the raw one-sided
-  posterior probability on the predicted side, on $\lbrack 0,1\rbrack$.
-  Values below $0.5$ indicate that the posterior is concentrated
-  opposite to the predicted direction; the adjustment will further
-  shrink such values, reflecting the combined weight of the data and the
-  conservative prior against the hypothesis.
+- **Directional** (`direction = "greater"` or `"less"`): *pd* is the raw
+  one-sided posterior probability on the predicted side, on
+  $\lbrack 0,1\rbrack$. Values below $0.5$ indicate that the posterior
+  is concentrated opposite to the predicted direction; the adjustment
+  will further shrink such values, reflecting the combined weight of the
+  data and the conservative prior against the hypothesis.
 
 ### Usage
 
@@ -80,7 +80,8 @@ pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
-          direction = c(1, 0, 1, 0, 1, 1), R = TRUE)
+           direction = c("greater", "two.sided", "greater", "two.sided", 
+           "greater", "greater"), R = TRUE)
 
 # When draws are unavailable, supply an assumed mean correlation
 pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
@@ -95,7 +96,7 @@ hypothesis:
 |--------------|-----------------------------------------------------------------------------------------------------------------------|
 | `mean.est`   | Posterior mean per parameter                                                                                          |
 | `null.value` | Null reference value used                                                                                             |
-| `direction`  | Testing mode: `1` (positive), `-1` (negative), `0` (agnostic)                                                         |
+| `direction`  | Testing mode: `greater`, `less`, `two.sided`                                                                          |
 | `pd`         | *pd* used in the adjustment; in $\lbrack 0.5,1\rbrack$ for agnostic tests, $\lbrack 0,1\rbrack$ for directional tests |
 | `pd.adj`     | Adjusted *pd* after prior-odds correction; same bounds as `pd`                                                        |
 | `q`          | Global null probability used                                                                                          |
@@ -112,12 +113,12 @@ When a `pd` vector is supplied directly, only `pd`, `pd.adj`, `q`, and
   scalar applies the same null to all parameters; a vector allows a
   different null per parameter, for instance when testing against a
   minimum effect of practical interest.
-- **`direction`** selects the testing mode per hypothesis (`1` for
-  positive, `-1` for negative, `0` for agnostic). A scalar is recycled;
-  a mixed vector applies different modes across hypotheses within the
-  same call. For directional tests, values of `pd` and `pd.adj` below
-  `0.5` indicate that the data contradicted the predicted direction; the
-  adjustment amplifies this evidence under the conservative prior.
+- **`direction`** selects the testing mode per hypothesis (`greater`,
+  `less`, `two.sided`). A scalar is recycled; a mixed vector applies
+  different modes across hypotheses within the same call. For
+  directional tests, values of `pd` and `pd.adj` below `0.5` indicate
+  that the data contradicted the predicted direction; the adjustment
+  amplifies this evidence under the conservative prior.
 
 ------------------------------------------------------------------------
 
