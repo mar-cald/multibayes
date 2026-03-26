@@ -135,6 +135,20 @@
 pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, null.value = 0,
                       direction = NULL, R = NULL) {
   
+  stopifnot(
+    "`q`: must be a single number in (0, 1)" = length(q) == 1L && q > 0 && q < 1
+  )
+  
+  if(!is.null(pd)){
+    if(!is.numeric(pd) || any(pd < 0.5 | pd > 1, na.rm = TRUE)){
+      stop("`pd` must be numeric in [0.5, 1].")
+    } 
+    if(!is.null(direction)){
+      warning("`direction` cannot be specified, fixed to `two.sided`")
+      direction <- rep("two.sided", length(pd))
+    } 
+  }
+  
   from_draws <- !is.null(draws)
   
   if (from_draws) {
@@ -160,11 +174,6 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, null.value = 0,
   }
   
   if (is.null(pd)) stop("Either `pd` or `draws` must be provided.")
-  
-  stopifnot(
-    "`pd` must be numeric in [0, 1]" = is.numeric(pd) && all(pd >= 0 & pd <= 1, na.rm = TRUE),
-    "`q`: must be a single number in (0, 1)" = length(q) == 1L && q > 0 && q < 1
-  )
   
   m <- length(pd)
   
@@ -226,7 +235,8 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, null.value = 0,
       pd.adj    = round(pd.adj, 4),
       q         = rep(q, length(pd)),
       m         = round(rep(m, length(pd)), 4),
-      direction = NA
+      direction = rep("two.sided",length(pd))
     )
   }
 }
+

@@ -7,9 +7,6 @@ Authors@R: c(
            email = "margherita.calderan@unipd.it",
            role = c("aut", "cre"),
            comment = c(ORCID = "0009-0005-5668-5162")),
-    person("Enrico", "Toffalini",
-           role = c("aut","ctb"),
-           comment = c(ORCID = "0000-0002-1404-5133")),
     person("Filippo", "Gambarota",
            role = c("aut","ctb"),
            comment = c(ORCID = "0000-0002-6666-1747"))
