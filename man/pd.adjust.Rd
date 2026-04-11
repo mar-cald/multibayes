@@ -8,33 +8,40 @@ pd.adjust(
   pd = NULL,
   draws = NULL,
   q = 0.4,
-  mu0 = 0,
+  null.value = 0,
   direction = NULL,
   R = NULL
 )
 }
 \arguments{
-\item{pd}{Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}.}
+\item{pd}{Numeric vector of \emph{pd} values. For direction-agnostic tests,
+values must be in \eqn{[0.5, 1]}. For directional tests, values are raw
+one-sided probabilities in \eqn{[0, 1]}. Ignored if \code{draws} is
+supplied.}
 
 \item{draws}{Optional matrix or data frame of posterior draws (columns = parameters).
-If provided, \code{pd} is calculated automatically.}
+If provided, \emph{pd} values are computed automatically from the draws
+according to \code{direction} and \code{null.value}.}
 
 \item{q}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
-\strong{all} hypotheses are null. Defaults to \code{0.4}.}
+\strong{all} hypotheses are null simultaneously. Defaults to \code{0.4}.}
 
-\item{mu0}{Numeric scalar or vector. The null (reference) value against which
-the posterior is evaluated. A scalar applies the same null to all parameters;
-a vector of length equal to \code{ncol(draws)} allows a different null per
-parameter. Ignored if \code{pd} is supplied directly. Defaults to \code{0}.}
+\item{null.value}{Numeric scalar or vector. The null (reference) value against
+which the posterior is evaluated, specified on the scale of the posterior.
+A single scalar applies the same null to all parameters; a vector of length \code{ncol(draws)}
+assigns a distinct null to each parameter. Ignored when \code{pd} is supplied directly.
+Defaults to \code{0}.}
 
-\item{direction}{Integer vector of \code{1}, \code{-1}, or \code{0} (or \code{NULL}).
-Specifies the expected direction of each effect: \code{1} for positive
-(tests \code{draws > mu0}), \code{-1} for negative (tests \code{draws < mu0}),
-and \code{0} for direction-agnostic (takes the maximum over both sides).
-Should be a vector of length \code{ncol(draws)} to specify a different
-direction per parameter; a scalar is recycled across all parameters.
-Should be specified when \code{mu0 != 0}. Defaults to \code{NULL} (direction-agnostic
-for all parameters).}
+\item{direction}{Character vector of \code{"greater"}, \code{"less"}, or
+\code{"two.sided"} (or \code{NULL}).
+Specifies the testing mode for each hypothesis: \code{"greater"} for a
+positive directional test (\eqn{\Pr(\theta > \theta_\text{null})}),
+\code{"less"} for a negative directional test
+(\eqn{\Pr(\theta < \theta_\text{null})}), and \code{"two.sided"} for
+direction-agnostic testing (maximum over both sides). A scalar is recycled
+to match the number of parameters; a mixed vector allows different modes
+across hypotheses. Defaults to \code{NULL} (direction-agnostic for all
+parameters).}
 
 \item{R}{Optional correlation information for computing \eqn{m_{\text{eff}}}.
 Accepts \code{TRUE} (correlation estimated from \code{draws}), a numeric
@@ -43,18 +50,23 @@ full correlation matrix. When provided, \eqn{m_{\text{eff}}} replaces the
 nominal \eqn{m}.}
 }
 \value{
-A \code{data.frame} with one row per hypothesis, containing the
-following columns: \code{pd} (original values), \code{pd_adj} (adjusted
+A \code{data.frame} with one row per hypothesis, containing:
+\code{pd} (values used in the adjustment), \code{pd.adj} (adjusted
 values), \code{q} (prior probability of the global null), and \code{m}
-(number of hypotheses or effective number of tests). When \code{draws} are
-supplied, \code{mean_est} (posterior mean per parameter), \code{mu0} (null
-reference values), and \code{direction} (declared direction per hypothesis;
-\code{0} indicates direction-agnostic) are also returned.
+(nominal or effective number of tests). For direction-agnostic tests,
+both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
+directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
+indicating that the data (and the adjustment) favoured the opposite
+direction. When \code{draws} are supplied, the output additionally
+includes \code{mean.est} (posterior mean per parameter), \code{null.value}
+(null reference values), and \code{direction}.
 }
 \description{
 The function accepts either a vector of pre-computed \emph{pd} values or
 a matrix of posterior draws, from which \emph{pd} values are computed
-internally. The global prior probability that all tested hypotheses are
+internally. Both direction-agnostic and directional tests are supported:
+the \code{direction} argument controls which formulation is applied per
+hypothesis. The global prior probability that all tested hypotheses are
 null, \eqn{q}, is decomposed into a per-hypothesis prior
 \eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses or,
 when the correlation structure among parameters is taken into account,
@@ -65,8 +77,31 @@ The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
 \eqn{P(H_0) = q^{1/m}} and its complement \eqn{P(H_1) = 1 - P(H_0)},
 the adjusted \emph{pd} is:
 \deqn{
-   pd_{adj} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}
+   pd_{adj} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd) P(H_0)}
 }
+
+Because the prior is conservative (\eqn{P(H_0) > P(H_1)}), the adjustment
+always shrinks \emph{pd} toward its lower bound.
+
+\strong{Direction-agnostic tests} (\code{"two.sided"}): \emph{pd} is
+defined as \eqn{\max\!\big(\Pr(\hat\theta > \theta_\text{null}),\,
+\Pr(\hat\theta < \theta_\text{null})\big)} and is bounded in
+\eqn{[0.5, 1]} by construction. \eqn{pd_{adj}} is also floored at
+\eqn{0.5}, so the adjustment produces shrinkage toward \eqn{0.5}.
+
+\strong{Directional tests} (\code{"greater"} or \code{"less"}): \emph{pd}
+is the raw posterior probability mass on the predicted side,
+\eqn{\Pr(\hat\theta > \theta_\text{null})} or
+\eqn{\Pr(\hat\theta < \theta_\text{null})}, and is defined on \eqn{[0, 1]}.
+Values of \emph{pd} below \eqn{0.5} indicate that the posterior is
+concentrated opposite to the predicted direction; the adjustment will
+further shrink such values toward \eqn{0}, reflecting the combined weight
+of the data and the conservative prior against the hypothesis.
+
+Mixed use of directional and direction-agnostic tests within the same call
+is supported: each element of \code{direction} is handled independently,
+and the same prior-odds adjustment is applied uniformly across all
+hypotheses regardless of their directionality.
 
 When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
 is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
@@ -75,6 +110,32 @@ is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
    m_{\text{eff}} = K \left( 1 - \frac{(K-1)\,\text{Var}(\lambda)}{K^2} \right)
 }
 where \eqn{K} is the number of hypotheses.
+}
+\examples{
+\dontrun{
+# From a vector of pd values (independence assumed, direction-agnostic)
+pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
+H5 = 0.891, H6 = 0.987)
+pd.adjust(pd = pd_values, q = 0.4)
+
+# Simulate correlated posterior draws
+Sigma <- matrix(0.4, nrow = 6, ncol = 6); diag(Sigma) <- 1
+mu    <- c(1, -0.1, 0.8, 0, 2, 3)
+draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
+colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
+
+# From posterior draws: pd and correlation estimated automatically
+pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
+
+# Mix of directional and agnostic tests with parameter-specific nulls
+pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+          direction = c("greater", "two.sided", "greater", 
+          "two.sided", "greater", "greater"), R = TRUE)
+
+# When draws are unavailable, supply an assumed mean correlation
+pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
+}
+
 }
 \references{
 Jeffreys, H. (1938). Significance tests when several degrees of freedom arise

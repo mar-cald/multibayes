@@ -2,17 +2,16 @@ Package: multibayes
 Type: Package
 Title: Bayesian Multiplicity Adjustments
 Version: 0.1.0
-Authors@R: 
+Authors@R: c(
     person("Margherita", "Calderan", 
-           email = "margherita.calderan@gmail.com", 
+           email = "margherita.calderan@unipd.it",
            role = c("aut", "cre"),
-           comment = c(ORCID = "0009-0005-5668-5162"))
+           comment = c(ORCID = "0009-0005-5668-5162")),
+    person("Filippo", "Gambarota",
+           role = c("aut","ctb"),
+           comment = c(ORCID = "0000-0002-6666-1747"))
+           )
 Description: multibayes provides tools for Bayesian inference and decision-making across multiple parameters simultaneously. 
-        The package offers two functions rooted in different but related principles: `pd.adjust()` addresses 
-        the decision-level multiplicity problem that arises when the Probability of 
-        Direction (*pd*) is used as a repeated decision rule, while `joint()` provides 
-        simultaneous credible intervals that are faithful to the joint posterior distribution, 
-        enabling inference about several parameters at once..
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -26,6 +25,6 @@ Imports:
 Suggests: 
     MASS,
     testthat (>= 3.0.0)
-URL: https://github.com/mar-cald/multibayes
+URL: https://github.com/mar-cald/multibayes, https://mar-cald.github.io/multibayes/
 BugReports: https://github.com/mar-cald/multibayes/issues
 Config/testthat/edition: 3
