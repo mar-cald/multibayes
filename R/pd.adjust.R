@@ -220,7 +220,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, null.value = 0,
   if (from_draws) {
     data.frame(
       mean.est  = round(colMeans(draws), 4),
-      null.value       = null.value,
+      null.value= null.value,
       pd        = round(pd, 4),
       pd.adj    = round(pd.adj, 4),
       q         = rep(q, length(pd)),
@@ -230,7 +230,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = 0.4, null.value = 0,
   } else {
     data.frame(
       mean.est  = NA,
-      null.value = NA,
+      null.value= NA,
       pd        = round(pd, 4),
       pd.adj    = round(pd.adj, 4),
       q         = rep(q, length(pd)),
