@@ -33,20 +33,15 @@
 #' @note
 #' If you use this function in published research, please cite:
 #' \itemize{
-#'   \item Goeman, J., Calderan, M., & Solari, A. (2026). Bonferroni for
-#'     Bayesian: Multiplicity correction based on joint credibility.
 #'   \item The package: \url{https://github.com/mar-cald/multibayes}.
 #' }
 #'
-#' @references
-#' Goeman, J., Calderan, M., & Solari, A. (2026). Bonferroni for Bayesian:
-#' Multiplicity correction based on joint credibility.
 #'
 #' @importFrom stats quantile median setNames
 #' @importFrom matrixStats colRanks rowMins colQuantiles
 #' @keywords internal
 #' @examples
-#' mu    <- c(4, 0, -2)
+#' mu <- c(4, 0, -2)
 #' Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 #' draws <- MASS::mvrnorm(2000, mu, Sigma)
 #' colnames(draws) <- c("theta1", "theta2", "theta3")
