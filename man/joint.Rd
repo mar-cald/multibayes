@@ -32,7 +32,7 @@ A dataframe with:
 \item{upper}{Upper bounds, one per parameter.}
 \item{prob}{Requested joint coverage probability.}
 \item{cq}{Critical value.}
-\item{sig}{Logical; \code{TRUE} if \code{null.value} is excluded from
+\item{test}{Logical; \code{TRUE} if \code{null.value} is excluded from
 the interval. Only present when \code{null.value} is supplied.}
 }
 }
