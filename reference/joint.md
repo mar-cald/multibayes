@@ -59,7 +59,7 @@ A dataframe with:
 
   Critical value.
 
-- sig:
+- test:
 
   Logical; `TRUE` if `null.value` is excluded from the interval. Only
   present when `null.value` is supplied.
