@@ -4,14 +4,7 @@
 \alias{pd.adjust}
 \title{Prior-odds adjustment for Probability of Direction (pd)}
 \usage{
-pd.adjust(
-  pd = NULL,
-  draws = NULL,
-  q = 0.4,
-  null.value = 0,
-  direction = NULL,
-  R = NULL
-)
+pd.adjust(pd = NULL, draws = NULL, q = NULL, null.value = 0, direction = NULL)
 }
 \arguments{
 \item{pd}{Numeric vector of \emph{pd} values. For direction-agnostic tests,
@@ -24,7 +17,7 @@ If provided, \emph{pd} values are computed automatically from the draws
 according to \code{direction} and \code{null.value}.}
 
 \item{q}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
-\strong{all} hypotheses are null simultaneously. Defaults to \code{0.4}.}
+\strong{all} hypotheses are null simultaneously.}
 
 \item{null.value}{Numeric scalar or vector. The null (reference) value against
 which the posterior is evaluated, specified on the scale of the posterior.
@@ -42,19 +35,13 @@ direction-agnostic testing (maximum over both sides). A scalar is recycled
 to match the number of parameters; a mixed vector allows different modes
 across hypotheses. Defaults to \code{NULL} (direction-agnostic for all
 parameters).}
-
-\item{R}{Optional correlation information for computing \eqn{m_{\text{eff}}}.
-Accepts \code{TRUE} (correlation estimated from \code{draws}), a numeric
-scalar (assumed uniform correlation applied to all parameter pairs), or a
-full correlation matrix. When provided, \eqn{m_{\text{eff}}} replaces the
-nominal \eqn{m}.}
 }
 \value{
 A \code{data.frame} with one row per hypothesis, containing:
 \code{pd} (values used in the adjustment), \code{pd.adj} (adjusted
 values), \code{q} (prior probability of the global null), and \code{m}
-(nominal or effective number of tests). For direction-agnostic tests,
-both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
+(number of tests), \code{qm} (prior probability for the null for each test).
+For direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
 directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
 indicating that the data (and the adjustment) favoured the opposite
 direction. When \code{draws} are supplied, the output additionally
@@ -68,9 +55,7 @@ internally. Both direction-agnostic and directional tests are supported:
 the \code{direction} argument controls which formulation is applied per
 hypothesis. The global prior probability that all tested hypotheses are
 null, \eqn{q}, is decomposed into a per-hypothesis prior
-\eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses or,
-when the correlation structure among parameters is taken into account,
-the effective number of tests \eqn{m_{\text{eff}}}.
+\eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses.
 }
 \details{
 The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
@@ -102,38 +87,27 @@ Mixed use of directional and direction-agnostic tests within the same call
 is supported: each element of \code{direction} is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.
-
-When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
-is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
-(Cheverud, 2001):
-\deqn{
-   m_{\text{eff}} = K \left( 1 - \frac{(K-1)\,\text{Var}(\lambda)}{K^2} \right)
-}
-where \eqn{K} is the number of hypotheses.
 }
 \examples{
 \dontrun{
-# From a vector of pd values (independence assumed, direction-agnostic)
+# From a vector of pd values 
 pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 H5 = 0.891, H6 = 0.987)
 pd.adjust(pd = pd_values, q = 0.4)
 
-# Simulate correlated posterior draws
-Sigma <- matrix(0.4, nrow = 6, ncol = 6); diag(Sigma) <- 1
+# Simulate draws
+Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
 mu    <- c(1, -0.1, 0.8, 0, 2, 3)
 draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
-# From posterior draws: pd and correlation estimated automatically
-pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
+# From posterior draws
+pd.adjust(draws = draws, q = 0.4, null.value = 0)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
-pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+pd.adjust(draws = draws, q = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater", 
           "two.sided", "greater", "greater"), R = TRUE)
-
-# When draws are unavailable, supply an assumed mean correlation
-pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
 }
 
 }
@@ -146,8 +120,4 @@ Mathematical and Physical Sciences, 165}(921), 161--198.
 Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian perspective
 on the Bonferroni adjustment. \emph{Biometrika, 84}(2), 419--427.
 \url{https://doi.org/10.2307/2337467}
-
-Cheverud, J. (2001). A simple correction for multiple comparisons in interval
-mapping genome scans. \emph{Heredity, 87}, 52--58.
-\url{https://doi.org/10.1046/j.1365-2540.2001.00901.x}
 }

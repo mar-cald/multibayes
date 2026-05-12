@@ -6,7 +6,9 @@
 #' the \code{direction} argument controls which formulation is applied per
 #' hypothesis. The global prior probability that all tested hypotheses are
 #' null, \eqn{q}, is decomposed into a per-hypothesis prior
-#' \eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses.
+#' \eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses or,
+#' when the correlation structure among parameters is taken into account,
+#' the effective number of tests \eqn{m_{\text{eff}}}.
 #'
 #' @details
 #' The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
@@ -39,6 +41,14 @@
 #' and the same prior-odds adjustment is applied uniformly across all
 #' hypotheses regardless of their directionality.
 #'
+#' When \code{R} is supplied, the effective number of tests \eqn{m_{\text{eff}}}
+#' is estimated from the eigenvalues \eqn{\lambda} of the correlation matrix
+#' (Cheverud, 2001):
+#' \deqn{
+#'    m_{\text{eff}} = K \left( 1 - \frac{(K-1)\,\text{Var}(\lambda)}{K^2} \right)
+#' }
+#' where \eqn{K} is the number of hypotheses.
+#'
 #' @param pd Numeric vector of \emph{pd} values. For direction-agnostic tests,
 #'   values must be in \eqn{[0.5, 1]}. For directional tests, values are raw
 #'   one-sided probabilities in \eqn{[0, 1]}. Ignored if \code{draws} is
@@ -63,12 +73,17 @@
 #'   parameters).
 #' @param q Numeric scalar in \eqn{(0, 1)}. The prior probability that
 #'   \strong{all} hypotheses are null simultaneously. 
+#' @param R Optional correlation information for computing \eqn{m_{\text{eff}}}.
+#'   Accepts \code{TRUE} (correlation estimated from \code{draws}), a numeric
+#'   scalar (assumed uniform correlation applied to all parameter pairs), or a
+#'   full correlation matrix. When provided, \eqn{m_{\text{eff}}} replaces the
+#'   nominal \eqn{m}.
 #'
 #' @return A \code{data.frame} with one row per hypothesis, containing:
 #'   \code{pd} (values used in the adjustment), \code{pd.adj} (adjusted
 #'   values), \code{q} (prior probability of the global null), and \code{m}
-#'   (number of tests), \code{qm} (prior probability for the null for each test). 
-#'   For direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
+#'   (nominal or effective number of tests). For direction-agnostic tests,
+#'   both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
 #'   directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
 #'   indicating that the data (and the adjustment) favoured the opposite
 #'   direction. When \code{draws} are supplied, the output additionally
@@ -77,24 +92,27 @@
 #'
 #' @examples
 #' \dontrun{
-#' # From a vector of pd values 
+#' # From a vector of pd values (independence assumed, direction-agnostic)
 #' pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 #' H5 = 0.891, H6 = 0.987)
 #' pd.adjust(pd = pd_values, q = 0.4)
 #'
-#' # Simulate draws
-#' Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
+#' # Simulate correlated posterior draws
+#' Sigma <- matrix(0.4, nrow = 6, ncol = 6); diag(Sigma) <- 1
 #' mu    <- c(1, -0.1, 0.8, 0, 2, 3)
 #' draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 #' colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 #'
-#' # From posterior draws
-#' pd.adjust(draws = draws, q = 0.4, null.value = 0)
+#' # From posterior draws: pd and correlation estimated automatically
+#' pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
 #'
 #' # Mix of directional and agnostic tests with parameter-specific nulls
 #' pd.adjust(draws = draws, q = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
 #'           direction = c("greater", "two.sided", "greater", 
 #'           "two.sided", "greater", "greater"), R = TRUE)
+#'
+#' # When draws are unavailable, supply an assumed mean correlation
+#' pd.adjust(pd = pd_values, q = 0.1, R = 0.4)
 #' }
 #'
 #' @references
@@ -107,11 +125,15 @@
 #' on the Bonferroni adjustment. \emph{Biometrika, 84}(2), 419--427.
 #' <https://doi.org/10.2307/2337467>
 #'
+#' Cheverud, J. (2001). A simple correction for multiple comparisons in interval
+#' mapping genome scans. \emph{Heredity, 87}, 52--58.
+#' <https://doi.org/10.1046/j.1365-2540.2001.00901.x>
+#'
 #' @importFrom stats var cor
 #'
 #' @export
 pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
-                      direction = NULL) {
+                      direction = NULL, R = NULL) {
   
   stopifnot(
     "`q`: must be a single number in (0, 1)" = length(q) == 1L && q > 0 && q < 1
@@ -155,6 +177,26 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
   
   m <- length(pd)
   
+  # Effective number of tests (Cheverud, 2001)
+  if (!is.null(R)) {
+    if (isTRUE(R) && is.null(draws))
+      stop("`R = TRUE` requires `draws` to be provided.")
+    
+    if (isTRUE(R) && !is.null(draws))
+      R <- cor(draws)
+    
+    if (is.numeric(R) && length(R) == 1L) {
+      R_val <- R
+      R <- matrix(R_val, nrow = length(pd), ncol = length(pd))
+      diag(R) <- 1
+    }
+    
+    ev   <- eigen(R, symmetric = TRUE, only.values = TRUE)$values
+    K    <- length(ev)
+    v_ev <- if (K == 1L) 0 else var(ev)
+    m    <- K * (1 - ((K - 1) * v_ev) / (K^2))
+  }
+  
   # Prior-odds adjustment
   prior_H0 <- q^(1 / m)
   
@@ -181,9 +223,8 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
       null.value= null.value,
       pd        = round(pd, 4),
       pd.adj    = round(pd.adj, 4),
-      q         = round(rep(q, length(pd)),4),
+      q         = rep(q, length(pd)),
       m         = round(rep(m, length(pd)), 4),
-      qm = round(rep(q^(1/m), length(pd)),4),
       direction = direction
     )
   } else {
@@ -192,9 +233,8 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
       null.value= NA,
       pd        = round(pd, 4),
       pd.adj    = round(pd.adj, 4),
-      q         = round(rep(q, length(pd)),4),
+      q         = rep(q, length(pd)),
       m         = round(rep(m, length(pd)), 4),
-      qm = round(rep(q^(1/m), length(pd)),4),
       direction = rep("two.sided",length(pd))
     )
   }

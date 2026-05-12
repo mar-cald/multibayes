@@ -46,22 +46,19 @@ library(multibayes)
 pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, H5 = 0.891, H6 = 0.987)
 pd.adjust(pd = pd_values, q = 0.4)
 
-# Simulate correlated posterior draws
-Sigma <- matrix(0.4, nrow = 6, ncol = 6); diag(Sigma) <- 1
+# Simulate posterior draws
+Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
 mu    <- c(1, -0.1, 0.8, 0, 2, 3)
 draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
-# From posterior draws: pd and correlation estimated automatically
-pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
+# From posterior draws
+pd.adjust(draws = draws, q = 0.4, null.value = 0)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
            direction = c("greater", "two.sided", "greater", "two.sided", 
-           "greater", "greater"), R = TRUE)
-
-# When draws are unavailable, supply an assumed mean correlation
-pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
+           "greater", "greater"))
 ```
 
 ### Output
