@@ -6,21 +6,12 @@ internally. Both direction-agnostic and directional tests are supported:
 the `direction` argument controls which formulation is applied per
 hypothesis. The global prior probability that all tested hypotheses are
 null, \\q\\, is decomposed into a per-hypothesis prior \\P(H_0) =
-q^{1/m}\\, where \\m\\ is the number of hypotheses or, when the
-correlation structure among parameters is taken into account, the
-effective number of tests \\m\_{\text{eff}}\\.
+q^{1/m}\\, where \\m\\ is the number of hypotheses.
 
 ## Usage
 
 ``` r
-pd.adjust(
-  pd = NULL,
-  draws = NULL,
-  q = 0.4,
-  null.value = 0,
-  direction = NULL,
-  R = NULL
-)
+pd.adjust(pd = NULL, draws = NULL, q = NULL, null.value = 0, direction = NULL)
 ```
 
 ## Arguments
@@ -41,7 +32,7 @@ pd.adjust(
 - q:
 
   Numeric scalar in \\(0, 1)\\. The prior probability that **all**
-  hypotheses are null simultaneously. Defaults to `0.4`.
+  hypotheses are null simultaneously.
 
 - null.value:
 
@@ -63,25 +54,18 @@ pd.adjust(
   different modes across hypotheses. Defaults to `NULL`
   (direction-agnostic for all parameters).
 
-- R:
-
-  Optional correlation information for computing \\m\_{\text{eff}}\\.
-  Accepts `TRUE` (correlation estimated from `draws`), a numeric scalar
-  (assumed uniform correlation applied to all parameter pairs), or a
-  full correlation matrix. When provided, \\m\_{\text{eff}}\\ replaces
-  the nominal \\m\\.
-
 ## Value
 
 A `data.frame` with one row per hypothesis, containing: `pd` (values
 used in the adjustment), `pd.adj` (adjusted values), `q` (prior
-probability of the global null), and `m` (nominal or effective number of
-tests). For direction-agnostic tests, both `pd` and `pd.adj` are bounded
-in \\\[0.5, 1\]\\; for directional tests, both are on \\\[0, 1\]\\, with
-values below \\0.5\\ indicating that the data (and the adjustment)
-favoured the opposite direction. When `draws` are supplied, the output
-additionally includes `mean.est` (posterior mean per parameter),
-`null.value` (null reference values), and `direction`.
+probability of the global null), and `m` (number of tests), `qm` (prior
+probability for the null for each test). For direction-agnostic tests,
+both `pd` and `pd.adj` are bounded in \\\[0.5, 1\]\\; for directional
+tests, both are on \\\[0, 1\]\\, with values below \\0.5\\ indicating
+that the data (and the adjustment) favoured the opposite direction. When
+`draws` are supplied, the output additionally includes `mean.est`
+(posterior mean per parameter), `null.value` (null reference values),
+and `direction`.
 
 ## Details
 
@@ -113,12 +97,6 @@ call is supported: each element of `direction` is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.
 
-When `R` is supplied, the effective number of tests \\m\_{\text{eff}}\\
-is estimated from the eigenvalues \\\lambda\\ of the correlation matrix
-(Cheverud, 2001): \$\$ m\_{\text{eff}} = K \left( 1 -
-\frac{(K-1)\\\text{Var}(\lambda)}{K^2} \right) \$\$ where \\K\\ is the
-number of hypotheses.
-
 ## References
 
 Jeffreys, H. (1938). Significance tests when several degrees of freedom
@@ -130,34 +108,27 @@ Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian
 perspective on the Bonferroni adjustment. *Biometrika, 84*(2), 419–427.
 <https://doi.org/10.2307/2337467>
 
-Cheverud, J. (2001). A simple correction for multiple comparisons in
-interval mapping genome scans. *Heredity, 87*, 52–58.
-<https://doi.org/10.1046/j.1365-2540.2001.00901.x>
-
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-# From a vector of pd values (independence assumed, direction-agnostic)
+# From a vector of pd values 
 pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 H5 = 0.891, H6 = 0.987)
 pd.adjust(pd = pd_values, q = 0.4)
 
-# Simulate correlated posterior draws
-Sigma <- matrix(0.4, nrow = 6, ncol = 6); diag(Sigma) <- 1
+# Simulate draws
+Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
 mu    <- c(1, -0.1, 0.8, 0, 2, 3)
 draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
-# From posterior draws: pd and correlation estimated automatically
-pd.adjust(draws = draws, q = 0.4, null.value = 0, R = TRUE)
+# From posterior draws
+pd.adjust(draws = draws, q = 0.4, null.value = 0)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
-pd.adjust(draws = draws, q = 0.4, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+pd.adjust(draws = draws, q = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater", 
           "two.sided", "greater", "greater"), R = TRUE)
-
-# When draws are unavailable, supply an assumed mean correlation
-pd.adjust(pd = pd_values, q = 0.4, R = 0.4)
 } # }
 ```
