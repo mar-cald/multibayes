@@ -4,14 +4,14 @@ a matrix of posterior draws, from which pd values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the direction argument controls which formulation is applied per
 hypothesis. The global prior probability that all tested hypotheses are
-null, \(q\), is decomposed into a per-hypothesis prior
-\(P(H_0) = q^{1/m}\), where \(m\) is the number of hypotheses."><meta property="og:description" content="The function accepts either a vector of pre-computed pd values or
+null, \(\Pi_0\), is decomposed into a per-hypothesis prior
+\(\pi_0 = \Pi_0^{1/m}\), where \(m\) is the number of hypotheses."><meta property="og:description" content="The function accepts either a vector of pre-computed pd values or
 a matrix of posterior draws, from which pd values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the direction argument controls which formulation is applied per
 hypothesis. The global prior probability that all tested hypotheses are
-null, \(q\), is decomposed into a per-hypothesis prior
-\(P(H_0) = q^{1/m}\), where \(m\) is the number of hypotheses."><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script></head><body>
+null, \(\Pi_0\), is decomposed into a per-hypothesis prior
+\(\pi_0 = \Pi_0^{1/m}\), where \(m\) is the number of hypotheses."><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -50,13 +50,13 @@ a matrix of posterior draws, from which <em>pd</em> values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the <code>direction</code> argument controls which formulation is applied per
 hypothesis. The global prior probability that all tested hypotheses are
-null, \(q\), is decomposed into a per-hypothesis prior
-\(P(H_0) = q^{1/m}\), where \(m\) is the number of hypotheses.</p>
+null, \(\Pi_0\), is decomposed into a per-hypothesis prior
+\(\pi_0 = \Pi_0^{1/m}\), where \(m\) is the number of hypotheses.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="cn">NULL</span>, draws <span class="op">=</span> <span class="cn">NULL</span>, q <span class="op">=</span> <span class="cn">NULL</span>, null.value <span class="op">=</span> <span class="fl">0</span>, direction <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="cn">NULL</span>, draws <span class="op">=</span> <span class="cn">NULL</span>, p <span class="op">=</span> <span class="cn">NULL</span>, null.value <span class="op">=</span> <span class="fl">0</span>, direction <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,7 +76,7 @@ If provided, <em>pd</em> values are computed automatically from the draws
 according to <code>direction</code> and <code>null.value</code>.</p></dd>
 
 
-<dt id="arg-q">q<a class="anchor" aria-label="anchor" href="#arg-q"></a></dt>
+<dt id="arg-p">p<a class="anchor" aria-label="anchor" href="#arg-p"></a></dt>
 <dd><p>Numeric scalar in \((0, 1)\). The prior probability that
 <strong>all</strong> hypotheses are null simultaneously.</p></dd>
 
@@ -106,8 +106,8 @@ parameters).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>data.frame</code> with one row per hypothesis, containing:
 <code>pd</code> (values used in the adjustment), <code>pd.adj</code> (adjusted
-values), <code>q</code> (prior probability of the global null), and <code>m</code>
-(number of tests), <code>qm</code> (prior probability for the null for each test).
+values), <code>p</code> (prior probability of the global null), and <code>m</code>
+(number of tests), <code>pm</code> (prior probability for the null for each test).
 For direction-agnostic tests, both <code>pd</code> and <code>pd.adj</code> are bounded in \([0.5, 1]\); for
 directional tests, both are on \([0, 1]\), with values below \(0.5\)
 indicating that the data (and the adjustment) favoured the opposite
@@ -118,12 +118,12 @@ includes <code>mean.est</code> (posterior mean per parameter), <code>null.value<
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
-\(P(H_0) = q^{1/m}\) and its complement \(P(H_1) = 1 - P(H_0)\),
+\(\pi_0 = \Pi_0^{1/m}\) and its complement \(\pi_1 = 1 - \pi_0\),
 the adjusted <em>pd</em> is:
 $$
-   pd_{adj} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd) P(H_0)}
+   pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + \pi_0 P(H_0)}
 $$</p>
-<p>Because the prior is conservative (\(P(H_0) &gt; P(H_1)\)), the adjustment
+<p>Because the prior is conservative (\(\pi_0 &gt; \pi_1\)), the adjustment
 always shrinks <em>pd</em> toward its lower bound.</p>
 <p><strong>Direction-agnostic tests</strong> (<code>"two.sided"</code>): <em>pd</em> is
 defined as \(\max\!\big(\Pr(\hat\theta &gt; \theta_\text{null}),\,
@@ -160,7 +160,7 @@ on the Bonferroni adjustment. <em>Biometrika, 84</em>(2), 419–427.
 <span class="r-in"><span><span class="co"># From a vector of pd values </span></span></span>
 <span class="r-in"><span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>, </span></span>
 <span class="r-in"><span>H5 <span class="op">=</span> <span class="fl">0.891</span>, H6 <span class="op">=</span> <span class="fl">0.987</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, q <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, p <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate draws</span></span></span>
 <span class="r-in"><span><span class="va">Sigma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, nrow <span class="op">=</span> <span class="fl">6</span>, ncol <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">1</span></span></span>
@@ -169,10 +169,10 @@ on the Bonferroni adjustment. <em>Biometrika, 84</em>(2), 419–427.
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"H1"</span>, <span class="st">"H2"</span>, <span class="st">"H3"</span>, <span class="st">"H4"</span>, <span class="st">"H5"</span>, <span class="st">"H6"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># From posterior draws</span></span></span>
-<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span></span>
-<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.2</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p <span class="op">=</span> <span class="fl">0.2</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>          direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, </span></span>
 <span class="r-in"><span>          <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span>, R <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>

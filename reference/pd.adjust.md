@@ -5,13 +5,13 @@ matrix of posterior draws, from which *pd* values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the `direction` argument controls which formulation is applied per
 hypothesis. The global prior probability that all tested hypotheses are
-null, \\q\\, is decomposed into a per-hypothesis prior \\P(H_0) =
-q^{1/m}\\, where \\m\\ is the number of hypotheses.
+null, \\\Pi_0\\, is decomposed into a per-hypothesis prior \\\pi_0 =
+\Pi_0^{1/m}\\, where \\m\\ is the number of hypotheses.
 
 ## Usage
 
 ``` r
-pd.adjust(pd = NULL, draws = NULL, q = NULL, null.value = 0, direction = NULL)
+pd.adjust(pd = NULL, draws = NULL, p = NULL, null.value = 0, direction = NULL)
 ```
 
 ## Arguments
@@ -29,7 +29,7 @@ pd.adjust(pd = NULL, draws = NULL, q = NULL, null.value = 0, direction = NULL)
   parameters). If provided, *pd* values are computed automatically from
   the draws according to `direction` and `null.value`.
 
-- q:
+- p:
 
   Numeric scalar in \\(0, 1)\\. The prior probability that **all**
   hypotheses are null simultaneously.
@@ -57,8 +57,8 @@ pd.adjust(pd = NULL, draws = NULL, q = NULL, null.value = 0, direction = NULL)
 ## Value
 
 A `data.frame` with one row per hypothesis, containing: `pd` (values
-used in the adjustment), `pd.adj` (adjusted values), `q` (prior
-probability of the global null), and `m` (number of tests), `qm` (prior
+used in the adjustment), `pd.adj` (adjusted values), `p` (prior
+probability of the global null), and `m` (number of tests), `pm` (prior
 probability for the null for each test). For direction-agnostic tests,
 both `pd` and `pd.adj` are bounded in \\\[0.5, 1\]\\; for directional
 tests, both are on \\\[0, 1\]\\, with values below \\0.5\\ indicating
@@ -70,11 +70,11 @@ and `direction`.
 ## Details
 
 The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
-\\P(H_0) = q^{1/m}\\ and its complement \\P(H_1) = 1 - P(H_0)\\, the
-adjusted *pd* is: \$\$ pd\_{adj} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd)
+\\\pi_0 = \Pi_0^{1/m}\\ and its complement \\\pi_1 = 1 - \pi_0\\, the
+adjusted *pd* is: \$\$ pd\_{adj} = \frac{pd \pi_1}{pd \pi_1 + \pi_0
 P(H_0)} \$\$
 
-Because the prior is conservative (\\P(H_0) \> P(H_1)\\), the adjustment
+Because the prior is conservative (\\\pi_0 \> \pi_1\\), the adjustment
 always shrinks *pd* toward its lower bound.
 
 **Direction-agnostic tests** (`"two.sided"`): *pd* is defined as
@@ -115,7 +115,7 @@ if (FALSE) { # \dontrun{
 # From a vector of pd values 
 pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 H5 = 0.891, H6 = 0.987)
-pd.adjust(pd = pd_values, q = 0.4)
+pd.adjust(pd = pd_values, p = 0.4)
 
 # Simulate draws
 Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
@@ -124,10 +124,10 @@ draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
 # From posterior draws
-pd.adjust(draws = draws, q = 0.4, null.value = 0)
+pd.adjust(draws = draws, p = 0.4, null.value = 0)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
-pd.adjust(draws = draws, q = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater", 
           "two.sided", "greater", "greater"), R = TRUE)
 } # }

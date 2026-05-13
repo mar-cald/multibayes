@@ -84,12 +84,12 @@
 <code>pd.adjust()</code>: Prior-Odds Adjustment for <em>pd</em>
 <a class="anchor" aria-label="anchor" href="#pdadjust-prior-odds-adjustment-for-pd"></a>
 </h2>
-<p>The Probability of Direction (<em>pd</em>) is often used as a decision rule: a hypothesis is accepted when <em>pd</em> exceeds a threshold. When this decision is made repeatedly across several hypotheses, the family-wise error probability can be much higher than intended. <code><a href="reference/pd.adjust.html">pd.adjust()</a></code> addresses this problem by making the implicit prior probability of the global null explicit, following the prior-odds framework of Jeffreys (1938) and Westfall et al. (1997).</p>
-<p>The global prior probability that <strong>all</strong> hypotheses are null, <em>q</em>, is decomposed into a per-hypothesis prior:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>q</mi><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup></mrow><annotation encoding="application/x-tex">P(H_0) = q^{1/m}</annotation></semantics></math></p>
+<p>The Probability of Direction (<em>pd</em>) is often used as a decision rule: a hypothesis is accepted when <em>pd</em> exceeds a threshold. When this decision is made repeatedly across several hypotheses, the family-wise error probability can be much higher than intended. <code><a href="reference/pd.adjust.html">pd.adjust()</a></code> addresses this problem by making the implicit prior probability of the global null explicit.</p>
+<p>The global prior probability that <strong>all</strong> hypotheses are null, <em>p</em>, is decomposed into a per-hypothesis prior:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>p</mi><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup></mrow><annotation encoding="application/x-tex">P(H_0) = p^{1/m}</annotation></semantics></math></p>
 <p>Each <em>pd</em> is then reweighted by Bayes’ theorem:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><msub><mi>d</mi><mtext mathvariant="normal">adj</mtext></msub><mo>=</mo><mfrac><mrow><mi>p</mi><mi>d</mi><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>p</mi><mi>d</mi><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">pd_{\text{adj}} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd) P(H_0)}</annotation></semantics></math></p>
-<p>Because the prior is conservative ( <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>&gt;</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(H_0) &gt; P(H_1)</annotation></semantics></math> ), the adjustment always shrinks <em>pd</em> toward its lower bound. When parameters are correlated, the effective number of tests <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mtext mathvariant="normal">eff</mtext></msub><annotation encoding="application/x-tex">m_\text{eff}</annotation></semantics></math> (Cheverud, 2001) is used in place of <em>m</em>, producing a less conservative adjustment.</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><msub><mi>d</mi><mtext mathvariant="normal">adj</mtext></msub><mo>=</mo><mfrac><mrow><mi>p</mi><mi>d</mi><mo>⋅</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>p</mi><mi>d</mi><mo>⋅</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">pd_{\text{adj}} = \frac{pd \cdot P(H_1)}{pd \cdot P(H_1) + (1 - pd) \cdot P(H_0)}</annotation></semantics></math></p>
+<p>Because the prior is conservative (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>&gt;</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(H_0) &gt; P(H_1)</annotation></semantics></math>), the adjustment always shrinks <em>pd</em> toward its lower bound.</p>
 <p>The function supports two testing modes, which can be mixed across hypotheses within the same call:</p>
 <ul>
 <li>
@@ -103,9 +103,9 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mar-cald/multibayes" class="external-link">multibayes</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># From a vector of pd values (independence assumed, direction-agnostic)</span></span>
+<span><span class="co"># From a vector of pd values (direction-agnostic)</span></span>
 <span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>, H5 <span class="op">=</span> <span class="fl">0.891</span>, H6 <span class="op">=</span> <span class="fl">0.987</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, q <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, p <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Simulate posterior draws</span></span>
 <span><span class="va">Sigma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, nrow <span class="op">=</span> <span class="fl">6</span>, ncol <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
@@ -113,13 +113,16 @@
 <span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MASS/man/mvrnorm.html" class="external-link">mvrnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4000</span>, mu <span class="op">=</span> <span class="va">mu</span>, Sigma <span class="op">=</span> <span class="va">Sigma</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"H1"</span>, <span class="st">"H2"</span>, <span class="st">"H3"</span>, <span class="st">"H4"</span>, <span class="st">"H5"</span>, <span class="st">"H6"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># From posterior draws</span></span>
-<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="co"># From posterior draws </span></span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span>
-<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, q <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
-<span>           direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span>, </span>
-<span>           <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span></span>
+<span>  draws      <span class="op">=</span> <span class="va">draws</span>,</span>
+<span>  p          <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  direction  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="output">Output<a class="anchor" aria-label="anchor" href="#output"></a>
@@ -145,7 +148,7 @@
 </tr>
 <tr>
 <td><code>direction</code></td>
-<td>Testing mode: <code>greater</code>, <code>less</code>, <code>two.sided</code>
+<td>Testing mode: <code>"greater"</code>, <code>"less"</code>, or <code>"two.sided"</code>
 </td>
 </tr>
 <tr>
@@ -159,28 +162,33 @@
 </td>
 </tr>
 <tr>
-<td><code>q</code></td>
-<td>Global null probability used</td>
+<td><code>p</code></td>
+<td>Global null probability supplied by the user</td>
 </tr>
 <tr>
 <td><code>m</code></td>
 <td>Family size used (<em>m</em> or <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mtext mathvariant="normal">eff</mtext></msub><annotation encoding="application/x-tex">m_\text{eff}</annotation></semantics></math>)</td>
 </tr>
+<tr>
+<td><code>pm</code></td>
+<td>Per-hypothesis null prior <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>p</mi><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup><annotation encoding="application/x-tex">p^{1/m}</annotation></semantics></math>
+</td>
+</tr>
 </tbody>
 </table>
-<p>When a <code>pd</code> vector is supplied directly, only <code>pd</code>, <code>pd.adj</code>, <code>q</code>, and <code>m</code> are returned.</p>
+<p>When a <code>pd</code> vector is supplied directly, <code>mean.est</code>, <code>null.value</code>, and <code>direction</code> are not returned.</p>
 </div>
 <div class="section level3">
-<h3 id="choosing-q-nullvalue-and-direction">Choosing <em>q</em>, <em>null.value</em>, and <em>direction</em>
-<a class="anchor" aria-label="anchor" href="#choosing-q-nullvalue-and-direction"></a>
+<h3 id="choosing-p-nullvalue-and-direction">Choosing <code>p</code>, <code>null.value</code>, and <code>direction</code>
+<a class="anchor" aria-label="anchor" href="#choosing-p-nullvalue-and-direction"></a>
 </h3>
 <ul>
 <li>
-<strong><code>q</code></strong> encodes your prior belief that all tested hypotheses are simultaneously null. A value of <code>0.4</code> is a skeptical default.</li>
+<strong><code>p</code></strong> encodes your prior belief that <strong>all</strong> tested hypotheses are simultaneously null.</li>
 <li>
-<strong><code>null.value</code></strong> sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter, for instance when testing against a minimum effect of practical interest.</li>
+<strong><code>null.value</code></strong> sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter.</li>
 <li>
-<strong><code>direction</code></strong> selects the testing mode per hypothesis (<code>greater</code>, <code>less</code>, <code>two.sided</code>). A scalar is recycled; a mixed vector applies different modes across hypotheses within the same call. For directional tests, values of <code>pd</code> and <code>pd.adj</code> below <code>0.5</code> indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.</li>
+<strong><code>direction</code></strong> selects the testing mode per hypothesis (<code>"greater"</code>, <code>"less"</code>, <code>"two.sided"</code>). A scalar is recycled across all hypotheses; a mixed vector applies different modes within the same call. For directional tests, values of <code>pd</code> and <code>pd.adj</code> below <code>0.5</code> indicate that the data contradicted the predicted direction; the adjustment amplifies this evidence under the conservative prior.</li>
 </ul>
 <hr>
 </div>
@@ -202,15 +210,13 @@
 </li>
 <li>Westfall, P. H., Johnson, W. O., &amp; Utts, J. M. (1997). A Bayesian perspective on the Bonferroni adjustment. <em>Biometrika, 84</em>(2), 419–427. <a href="https://doi.org/10.2307/2337467" class="external-link uri">https://doi.org/10.2307/2337467</a>
 </li>
-<li>Cheverud, J. (2001). A simple correction for multiple comparisons in interval mapping genome scans. <em>Heredity, 87</em>, 52–58. <a href="https://doi.org/10.1046/j.1365-2540.2001.00901.x" class="external-link uri">https://doi.org/10.1046/j.1365-2540.2001.00901.x</a>
-</li>
 </ul>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>GNU GENERAL PUBLIC LICENSE, Version 3</p>
+<p>GNU General Public License, Version 3</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
