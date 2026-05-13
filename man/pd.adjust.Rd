@@ -2,7 +2,7 @@
 % Please edit documentation in R/pd.adjust.R
 \name{pd.adjust}
 \alias{pd.adjust}
-\title{Prior-odds adjustment for Probability of Direction (pd)}
+\title{Prior-odds adjustment for Probability of Direction \emph{pd}}
 \usage{
 pd.adjust(pd = NULL, draws = NULL, p = NULL, null.value = 0, direction = NULL)
 }
@@ -62,7 +62,7 @@ The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
 \eqn{\pi_0 = \Pi_0^{1/m}} and its complement \eqn{\pi_1 = 1 - \pi_0},
 the adjusted \emph{pd} is:
 \deqn{
-   pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + \pi_0 P(H_0)}
+   pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + (1-pd)\pi_0}
 }
 
 Because the prior is conservative (\eqn{\pi_0 > \pi_1}), the adjustment
@@ -89,7 +89,6 @@ and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.
 }
 \examples{
-\dontrun{
 # From a vector of pd values 
 pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 H5 = 0.891, H6 = 0.987)
@@ -108,7 +107,6 @@ pd.adjust(draws = draws, p = 0.4, null.value = 0)
 pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater", 
           "two.sided", "greater", "greater"), R = TRUE)
-}
 
 }
 \references{

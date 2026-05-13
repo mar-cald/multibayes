@@ -1,4 +1,4 @@
-#' Prior-odds adjustment for Probability of Direction (pd)
+#' Prior-odds adjustment for Probability of Direction \emph{pd}
 #'
 #' The function accepts either a vector of pre-computed \emph{pd} values or
 #' a matrix of posterior draws, from which \emph{pd} values are computed
@@ -13,7 +13,7 @@
 #' \eqn{\pi_0 = \Pi_0^{1/m}} and its complement \eqn{\pi_1 = 1 - \pi_0},
 #' the adjusted \emph{pd} is:
 #' \deqn{
-#'    pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + \pi_0 P(H_0)}
+#'    pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + (1-pd)\pi_0}
 #' }
 #'
 #' Because the prior is conservative (\eqn{\pi_0 > \pi_1}), the adjustment
@@ -76,7 +76,6 @@
 #'   (null reference values), and \code{direction}.
 #'
 #' @examples
-#' \dontrun{
 #' # From a vector of pd values 
 #' pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 #' H5 = 0.891, H6 = 0.987)
@@ -95,7 +94,6 @@
 #' pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
 #'           direction = c("greater", "two.sided", "greater", 
 #'           "two.sided", "greater", "greater"), R = TRUE)
-#' }
 #'
 #' @references
 #' Jeffreys, H. (1938). Significance tests when several degrees of freedom arise
