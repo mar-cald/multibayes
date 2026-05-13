@@ -5,18 +5,18 @@
 #' internally. Both direction-agnostic and directional tests are supported:
 #' the \code{direction} argument controls which formulation is applied per
 #' hypothesis. The global prior probability that all tested hypotheses are
-#' null, \eqn{q}, is decomposed into a per-hypothesis prior
-#' \eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses.
+#' null, \eqn{\Pi_0}, is decomposed into a per-hypothesis prior
+#' \eqn{\pi_0 = \Pi_0^{1/m}}, where \eqn{m} is the number of hypotheses.
 #'
 #' @details
 #' The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
-#' \eqn{P(H_0) = q^{1/m}} and its complement \eqn{P(H_1) = 1 - P(H_0)},
+#' \eqn{\pi_0 = \Pi_0^{1/m}} and its complement \eqn{\pi_1 = 1 - \pi_0},
 #' the adjusted \emph{pd} is:
 #' \deqn{
-#'    pd_{adj} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd) P(H_0)}
+#'    pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + \pi_0 P(H_0)}
 #' }
 #'
-#' Because the prior is conservative (\eqn{P(H_0) > P(H_1)}), the adjustment
+#' Because the prior is conservative (\eqn{\pi_0 > \pi_1}), the adjustment
 #' always shrinks \emph{pd} toward its lower bound.
 #'
 #' \strong{Direction-agnostic tests} (\code{"two.sided"}): \emph{pd} is
@@ -46,6 +46,8 @@
 #' @param draws Optional matrix or data frame of posterior draws (columns = parameters).
 #'   If provided, \emph{pd} values are computed automatically from the draws
 #'   according to \code{direction} and \code{null.value}.
+#' @param p Numeric scalar in \eqn{(0, 1)}. The prior probability that
+#'   \strong{all} hypotheses are null simultaneously. 
 #' @param null.value Numeric scalar or vector. The null (reference) value against 
 #'  which the posterior is evaluated, specified on the scale of the posterior. 
 #'  A single scalar applies the same null to all parameters; a vector of length \code{ncol(draws)} 
@@ -61,13 +63,11 @@
 #'   to match the number of parameters; a mixed vector allows different modes
 #'   across hypotheses. Defaults to \code{NULL} (direction-agnostic for all
 #'   parameters).
-#' @param q Numeric scalar in \eqn{(0, 1)}. The prior probability that
-#'   \strong{all} hypotheses are null simultaneously. 
 #'
 #' @return A \code{data.frame} with one row per hypothesis, containing:
 #'   \code{pd} (values used in the adjustment), \code{pd.adj} (adjusted
-#'   values), \code{q} (prior probability of the global null), and \code{m}
-#'   (number of tests), \code{qm} (prior probability for the null for each test). 
+#'   values), \code{p} (prior probability of the global null), and \code{m}
+#'   (number of tests), \code{pm} (prior probability for the null for each test). 
 #'   For direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
 #'   directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
 #'   indicating that the data (and the adjustment) favoured the opposite
@@ -80,7 +80,7 @@
 #' # From a vector of pd values 
 #' pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 #' H5 = 0.891, H6 = 0.987)
-#' pd.adjust(pd = pd_values, q = 0.4)
+#' pd.adjust(pd = pd_values, p = 0.4)
 #'
 #' # Simulate draws
 #' Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
@@ -89,10 +89,10 @@
 #' colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 #'
 #' # From posterior draws
-#' pd.adjust(draws = draws, q = 0.4, null.value = 0)
+#' pd.adjust(draws = draws, p = 0.4, null.value = 0)
 #'
 #' # Mix of directional and agnostic tests with parameter-specific nulls
-#' pd.adjust(draws = draws, q = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+#' pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
 #'           direction = c("greater", "two.sided", "greater", 
 #'           "two.sided", "greater", "greater"), R = TRUE)
 #' }
@@ -110,11 +110,11 @@
 #' @importFrom stats var cor
 #'
 #' @export
-pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
+pd.adjust <- function(pd = NULL, draws = NULL, p = NULL, null.value = 0,
                       direction = NULL) {
   
   stopifnot(
-    "`q`: must be a single number in (0, 1)" = length(q) == 1L && q > 0 && q < 1
+    "`p`: must be a single number in (0, 1)" = length(p) == 1L && p > 0 && p < 1
   )
   
   if(!is.null(pd)){
@@ -131,14 +131,14 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
   
   if (from_draws) {
     draws <- as.matrix(draws)
-    p <- ncol(draws)
+    nc <- ncol(draws)
     
-    if (length(null.value) == 1L) null.value <- rep(null.value, p)
-    if (is.null(direction))      direction <- rep("two.sided", p)
-    if (length(direction) == 1L) direction <- rep(direction, p)
+    if (length(null.value) == 1L) null.value <- rep(null.value, nc)
+    if (is.null(direction))      direction <- rep("two.sided", nc)
+    if (length(direction) == 1L) direction <- rep(direction, nc)
     
-    if (length(null.value) != p) stop("`null.value` must be a scalar or a vector of length `ncol(draws)`.")
-    if (length(direction) != p)  stop("`direction` must be a scalar or a vector of length `ncol(draws)`.")
+    if (length(null.value) != nc) stop("`null.value` must be a scalar or a vector of length `ncol(draws)`.")
+    if (length(direction) != nc)  stop("`direction` must be a scalar or a vector of length `ncol(draws)`.")
     if (!all(direction %in% c("two.sided", "less", "greater"))) stop("`direction` must contain only two.sided, less, greater.")
     
     centered <- sweep(draws, 2, null.value, "-")
@@ -148,7 +148,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
       if      (d ==  "greater") mean(centered[, j] > 0)
       else if (d == "less") mean(centered[, j] < 0)
       else    max(mean(centered[, j] > 0), mean(centered[, j] < 0))
-    }, seq_len(p), direction)
+    }, seq_len(nc), direction)
   }
   
   if (is.null(pd)) stop("Either `pd` or `draws` must be provided.")
@@ -156,7 +156,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
   m <- length(pd)
   
   # Prior-odds adjustment
-  prior_H0 <- q^(1 / m)
+  prior_H0 <- p^(1 / m)
   
   if (prior_H0 > 0.5) {
     prior_H1 <- 1 - prior_H0
@@ -181,9 +181,9 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
       null.value= null.value,
       pd        = round(pd, 4),
       pd.adj    = round(pd.adj, 4),
-      q         = round(rep(q, length(pd)),4),
+      p         = round(rep(p, length(pd)),4),
       m         = round(rep(m, length(pd)), 4),
-      qm = round(rep(q^(1/m), length(pd)),4),
+      pm = round(rep(p^(1/m), length(pd)),4),
       direction = direction
     )
   } else {
@@ -192,9 +192,9 @@ pd.adjust <- function(pd = NULL, draws = NULL, q = NULL, null.value = 0,
       null.value= NA,
       pd        = round(pd, 4),
       pd.adj    = round(pd.adj, 4),
-      q         = round(rep(q, length(pd)),4),
+      p         = round(rep(p, length(pd)),4),
       m         = round(rep(m, length(pd)), 4),
-      qm = round(rep(q^(1/m), length(pd)),4),
+      pm = round(rep(p^(1/m), length(pd)),4),
       direction = rep("two.sided",length(pd))
     )
   }

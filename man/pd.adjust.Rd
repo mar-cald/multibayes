@@ -4,7 +4,7 @@
 \alias{pd.adjust}
 \title{Prior-odds adjustment for Probability of Direction (pd)}
 \usage{
-pd.adjust(pd = NULL, draws = NULL, q = NULL, null.value = 0, direction = NULL)
+pd.adjust(pd = NULL, draws = NULL, p = NULL, null.value = 0, direction = NULL)
 }
 \arguments{
 \item{pd}{Numeric vector of \emph{pd} values. For direction-agnostic tests,
@@ -16,7 +16,7 @@ supplied.}
 If provided, \emph{pd} values are computed automatically from the draws
 according to \code{direction} and \code{null.value}.}
 
-\item{q}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
+\item{p}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
 \strong{all} hypotheses are null simultaneously.}
 
 \item{null.value}{Numeric scalar or vector. The null (reference) value against
@@ -39,8 +39,8 @@ parameters).}
 \value{
 A \code{data.frame} with one row per hypothesis, containing:
 \code{pd} (values used in the adjustment), \code{pd.adj} (adjusted
-values), \code{q} (prior probability of the global null), and \code{m}
-(number of tests), \code{qm} (prior probability for the null for each test).
+values), \code{p} (prior probability of the global null), and \code{m}
+(number of tests), \code{pm} (prior probability for the null for each test).
 For direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
 directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
 indicating that the data (and the adjustment) favoured the opposite
@@ -54,18 +54,18 @@ a matrix of posterior draws, from which \emph{pd} values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the \code{direction} argument controls which formulation is applied per
 hypothesis. The global prior probability that all tested hypotheses are
-null, \eqn{q}, is decomposed into a per-hypothesis prior
-\eqn{P(H_0) = q^{1/m}}, where \eqn{m} is the number of hypotheses.
+null, \eqn{\Pi_0}, is decomposed into a per-hypothesis prior
+\eqn{\pi_0 = \Pi_0^{1/m}}, where \eqn{m} is the number of hypotheses.
 }
 \details{
 The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
-\eqn{P(H_0) = q^{1/m}} and its complement \eqn{P(H_1) = 1 - P(H_0)},
+\eqn{\pi_0 = \Pi_0^{1/m}} and its complement \eqn{\pi_1 = 1 - \pi_0},
 the adjusted \emph{pd} is:
 \deqn{
-   pd_{adj} = \frac{pd P(H_1)}{pd P(H_1) + (1 - pd) P(H_0)}
+   pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + \pi_0 P(H_0)}
 }
 
-Because the prior is conservative (\eqn{P(H_0) > P(H_1)}), the adjustment
+Because the prior is conservative (\eqn{\pi_0 > \pi_1}), the adjustment
 always shrinks \emph{pd} toward its lower bound.
 
 \strong{Direction-agnostic tests} (\code{"two.sided"}): \emph{pd} is
@@ -93,7 +93,7 @@ hypotheses regardless of their directionality.
 # From a vector of pd values 
 pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 H5 = 0.891, H6 = 0.987)
-pd.adjust(pd = pd_values, q = 0.4)
+pd.adjust(pd = pd_values, p = 0.4)
 
 # Simulate draws
 Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
@@ -102,10 +102,10 @@ draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
 # From posterior draws
-pd.adjust(draws = draws, q = 0.4, null.value = 0)
+pd.adjust(draws = draws, p = 0.4, null.value = 0)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
-pd.adjust(draws = draws, q = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater", 
           "two.sided", "greater", "greater"), R = TRUE)
 }
