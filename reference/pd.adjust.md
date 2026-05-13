@@ -1,4 +1,4 @@
-# Prior-odds adjustment for Probability of Direction (pd)
+# Prior-odds adjustment for Probability of Direction *pd*
 
 The function accepts either a vector of pre-computed *pd* values or a
 matrix of posterior draws, from which *pd* values are computed
@@ -71,8 +71,8 @@ and `direction`.
 
 The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
 \\\pi_0 = \Pi_0^{1/m}\\ and its complement \\\pi_1 = 1 - \pi_0\\, the
-adjusted *pd* is: \$\$ pd\_{adj} = \frac{pd \pi_1}{pd \pi_1 + \pi_0
-P(H_0)} \$\$
+adjusted *pd* is: \$\$ pd\_{adj} = \frac{pd \pi_1}{pd \pi_1 +
+(1-pd)\pi_0} \$\$
 
 Because the prior is conservative (\\\pi_0 \> \pi_1\\), the adjustment
 always shrinks *pd* toward its lower bound.
@@ -111,11 +111,18 @@ perspective on the Bonferroni adjustment. *Biometrika, 84*(2), 419–427.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 # From a vector of pd values 
 pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
 H5 = 0.891, H6 = 0.987)
 pd.adjust(pd = pd_values, p = 0.4)
+#> Warning: some pd.adj have been floored to 0.5.
+#>    mean.est null.value    pd pd.adj   p m     pm direction
+#> H1       NA         NA 0.999 0.9940 0.4 6 0.8584 two.sided
+#> H2       NA         NA 0.946 0.7430 0.4 6 0.8584 two.sided
+#> H3       NA         NA 0.813 0.5000 0.4 6 0.8584 two.sided
+#> H4       NA         NA 0.763 0.5000 0.4 6 0.8584 two.sided
+#> H5       NA         NA 0.891 0.5742 0.4 6 0.8584 two.sided
+#> H6       NA         NA 0.987 0.9261 0.4 6 0.8584 two.sided
 
 # Simulate draws
 Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
@@ -125,10 +132,18 @@ colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
 # From posterior draws
 pd.adjust(draws = draws, p = 0.4, null.value = 0)
+#> Warning: some pd.adj have been floored to 0.5.
+#>    mean.est null.value     pd pd.adj   p m     pm direction
+#> H1   0.9930          0 0.8410 0.5000 0.4 6 0.8584 two.sided
+#> H2  -0.0922          0 0.5330 0.5000 0.4 6 0.8584 two.sided
+#> H3   0.7609          0 0.7708 0.5000 0.4 6 0.8584 two.sided
+#> H4  -0.0196          0 0.5118 0.5000 0.4 6 0.8584 two.sided
+#> H5   2.0129          0 0.9755 0.8679 0.4 6 0.8584 two.sided
+#> H6   2.9963          0 0.9998 0.9985 0.4 6 0.8584 two.sided
 
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater", 
           "two.sided", "greater", "greater"), R = TRUE)
-} # }
+#> Error in pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2,     0, 0.5, 0.5), direction = c("greater", "two.sided", "greater",     "two.sided", "greater", "greater"), R = TRUE): unused argument (R = TRUE)
 ```
