@@ -93,7 +93,7 @@
 #' # Mix of directional and agnostic tests with parameter-specific nulls
 #' pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
 #'           direction = c("greater", "two.sided", "greater", 
-#'           "two.sided", "greater", "greater"), R = TRUE)
+#'           "two.sided", "greater", "greater"))
 #'
 #' @references
 #' Jeffreys, H. (1938). Significance tests when several degrees of freedom arise
