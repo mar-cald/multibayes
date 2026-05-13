@@ -100,6 +100,9 @@ If you use **multibayes** in published research, please cite:
 
 > Calderan, M., Gambarota, F., Toffalini, E., & Altoè, G. (2026). Adjusting the Probability of Direction for Multiple Testing.
 
+Pre-print:
+ - [pdf](paper/manuscript.pdf)
+ - [html](paper/manuscipt.html)
 ---
 
 ## References
