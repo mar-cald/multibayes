@@ -144,6 +144,13 @@ pd.adjust(draws = draws, p = 0.4, null.value = 0)
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater", 
-          "two.sided", "greater", "greater"), R = TRUE)
-#> Error in pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2,     0, 0.5, 0.5), direction = c("greater", "two.sided", "greater",     "two.sided", "greater", "greater"), R = TRUE): unused argument (R = TRUE)
+          "two.sided", "greater", "greater"))
+#> Warning: some pd.adj have been floored to 0.5.
+#>    mean.est null.value     pd pd.adj   p m     pm direction
+#> H1   0.9930        0.2 0.7832 0.5265 0.2 6 0.7647   greater
+#> H2  -0.0922        0.0 0.5330 0.5000 0.2 6 0.7647 two.sided
+#> H3   0.7609        0.2 0.7035 0.4220 0.2 6 0.7647   greater
+#> H4  -0.0196        0.0 0.5118 0.5000 0.2 6 0.7647 two.sided
+#> H5   2.0129        0.5 0.9368 0.8200 0.2 6 0.7647   greater
+#> H6   2.9963        0.5 0.9958 0.9863 0.2 6 0.7647   greater
 ```
