@@ -84,7 +84,7 @@
 <code>pd.adjust()</code>: Prior-Odds Adjustment for <em>pd</em>
 <a class="anchor" aria-label="anchor" href="#pdadjust-prior-odds-adjustment-for-pd"></a>
 </h2>
-<p>The Probability of Direction (<em>pd</em>) is often used as a decision rule: a hypothesis is accepted when <em>pd</em> exceeds a threshold. When this decision is made repeatedly across several hypotheses, the family-wise error probability can be much higher than intended. <code><a href="reference/pd.adjust.html">pd.adjust()</a></code> addresses this problem by making the implicit prior probability of the global null explicit.</p>
+<p>The Probability of Direction (<em>pd</em>) is often used as a decision rule: a hypothesis is accepted when <em>pd</em> exceeds a threshold. When this decision is made repeatedly across several hypotheses, the global null probability can be much lower than intended. <code><a href="reference/pd.adjust.html">pd.adjust()</a></code> addresses this problem by making explicit the prior probability of the global null.</p>
 <p>The global prior probability that <strong>all</strong> hypotheses are null, <em>p</em> (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi mathvariant="normal">Π</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\Pi_0</annotation></semantics></math>), is decomposed into a per-hypothesis prior:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mn>0</mn></msub><mo>=</mo><msup><mi>p</mi><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\pi_0 = p^{1/m}</annotation></semantics></math></p>
 <p>Each <em>pd</em> is then reweighted by Bayes’ theorem:</p>

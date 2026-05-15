@@ -25,11 +25,11 @@ remotes::install_github("mar-cald/multibayes")
 
 The Probability of Direction (*pd*) is often used as a decision rule: a
 hypothesis is accepted when *pd* exceeds a threshold. When this decision
-is made repeatedly across several hypotheses, the family-wise error
-probability can be much higher than intended.
+is made repeatedly across several hypotheses, the global null
+probability can be much lower than intended.
 [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
-addresses this problem by making the implicit prior probability of the
-global null explicit.
+addresses this problem by making explicit the prior probability of the
+global null.
 
 The global prior probability that **all** hypotheses are null, *p*
 ($`\Pi_0`$), is decomposed into a per-hypothesis prior:
