@@ -4,8 +4,8 @@
 bayes_posterior_analytical <- function(x, sigma = 1, tau0 = 1, mu0=0) {
   n = length(x)
   bar_y  = mean(x)
-  post_mean  = (bar_y * (n / sigma^2) + mu0 * (1 / tau0^2)) / (n / sigma^2 + 1 / tau0^2)
-  post_sd  = sqrt(1 / (n / sigma^2 + 1 / tau0^2))
+  post_mean = (bar_y * (n / sigma^2) + mu0 * (1 / tau0^2)) / (n / sigma^2 + 1 / tau0^2)
+  post_sd = sqrt(1 / (n / sigma^2 + 1 / tau0^2))
   pd = pnorm(abs(post_mean - 0) / post_sd) # analytic pd
   return(pd)
 }
@@ -24,7 +24,7 @@ compute_metrics <- function(res_list) {
   # Check simulation set up
   pi0_check <- mean(is_null_mat) 
   
-  # Curiosity
+  # Curiosity-----
   gamma <- 0.60
   prob_H0_in_zone <- (gamma - 0.5) / 0.5
   
@@ -35,7 +35,7 @@ compute_metrics <- function(res_list) {
   prop_not_sig_adj <- mean(pd_adj_mat < 0.975, na.rm = TRUE)
   prop_not_sig_pd  <- mean(pd_mat < 0.975,     na.rm = TRUE)
   
-  # False Positive
+  # False Positive----
   fp_adj_mat <- (pd_adj_mat > 0.975) & is_null_mat
   fp_pd_mat  <- (pd_mat > 0.975) & is_null_mat
   
