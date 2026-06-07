@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Bayesian Multiplicity Adjustments">
-<meta name="description" content="multibayes provides tools for Bayesian inference and decision-making across multiple parameters simultaneously.">
-<meta property="og:description" content="multibayes provides tools for Bayesian inference and decision-making across multiple parameters simultaneously.">
+<meta name="description" content="multibayes provides tools for Bayesian inference and decision-making across multiple parameters.">
+<meta property="og:description" content="multibayes provides tools for Bayesian inference and decision-making across multiple parameters.">
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script>
 </head>
 <body>
@@ -85,8 +85,8 @@
 <a class="anchor" aria-label="anchor" href="#pdadjust-prior-odds-adjustment-for-pd"></a>
 </h2>
 <p>The Probability of Direction (<em>pd</em>) is often used as a decision rule: a hypothesis is accepted when <em>pd</em> exceeds a threshold. When this decision is made repeatedly across several hypotheses, the global null probability can be much lower than intended. <code><a href="reference/pd.adjust.html">pd.adjust()</a></code> addresses this problem by making explicit the prior probability of the global null.</p>
-<p>The global prior probability that <strong>all</strong> hypotheses are null, <em>p</em> (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi mathvariant="normal">Π</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\Pi_0</annotation></semantics></math>), is decomposed into a per-hypothesis prior:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mn>0</mn></msub><mo>=</mo><msup><mi>p</mi><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\pi_0 = p^{1/m}</annotation></semantics></math></p>
+<p>The primary input is the per-test prior <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\pi_0</annotation></semantics></math>, the probability that an individual effect is null. Under exchangeability this is the expected proportion of null effects in the family. Equivalently, you may specify the global null, <em>p0</em> (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Pr(H_0)</annotation></semantics></math>), the prior probability that <strong>all</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math> hypotheses are null, from which the per-test prior is recovered under independence:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>π</mi><mn>0</mn><mi>m</mi></msubsup><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>π</mi><mn>0</mn></msub><mo>=</mo><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">\Pr(H_0) = \pi_0^{m}, \qquad \pi_0 = \Pr(H_0)^{1/m}.</annotation></semantics></math></p>
 <p>Each <em>pd</em> is then reweighted by Bayes’ theorem:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><msub><mi>d</mi><mtext mathvariant="normal">adj</mtext></msub><mo>=</mo><mfrac><mrow><mi>p</mi><mi>d</mi><mo>⋅</mo><msub><mi>π</mi><mn>1</mn></msub></mrow><mrow><mi>p</mi><mi>d</mi><mo>⋅</mo><msub><mi>π</mi><mn>1</mn></msub><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><msub><mi>π</mi><mn>0</mn></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">pd_{\text{adj}} = \frac{pd \cdot \pi_1}{pd \cdot \pi_1 + (1 - pd) \cdot \pi_0}</annotation></semantics></math></p>
 <p>Because the prior is conservative (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mn>0</mn></msub><mo>&gt;</mo><msub><mi>π</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\pi_0 &gt; \pi_1</annotation></semantics></math>), the adjustment always shrinks <em>pd</em> toward its lower bound.</p>
@@ -105,7 +105,12 @@
 <span></span>
 <span><span class="co"># From a vector of pd values (direction-agnostic)</span></span>
 <span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>, H5 <span class="op">=</span> <span class="fl">0.891</span>, H6 <span class="op">=</span> <span class="fl">0.987</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, p <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Specify the per-test null prior pi0 directly (primary interface)</span></span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, pi0 <span class="op">=</span> <span class="fl">0.65</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># ...or specify the global null p = Pr(all null); pi0 is then p^(1/m)</span></span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, p0 <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Simulate posterior draws</span></span>
 <span><span class="va">Sigma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, nrow <span class="op">=</span> <span class="fl">6</span>, ncol <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
@@ -113,13 +118,16 @@
 <span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MASS/man/mvrnorm.html" class="external-link">mvrnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4000</span>, mu <span class="op">=</span> <span class="va">mu</span>, Sigma <span class="op">=</span> <span class="va">Sigma</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"H1"</span>, <span class="st">"H2"</span>, <span class="st">"H3"</span>, <span class="st">"H4"</span>, <span class="st">"H5"</span>, <span class="st">"H6"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># From posterior draws </span></span>
-<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="co"># From posterior draws (per-test correction only)</span></span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Also return the cumulative joint statement (this orders rows by evidence)</span></span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span>, joint <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span>
 <span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span></span>
 <span>  draws <span class="op">=</span> <span class="va">draws</span>,</span>
-<span>  p <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  pi0 <span class="op">=</span> <span class="fl">0.4</span>,</span>
 <span>  null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
 <span>  direction  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -127,7 +135,7 @@
 <div class="section level3">
 <h3 id="output">Output<a class="anchor" aria-label="anchor" href="#output"></a>
 </h3>
-<p>When <code>draws</code> are supplied, the output is a <code>data.frame</code> with one row per hypothesis:</p>
+<p><code><a href="reference/pd.adjust.html">pd.adjust()</a></code> returns a <code>pd_adjust</code> object — a <code>data.frame</code> with a tidy <code>print</code> method that summarises the constant quantities (<code>pi0</code>, <code>m</code>) in a header and shows the per-test table. With <code>draws</code>, it has one row per hypothesis:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -139,17 +147,12 @@
 </tr></thead>
 <tbody>
 <tr>
-<td><code>mean.est</code></td>
-<td>Posterior mean per parameter</td>
+<td><code>median.est</code></td>
+<td>Posterior median per parameter (the sign of <code>median.est − null.value</code> matches <code>pd</code>’s dominant direction)</td>
 </tr>
 <tr>
 <td><code>null.value</code></td>
 <td>Null reference value used</td>
-</tr>
-<tr>
-<td><code>direction</code></td>
-<td>Testing mode: <code>"greater"</code>, <code>"less"</code>, or <code>"two.sided"</code>
-</td>
 </tr>
 <tr>
 <td><code>pd</code></td>
@@ -162,29 +165,35 @@
 </td>
 </tr>
 <tr>
-<td><code>p</code></td>
-<td>Global null probability supplied by the user (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi mathvariant="normal">Π</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\Pi_0</annotation></semantics></math>)</td>
+<td><code>pi0</code></td>
+<td>Per-test null prior <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\pi_0</annotation></semantics></math> — the expected proportion of nulls (robust under exchangeability)</td>
 </tr>
 <tr>
 <td><code>m</code></td>
 <td>Family size used</td>
 </tr>
 <tr>
-<td><code>pm</code></td>
-<td>Per-hypothesis null prior <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>p</mi><mrow><mn>1</mn><mi>/</mi><mi>m</mi></mrow></msup><mo>=</mo><msub><mi>π</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">p^{1/m} = \pi_0</annotation></semantics></math>
+<td><code>direction</code></td>
+<td>Testing mode: <code>"greater"</code>, <code>"less"</code>, or <code>"two.sided"</code>
 </td>
+</tr>
+<tr>
+<td><code>joint_cum</code></td>
+<td>
+<em>(only if <code>joint = TRUE</code>)</em> cumulative joint probability that the first <em>k</em> hypotheses (in row order) all hold in their claimed direction — computed from the draws (dependence-aware) or, for <code>pd</code> input, as the running product of <code>pd</code> (independence)</td>
 </tr>
 </tbody>
 </table>
-<p>When a <code>pd</code> vector is supplied directly, <code>mean.est</code>, <code>null.value</code>, and <code>direction</code> are not returned.</p>
+<p>The global null <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Π</mi><mn>0</mn></msub><mo>=</mo><msubsup><mi>π</mi><mn>0</mn><mi>m</mi></msubsup></mrow><annotation encoding="application/x-tex">\Pi_0 = \pi_0^m</annotation></semantics></math> is <strong>not</strong> reported as a column: it holds only under independence and can mislead when tests are dependent, so the per-test prior <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\pi_0</annotation></semantics></math> (<code>pi0</code>) is reported instead. You may still <em>supply</em> the prior as <code>p0</code>; it is converted to <code>pi0</code> internally.</p>
+<p>By default only the <strong>per-test correction</strong> is returned. Set <strong><code>joint = TRUE</code></strong> to <em>additionally</em> return the <strong>joint statement</strong> (<code>joint_cum</code>); this also orders the rows by decreasing <code>pd</code>, since the cumulative joint is only interpretable strongest-first. (<strong><code>order = TRUE</code></strong> on its own just sorts the rows by <code>pd</code>, without adding the joint.) When a <code>pd</code> vector is supplied directly, <code>median.est</code>, <code>null.value</code>, and <code>direction</code> are not returned. The header is cosmetic: every quantity remains available as a column for programmatic use (e.g. <code>result$pd.adj</code>, <code>result$joint_cum</code>).</p>
 </div>
 <div class="section level3">
-<h3 id="choosing-p-nullvalue-and-direction">Choosing <code>p</code>, <code>null.value</code>, and <code>direction</code>
-<a class="anchor" aria-label="anchor" href="#choosing-p-nullvalue-and-direction"></a>
+<h3 id="choosing-pi0-or-p0-nullvalue-and-direction">Choosing <code>pi0</code> (or <code>p0</code>), <code>null.value</code>, and <code>direction</code>
+<a class="anchor" aria-label="anchor" href="#choosing-pi0-or-p0-nullvalue-and-direction"></a>
 </h3>
 <ul>
 <li>
-<strong><code>p</code></strong> encodes your prior belief that <strong>all</strong> tested hypotheses are simultaneously null.</li>
+<strong><code>pi0</code></strong> (primary) is your prior probability that any single effect is null — equivalently, the expected proportion of null effects in the family. Alternatively, <strong><code>p0</code></strong> encodes the prior belief that <strong>all</strong> tested hypotheses are simultaneously null, with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>H</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>π</mi><mn>0</mn><mi>m</mi></msubsup></mrow><annotation encoding="application/x-tex">\Pr(H_0) = \pi_0^m</annotation></semantics></math>. Supply one of the two.</li>
 <li>
 <strong><code>null.value</code></strong> sets the null reference value for each parameter. A scalar applies the same null to all parameters; a vector allows a different null per parameter.</li>
 <li>
@@ -200,17 +209,7 @@
 <blockquote>
 <p>Calderan, M., Gambarota, F., Toffalini, E., &amp; Altoè, G. (2026). Adjusting the Probability of Direction for Multiple Testing.</p>
 </blockquote>
-<p>Pre-print: - <a href="paper/manuscript.pdf">pdf</a> - <a href="paper/manuscipt.html">html</a> —</p>
-</div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<ul>
-<li>Jeffreys, H. (1938). Significance tests when several degrees of freedom arise simultaneously. <em>Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences, 165</em>(921), 161–198. <a href="https://doi.org/10.1098/rspa.1938.0052" class="external-link uri">https://doi.org/10.1098/rspa.1938.0052</a>
-</li>
-<li>Westfall, P. H., Johnson, W. O., &amp; Utts, J. M. (1997). A Bayesian perspective on the Bonferroni adjustment. <em>Biometrika, 84</em>(2), 419–427. <a href="https://doi.org/10.2307/2337467" class="external-link uri">https://doi.org/10.2307/2337467</a>
-</li>
-</ul>
+<p>Pre-print: - <a href="paper/manuscript.pdf">pdf</a> - <a href="paper/manuscipt.html">html</a></p>
 <hr>
 </div>
 <div class="section level2">

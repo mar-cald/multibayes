@@ -3,15 +3,19 @@
 a matrix of posterior draws, from which pd values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the direction argument controls which formulation is applied per
-hypothesis. The global prior probability that all tested hypotheses are
-null, \(\Pi_0\), is decomposed into a per-hypothesis prior
-\(\pi_0 = \Pi_0^{1/m}\), where \(m\) is the number of hypotheses."><meta property="og:description" content="The function accepts either a vector of pre-computed pd values or
+hypothesis. The adjustment is governed by the per-test prior probability
+that an individual effect is null, \(\pi_0\) (argument pi0).
+Equivalently, one may supply the global null \(\Pi_0\) (argument
+p0), the prior that all \(m\) hypotheses are null, from which
+\(\pi_0 = \Pi_0^{1/m}\) is recovered under independence."><meta property="og:description" content="The function accepts either a vector of pre-computed pd values or
 a matrix of posterior draws, from which pd values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the direction argument controls which formulation is applied per
-hypothesis. The global prior probability that all tested hypotheses are
-null, \(\Pi_0\), is decomposed into a per-hypothesis prior
-\(\pi_0 = \Pi_0^{1/m}\), where \(m\) is the number of hypotheses."><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script></head><body>
+hypothesis. The adjustment is governed by the per-test prior probability
+that an individual effect is null, \(\pi_0\) (argument pi0).
+Equivalently, one may supply the global null \(\Pi_0\) (argument
+p0), the prior that all \(m\) hypotheses are null, from which
+\(\pi_0 = \Pi_0^{1/m}\) is recovered under independence."><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -49,14 +53,25 @@ null, \(\Pi_0\), is decomposed into a per-hypothesis prior
 a matrix of posterior draws, from which <em>pd</em> values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the <code>direction</code> argument controls which formulation is applied per
-hypothesis. The global prior probability that all tested hypotheses are
-null, \(\Pi_0\), is decomposed into a per-hypothesis prior
-\(\pi_0 = \Pi_0^{1/m}\), where \(m\) is the number of hypotheses.</p>
+hypothesis. The adjustment is governed by the per-test prior probability
+that an individual effect is null, \(\pi_0\) (argument <code>pi0</code>).
+Equivalently, one may supply the global null \(\Pi_0\) (argument
+<code>p0</code>), the prior that all \(m\) hypotheses are null, from which
+\(\pi_0 = \Pi_0^{1/m}\) is recovered under independence.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="cn">NULL</span>, draws <span class="op">=</span> <span class="cn">NULL</span>, p <span class="op">=</span> <span class="cn">NULL</span>, null.value <span class="op">=</span> <span class="fl">0</span>, direction <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pd.adjust</span><span class="op">(</span></span>
+<span>  pd <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  draws <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  p0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pi0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  null.value <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  direction <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  joint <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,9 +91,19 @@ If provided, <em>pd</em> values are computed automatically from the draws
 according to <code>direction</code> and <code>null.value</code>.</p></dd>
 
 
-<dt id="arg-p">p<a class="anchor" aria-label="anchor" href="#arg-p"></a></dt>
+<dt id="arg-p-">p0<a class="anchor" aria-label="anchor" href="#arg-p-"></a></dt>
 <dd><p>Numeric scalar in \((0, 1)\). The prior probability that
-<strong>all</strong> hypotheses are null simultaneously.</p></dd>
+<strong>all</strong> hypotheses are null simultaneously (the global null,
+\(\Pi_0\)). Supply <strong>either</strong> <code>pi0</code> <strong>or</strong> <code>p0</code>,
+not both. When <code>p0</code> is given, the per-test prior is derived under
+independence as \(\pi_0 = \Pi_0^{1/m}\).</p></dd>
+
+
+<dt id="arg-pi-">pi0<a class="anchor" aria-label="anchor" href="#arg-pi-"></a></dt>
+<dd><p>Numeric scalar in \((0, 1)\). The per-test prior probability that
+an individual effect is null, applied to every test. Supply <strong>either</strong> <code>pi0</code> <strong>or</strong> <code>p0</code>, not both. When
+<code>pi0</code> is given, the implied global null is \(\Pi_0 = \pi_0^{m}\)
+(valid under independence) and is returned in <code>p0</code>.</p></dd>
 
 
 <dt id="arg-null-value">null.value<a class="anchor" aria-label="anchor" href="#arg-null-value"></a></dt>
@@ -101,19 +126,46 @@ to match the number of parameters; a mixed vector allows different modes
 across hypotheses. Defaults to <code>NULL</code> (direction-agnostic for all
 parameters).</p></dd>
 
+
+<dt id="arg-order">order<a class="anchor" aria-label="anchor" href="#arg-order"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, the returned rows are ordered by
+decreasing <code>pd</code> (strongest directional evidence first). If <code>FALSE</code>
+(the default), rows are returned in input order, so the output stays aligned
+with the columns of <code>draws</code> (or the elements of <code>pd</code>); use this for
+programmatic work that pairs <code>pd.adj</code> with external vectors. Ordering is
+enabled automatically when <code>joint = TRUE</code>.</p></dd>
+
+
+<dt id="arg-joint">joint<a class="anchor" aria-label="anchor" href="#arg-joint"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, the output <em>additionally</em> includes
+the cumulative joint probability <code>joint_cum</code> (see Details). Because that
+cumulative joint is only interpretable when accumulated from the strongest
+claim down, <code>joint = TRUE</code> orders the rows by decreasing <code>pd</code>
+(i.e. it implies <code>order = TRUE</code>). Defaults to <code>FALSE</code>, in which case
+only the per-test correction is returned.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>data.frame</code> with one row per hypothesis, containing:
-<code>pd</code> (values used in the adjustment), <code>pd.adj</code> (adjusted
-values), <code>p</code> (prior probability of the global null), and <code>m</code>
-(number of tests), <code>pm</code> (prior probability for the null for each test).
-For direction-agnostic tests, both <code>pd</code> and <code>pd.adj</code> are bounded in \([0.5, 1]\); for
-directional tests, both are on \([0, 1]\), with values below \(0.5\)
-indicating that the data (and the adjustment) favoured the opposite
-direction. When <code>draws</code> are supplied, the output additionally
-includes <code>mean.est</code> (posterior mean per parameter), <code>null.value</code>
-(null reference values), and <code>direction</code>.</p>
+    <p>An object of class <code>pd_adjust</code> (a <code>data.frame</code> with a
+dedicated <code><a href="print.pd_adjust.html">print.pd_adjust</a></code> method), with one row per
+hypothesis. Columns: <code>pd</code> (values used in the adjustment),
+<code>pd.adj</code> (adjusted values), <code>pi0</code> (per-test null prior
+\(\pi_0\)), and <code>m</code> (number of tests). The global null
+\(\Pi_0 = \pi_0^m\) is <strong>not</strong> returned: it is exact only under
+independence, and reporting it alongside per-test results can mislead when
+the tests are dependent; the per-test prior \(\pi_0\) is the robust
+quantity (the expected proportion of nulls under exchangeability). When
+<code>joint = TRUE</code> a <code>joint_cum</code> column is added; when
+<code>order = TRUE</code> the rows are sorted by decreasing <code>pd</code>. For
+direction-agnostic tests, both <code>pd</code> and <code>pd.adj</code> are bounded in
+\([0.5, 1]\); for directional tests, both are on \([0, 1]\), with values
+below \(0.5\) indicating that the data (and the adjustment) favoured the
+opposite direction. When <code>draws</code> are supplied, the output additionally
+includes <code>median.est</code> (posterior median per parameter), <code>null.value</code>,
+and <code>direction</code>. The <code>print</code> method summarises the constant
+quantities (<code>pi0</code>, <code>m</code>) in a header and displays the per-test
+table; the columns themselves remain available for programmatic access.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -142,32 +194,51 @@ of the data and the conservative prior against the hypothesis.</p>
 is supported: each element of <code>direction</code> is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.</p>
-    </div>
-    <div class="section level2">
-    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Jeffreys, H. (1938). Significance tests when several degrees of freedom arise
-simultaneously. <em>Proceedings of the Royal Society of London. Series A.
-Mathematical and Physical Sciences, 165</em>(921), 161–198.
-<a href="https://doi.org/10.1098/rspa.1938.0052" class="external-link">https://doi.org/10.1098/rspa.1938.0052</a></p>
-<p>Westfall, P. H., Johnson, W. O., &amp; Utts, J. M. (1997). A Bayesian perspective
-on the Bonferroni adjustment. <em>Biometrika, 84</em>(2), 419–427.
-<a href="https://doi.org/10.2307/2337467" class="external-link">https://doi.org/10.2307/2337467</a></p>
+<p><strong>Per-test correction and joint statement.</strong> By default the function
+returns the per-test correction only (the marginal <code>pd</code> and its adjusted
+value <code>pd.adj</code>). Setting <code>joint = TRUE</code> <em>additionally</em> returns
+<code>joint_cum</code> and orders the rows by decreasing <code>pd</code>, so that
+<code>joint_cum</code> is the cumulative joint probability that the \(k\) strongest
+claims all hold in their claimed direction. When <code>draws</code> are supplied this joint is computed
+directly from the draws by intersecting the per-draw directional events, so it
+reflects the posterior dependence among parameters; when only <code>pd</code> is
+supplied it is the running product of the <em>pd</em> values, valid only under
+independence. The claimed direction for a <code>"two.sided"</code> test is its
+dominant posterior side, and the last entry of <code>joint_cum</code> is the joint
+probability that all \(m\) claims hold simultaneously.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># From a vector of pd values </span></span></span>
-<span class="r-in"><span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>, </span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># From a vector of pd values</span></span></span>
+<span class="r-in"><span><span class="va">pd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H1 <span class="op">=</span> <span class="fl">0.999</span>, H2 <span class="op">=</span> <span class="fl">0.946</span>, H3 <span class="op">=</span> <span class="fl">0.813</span>, H4 <span class="op">=</span> <span class="fl">0.763</span>,</span></span>
 <span class="r-in"><span>H5 <span class="op">=</span> <span class="fl">0.891</span>, H6 <span class="op">=</span> <span class="fl">0.987</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, p <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, p0 <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    mean.est null.value    pd pd.adj   p m     pm direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H1       NA         NA 0.999 0.9940 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H2       NA         NA 0.946 0.7430 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H3       NA         NA 0.813 0.5000 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H4       NA         NA 0.763 0.5000 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H5       NA         NA 0.891 0.5742 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H6       NA         NA 0.987 0.9261 0.4 6 0.8584 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       pd pd.adj direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1 0.999 0.9940 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2 0.946 0.7430 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3 0.813 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4 0.763 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5 0.891 0.5742 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6 0.987 0.9261 two.sided</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Equivalent call specifying the per-test prior pi0 directly</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, pi0 <span class="op">=</span> <span class="fl">0.4</span><span class="op">^</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       pd pd.adj direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1 0.999 0.9940 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2 0.946 0.7430 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3 0.813 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4 0.763 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5 0.891 0.5742 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6 0.987 0.9261 two.sided</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate draws</span></span></span>
 <span class="r-in"><span><span class="va">Sigma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, nrow <span class="op">=</span> <span class="fl">6</span>, ncol <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">1</span></span></span>
@@ -175,29 +246,51 @@ on the Bonferroni adjustment. <em>Biometrika, 84</em>(2), 419–427.
 <span class="r-in"><span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MASS/man/mvrnorm.html" class="external-link">mvrnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4000</span>, mu <span class="op">=</span> <span class="va">mu</span>, Sigma <span class="op">=</span> <span class="va">Sigma</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"H1"</span>, <span class="st">"H2"</span>, <span class="st">"H3"</span>, <span class="st">"H4"</span>, <span class="st">"H5"</span>, <span class="st">"H6"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># From posterior draws</span></span></span>
-<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Per-test correction only (default)</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    mean.est null.value     pd pd.adj   p m     pm direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H1   0.9930          0 0.8410 0.5000 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H2  -0.0922          0 0.5330 0.5000 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H3   0.7609          0 0.7708 0.5000 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H4  -0.0196          0 0.5118 0.5000 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H5   2.0129          0 0.9755 0.8679 0.4 6 0.8584 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H6   2.9963          0 0.9998 0.9985 0.4 6 0.8584 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    median.est null.value     pd pd.adj direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9602          0 0.8410 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.0793          0 0.5330 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7481          0 0.7708 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0349          0 0.5118 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5     2.0256          0 0.9755 0.8679 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9828          0 0.9998 0.9985 two.sided</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Also return the cumulative joint statement, ordered by evidence</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span>, order <span class="op">=</span> <span class="cn">TRUE</span>, joint <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    median.est null.value     pd pd.adj direction joint_cum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9828          0 0.9998 0.9985 two.sided    0.9998</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5     2.0256          0 0.9755 0.8679 two.sided    0.9752</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9602          0 0.8410 0.5000 two.sided    0.8202</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7481          0 0.7708 0.5000 two.sided    0.6328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.0793          0 0.5330 0.5000 two.sided    0.3405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0349          0 0.5118 0.5000 two.sided    0.1663</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> joint_cum: cumulative joint Pr(first k claims hold), in the order shown.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span></span>
-<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p <span class="op">=</span> <span class="fl">0.2</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>          direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, </span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.2</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>          direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"greater"</span>,</span></span>
 <span class="r-in"><span>          <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    mean.est null.value     pd pd.adj   p m     pm direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H1   0.9930        0.2 0.7832 0.5265 0.2 6 0.7647   greater</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H2  -0.0922        0.0 0.5330 0.5000 0.2 6 0.7647 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H3   0.7609        0.2 0.7035 0.4220 0.2 6 0.7647   greater</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H4  -0.0196        0.0 0.5118 0.5000 0.2 6 0.7647 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H5   2.0129        0.5 0.9368 0.8200 0.2 6 0.7647   greater</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H6   2.9963        0.5 0.9958 0.9863 0.2 6 0.7647   greater</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.7647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    median.est null.value     pd pd.adj direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9602        0.2 0.7832 0.5265   greater</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.0793        0.0 0.5330 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7481        0.2 0.7035 0.4220   greater</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0349        0.0 0.5118 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5     2.0256        0.5 0.9368 0.8200   greater</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9828        0.5 0.9958 0.9863   greater</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

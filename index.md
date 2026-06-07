@@ -31,11 +31,15 @@ probability can be much lower than intended.
 addresses this problem by making explicit the prior probability of the
 global null.
 
-The global prior probability that **all** hypotheses are null, *p*
-($`\Pi_0`$), is decomposed into a per-hypothesis prior:
+The primary input is the per-test prior $`\pi_0`$, the probability that
+an individual effect is null. Under exchangeability this is the expected
+proportion of null effects in the family. Equivalently, you may specify
+the global null, *p0* ($`\Pr(H_0)`$), the prior probability that **all**
+$`m`$ hypotheses are null, from which the per-test prior is recovered
+under independence:
 
 ``` math
-\pi_0 = p^{1/m}
+\Pr(H_0) = \pi_0^{m}, \qquad \pi_0 = \Pr(H_0)^{1/m}.
 ```
 
 Each *pd* is then reweighted by Bayes’ theorem:
@@ -69,7 +73,12 @@ library(multibayes)
 
 # From a vector of pd values (direction-agnostic)
 pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, H5 = 0.891, H6 = 0.987)
-pd.adjust(pd = pd_values, p = 0.4)
+
+# Specify the per-test null prior pi0 directly (primary interface)
+pd.adjust(pd = pd_values, pi0 = 0.65)
+
+# ...or specify the global null p = Pr(all null); pi0 is then p^(1/m)
+pd.adjust(pd = pd_values, p0 = 0.4)
 
 # Simulate posterior draws
 Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
@@ -77,13 +86,16 @@ mu <- c(1, -0.1, 0.8, 0, 2, 3)
 draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
-# From posterior draws 
-pd.adjust(draws = draws, p = 0.4, null.value = 0)
+# From posterior draws (per-test correction only)
+pd.adjust(draws = draws, p0 = 0.4, null.value = 0)
+
+# Also return the cumulative joint statement (this orders rows by evidence)
+pd.adjust(draws = draws, p0 = 0.4, null.value = 0, joint = TRUE)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(
   draws = draws,
-  p = 0.4,
+  pi0 = 0.4,
   null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
   direction  = c("greater", "two.sided", "greater", "two.sided", "greater", "greater")
 )
@@ -91,27 +103,44 @@ pd.adjust(
 
 ### Output
 
-When `draws` are supplied, the output is a `data.frame` with one row per
-hypothesis:
+[`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
+returns a `pd_adjust` object — a `data.frame` with a tidy `print` method
+that summarises the constant quantities (`pi0`, `m`) in a header and
+shows the per-test table. With `draws`, it has one row per hypothesis:
 
 | Column | Description |
 |----|----|
-| `mean.est` | Posterior mean per parameter |
+| `median.est` | Posterior median per parameter (the sign of `median.est − null.value` matches `pd`’s dominant direction) |
 | `null.value` | Null reference value used |
-| `direction` | Testing mode: `"greater"`, `"less"`, or `"two.sided"` |
 | `pd` | *pd* used in the adjustment; in $`[0.5, 1]`$ for agnostic tests, $`[0, 1]`$ for directional tests |
 | `pd.adj` | Adjusted *pd* after prior-odds correction; same bounds as `pd` |
-| `p` | Global null probability supplied by the user ($`\Pi_0`$) |
+| `pi0` | Per-test null prior $`\pi_0`$ — the expected proportion of nulls (robust under exchangeability) |
 | `m` | Family size used |
-| `pm` | Per-hypothesis null prior $`p^{1/m} = \pi_0`$ |
+| `direction` | Testing mode: `"greater"`, `"less"`, or `"two.sided"` |
+| `joint_cum` | *(only if `joint = TRUE`)* cumulative joint probability that the first *k* hypotheses (in row order) all hold in their claimed direction — computed from the draws (dependence-aware) or, for `pd` input, as the running product of `pd` (independence) |
 
-When a `pd` vector is supplied directly, `mean.est`, `null.value`, and
-`direction` are not returned.
+The global null $`\Pi_0 = \pi_0^m`$ is **not** reported as a column: it
+holds only under independence and can mislead when tests are dependent,
+so the per-test prior $`\pi_0`$ (`pi0`) is reported instead. You may
+still *supply* the prior as `p0`; it is converted to `pi0` internally.
 
-### Choosing `p`, `null.value`, and `direction`
+By default only the **per-test correction** is returned. Set
+**`joint = TRUE`** to *additionally* return the **joint statement**
+(`joint_cum`); this also orders the rows by decreasing `pd`, since the
+cumulative joint is only interpretable strongest-first.
+(**`order = TRUE`** on its own just sorts the rows by `pd`, without
+adding the joint.) When a `pd` vector is supplied directly,
+`median.est`, `null.value`, and `direction` are not returned. The header
+is cosmetic: every quantity remains available as a column for
+programmatic use (e.g. `result$pd.adj`, `result$joint_cum`).
 
-- **`p`** encodes your prior belief that **all** tested hypotheses are
-  simultaneously null.
+### Choosing `pi0` (or `p0`), `null.value`, and `direction`
+
+- **`pi0`** (primary) is your prior probability that any single effect
+  is null — equivalently, the expected proportion of null effects in the
+  family. Alternatively, **`p0`** encodes the prior belief that **all**
+  tested hypotheses are simultaneously null, with
+  $`\Pr(H_0) = \pi_0^m`$. Supply one of the two.
 - **`null.value`** sets the null reference value for each parameter. A
   scalar applies the same null to all parameters; a vector allows a
   different null per parameter.
@@ -133,17 +162,7 @@ If you use **multibayes** in published research, please cite:
 
 Pre-print: -
 [pdf](https://mar-cald.github.io/multibayes/paper/manuscript.pdf) -
-[html](https://mar-cald.github.io/multibayes/paper/manuscipt.md) —
-
-## References
-
-- Jeffreys, H. (1938). Significance tests when several degrees of
-  freedom arise simultaneously. *Proceedings of the Royal Society of
-  London. Series A. Mathematical and Physical Sciences, 165*(921),
-  161–198. <https://doi.org/10.1098/rspa.1938.0052>
-- Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian
-  perspective on the Bonferroni adjustment. *Biometrika, 84*(2),
-  419–427. <https://doi.org/10.2307/2337467>
+[html](https://mar-cald.github.io/multibayes/paper/manuscipt.md)
 
 ------------------------------------------------------------------------
 
