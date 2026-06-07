@@ -431,11 +431,11 @@ A boundary condition arises when the specified $\pi_0$ falls below $0.5$ (which,
 
 ## Error rates under the prior-odds adjustment
 
-For a family of $m$ such tests, let $R$ denote the total number of rejections and $V$ the number of false rejections (true nulls that are rejected). The quantity we want to consider is the False Discovery Rate (FDR) [@Benjamini1995],
+For a family of $m$ such tests, let $R$ denote the total number of rejections and $V$ the number of false rejections (true nulls that are rejected). The quantity we want to consider is the False Discovery Rate (FDR),
 $$
 \mathrm{FDR} = \mathbb{E}\!\left[\frac{V}{\max(R, 1)}\right],
 $$
-where the $\max(R, 1)$ in the denominator sets the ratio to zero when no hypothesis is rejected. The FDR can be decomposed as the product of the positive False Discovery Rate (pFDR) [@Storey2003],
+where the $\max(R, 1)$ in the denominator sets the ratio to zero when no hypothesis is rejected [@Benjamini1995]. The FDR can be decomposed as the product of the positive False Discovery Rate (pFDR) [@Storey2003],
 $$
 \mathrm{pFDR} = \mathbb{E}\!\left[\frac{V}{R} \,\Big|\, R > 0\right],
 $$
@@ -444,11 +444,11 @@ $$
 \mathrm{FDR} = \mathrm{pFDR} \times \Pr(R > 0).
 $$
 
-If each hypothesis is null with prior probability $\pi_0$ and non-null with probability $1 - \pi_0$, the pFDR is given by
+If each hypothesis is null with prior probability $\pi_0$ and non-null with probability $1 - \pi_0$, and the tests are independent and identical (sharing the same rejection region and the same null and alternative distributions), the pFDR can be written as
 $$
 \mathrm{pFDR} = \frac{\pi_0\, \alpha}{\pi_0\, \alpha + (1 - \pi_0)(1 - \beta)},
 $$
-where $\alpha$ and $\beta$ are the per-test Type I and Type II error probabilities [@Storey2003; @berger2023]. This expression shows that the pFDR is governed by the null probability $\pi_0$ and the per-test error rates $\alpha$ and $\beta$. 
+where $\alpha$ and $1 - \beta$ are the per-test Type I error rate and power, respectively [@Storey2003; @berger2023]. Here $\pi_0$ is the prior probability that a hypothesis is null, whereas $\alpha$ and $\beta$ describe the operating characteristics of the test. When the tests are heterogeneous, there is no single common $(\alpha, \beta)$ pair; one may then summarize performance by the family-level averages $\bar{\alpha}$ and $\bar{\beta}$, which yield the ratio $\mathbb{E}[V]/\mathbb{E}[R]$.
 
 In the proposed correction the researcher's prior fixes $\pi_0$, while the same adjustment implicitly reduces $\alpha$ (i.e., increases $c$, since $c = 1-\alpha/2$). Indeed, if we write the decision rule $pd_{\mathrm{adj},i} > c$ in odds form, $\frac{pd_{\mathrm{adj},i}}{1 - pd_{\mathrm{adj},i}} > \frac{c}{1 - c}$, and substitute the adjusted odds defined above, the rule reduces to a condition on the unadjusted odds,
 $$

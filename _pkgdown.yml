@@ -12,7 +12,7 @@ navbar:
     - articles
 reference:
 - title: Multiplicity correction
-  contents: 
+  contents:
     - pd.adjust
-  
+    - print.pd_adjust
 
