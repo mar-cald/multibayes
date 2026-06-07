@@ -44,22 +44,3 @@ mod_rt <- brm(formula = formula,
 save(mod_rt, file = "paper/script/example/mod_rt.rda")
 
 
-## Accuracy analysis--------------------------------
-
-data_acc_agg <- data_stroop |>
-  group_by(id, condition, congruency, prev_cong) |>
-  summarise(hits = sum(acc), n = n(), .groups = "drop")
-
-formula <- hits | trials(n) ~ 1 + congruency*prev_cong +
-  congruency*condition + 
-  (1 + congruency*prev_cong + congruency*condition || id)
-
-mod_acc <- brm(formula = formula, 
-           family = binomial(link = "logit"),
-           cores = 3, chains = 3,
-           iter = 10000, 
-           data = data_acc_agg)
-
-save(mod_acc, file = "paper/script/example/mod_acc.rda")
-
-

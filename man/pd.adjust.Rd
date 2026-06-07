@@ -4,7 +4,16 @@
 \alias{pd.adjust}
 \title{Prior-odds adjustment for Probability of Direction \emph{pd}}
 \usage{
-pd.adjust(pd = NULL, draws = NULL, p = NULL, null.value = 0, direction = NULL)
+pd.adjust(
+  pd = NULL,
+  draws = NULL,
+  p0 = NULL,
+  pi0 = NULL,
+  null.value = 0,
+  direction = NULL,
+  order = FALSE,
+  joint = FALSE
+)
 }
 \arguments{
 \item{pd}{Numeric vector of \emph{pd} values. For direction-agnostic tests,
@@ -16,8 +25,16 @@ supplied.}
 If provided, \emph{pd} values are computed automatically from the draws
 according to \code{direction} and \code{null.value}.}
 
-\item{p}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
-\strong{all} hypotheses are null simultaneously.}
+\item{p0}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
+\strong{all} hypotheses are null simultaneously (the global null,
+\eqn{\Pi_0}). Supply \strong{either} \code{pi0} \strong{or} \code{p0},
+not both. When \code{p0} is given, the per-test prior is derived under
+independence as \eqn{\pi_0 = \Pi_0^{1/m}}.}
+
+\item{pi0}{Numeric scalar in \eqn{(0, 1)}. The per-test prior probability that
+an individual effect is null, applied to every test. Supply \strong{either} \code{pi0} \strong{or} \code{p0}, not both. When
+\code{pi0} is given, the implied global null is \eqn{\Pi_0 = \pi_0^{m}}
+(valid under independence) and is returned in \code{p0}.}
 
 \item{null.value}{Numeric scalar or vector. The null (reference) value against
 which the posterior is evaluated, specified on the scale of the posterior.
@@ -35,27 +52,52 @@ direction-agnostic testing (maximum over both sides). A scalar is recycled
 to match the number of parameters; a mixed vector allows different modes
 across hypotheses. Defaults to \code{NULL} (direction-agnostic for all
 parameters).}
+
+\item{order}{Logical. If \code{TRUE}, the returned rows are ordered by
+decreasing \code{pd} (strongest directional evidence first). If \code{FALSE}
+(the default), rows are returned in input order, so the output stays aligned
+with the columns of \code{draws} (or the elements of \code{pd}); use this for
+programmatic work that pairs \code{pd.adj} with external vectors. Ordering is
+enabled automatically when \code{joint = TRUE}.}
+
+\item{joint}{Logical. If \code{TRUE}, the output \emph{additionally} includes
+the cumulative joint probability \code{joint_cum} (see Details). Because that
+cumulative joint is only interpretable when accumulated from the strongest
+claim down, \code{joint = TRUE} orders the rows by decreasing \code{pd}
+(i.e. it implies \code{order = TRUE}). Defaults to \code{FALSE}, in which case
+only the per-test correction is returned.}
 }
 \value{
-A \code{data.frame} with one row per hypothesis, containing:
-\code{pd} (values used in the adjustment), \code{pd.adj} (adjusted
-values), \code{p} (prior probability of the global null), and \code{m}
-(number of tests), \code{pm} (prior probability for the null for each test).
-For direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in \eqn{[0.5, 1]}; for
-directional tests, both are on \eqn{[0, 1]}, with values below \eqn{0.5}
-indicating that the data (and the adjustment) favoured the opposite
-direction. When \code{draws} are supplied, the output additionally
-includes \code{mean.est} (posterior mean per parameter), \code{null.value}
-(null reference values), and \code{direction}.
+An object of class \code{pd_adjust} (a \code{data.frame} with a
+dedicated \code{\link{print.pd_adjust}} method), with one row per
+hypothesis. Columns: \code{pd} (values used in the adjustment),
+\code{pd.adj} (adjusted values), \code{pi0} (per-test null prior
+\eqn{\pi_0}), and \code{m} (number of tests). The global null
+\eqn{\Pi_0 = \pi_0^m} is \strong{not} returned: it is exact only under
+independence, and reporting it alongside per-test results can mislead when
+the tests are dependent; the per-test prior \eqn{\pi_0} is the robust
+quantity (the expected proportion of nulls under exchangeability). When
+\code{joint = TRUE} a \code{joint_cum} column is added; when
+\code{order = TRUE} the rows are sorted by decreasing \code{pd}. For
+direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in
+\eqn{[0.5, 1]}; for directional tests, both are on \eqn{[0, 1]}, with values
+below \eqn{0.5} indicating that the data (and the adjustment) favoured the
+opposite direction. When \code{draws} are supplied, the output additionally
+includes \code{median.est} (posterior median per parameter), \code{null.value},
+and \code{direction}. The \code{print} method summarises the constant
+quantities (\code{pi0}, \code{m}) in a header and displays the per-test
+table; the columns themselves remain available for programmatic access.
 }
 \description{
 The function accepts either a vector of pre-computed \emph{pd} values or
 a matrix of posterior draws, from which \emph{pd} values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the \code{direction} argument controls which formulation is applied per
-hypothesis. The global prior probability that all tested hypotheses are
-null, \eqn{\Pi_0}, is decomposed into a per-hypothesis prior
-\eqn{\pi_0 = \Pi_0^{1/m}}, where \eqn{m} is the number of hypotheses.
+hypothesis. The adjustment is governed by the per-test prior probability
+that an individual effect is null, \eqn{\pi_0} (argument \code{pi0}).
+Equivalently, one may supply the global null \eqn{\Pi_0} (argument
+\code{p0}), the prior that all \eqn{m} hypotheses are null, from which
+\eqn{\pi_0 = \Pi_0^{1/m}} is recovered under independence.
 }
 \details{
 The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
@@ -87,12 +129,28 @@ Mixed use of directional and direction-agnostic tests within the same call
 is supported: each element of \code{direction} is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.
+
+\strong{Per-test correction and joint statement.} By default the function
+returns the per-test correction only (the marginal \code{pd} and its adjusted
+value \code{pd.adj}). Setting \code{joint = TRUE} \emph{additionally} returns
+\code{joint_cum} and orders the rows by decreasing \code{pd}, so that
+\code{joint_cum} is the cumulative joint probability that the \eqn{k} strongest
+claims all hold in their claimed direction. When \code{draws} are supplied this joint is computed
+directly from the draws by intersecting the per-draw directional events, so it
+reflects the posterior dependence among parameters; when only \code{pd} is
+supplied it is the running product of the \emph{pd} values, valid only under
+independence. The claimed direction for a \code{"two.sided"} test is its
+dominant posterior side, and the last entry of \code{joint_cum} is the joint
+probability that all \eqn{m} claims hold simultaneously.
 }
 \examples{
-# From a vector of pd values 
-pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763, 
+# From a vector of pd values
+pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763,
 H5 = 0.891, H6 = 0.987)
-pd.adjust(pd = pd_values, p = 0.4)
+pd.adjust(pd = pd_values, p0 = 0.4)
+
+# Equivalent call specifying the per-test prior pi0 directly
+pd.adjust(pd = pd_values, pi0 = 0.4^(1/6))
 
 # Simulate draws
 Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
@@ -100,22 +158,15 @@ mu    <- c(1, -0.1, 0.8, 0, 2, 3)
 draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
-# From posterior draws
-pd.adjust(draws = draws, p = 0.4, null.value = 0)
+# Per-test correction only (default)
+pd.adjust(draws = draws, p0 = 0.4, null.value = 0)
+
+# Also return the cumulative joint statement, ordered by evidence
+pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE, joint = TRUE)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
-pd.adjust(draws = draws, p = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
-          direction = c("greater", "two.sided", "greater", 
+pd.adjust(draws = draws, p0 = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+          direction = c("greater", "two.sided", "greater",
           "two.sided", "greater", "greater"))
 
-}
-\references{
-Jeffreys, H. (1938). Significance tests when several degrees of freedom arise
-simultaneously. \emph{Proceedings of the Royal Society of London. Series A.
-Mathematical and Physical Sciences, 165}(921), 161--198.
-\url{https://doi.org/10.1098/rspa.1938.0052}
-
-Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian perspective
-on the Bonferroni adjustment. \emph{Biometrika, 84}(2), 419--427.
-\url{https://doi.org/10.2307/2337467}
 }

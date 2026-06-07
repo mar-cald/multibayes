@@ -1,4 +1,5 @@
 ^LICENSE\.md$
+^LICENSE$
 ^paper$
 ^my-prior-odds\.Rproj$
 ^\.Rproj\.user$
@@ -7,3 +8,6 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^\.Rhistory$
+^\.DS_Store$
+^.*\.DS_Store$
