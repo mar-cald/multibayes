@@ -160,6 +160,79 @@ test_that("pd.adjust() requires exactly one of p0 or pi0", {
   expect_error(pd.adjust(pd = pd, pi0 = 1.2), "must be a single number")
 })
 
+test_that("pd.adjust() reports the adjusted threshold and effective alpha", {
+  pd  <- c(0.999, 0.95, 0.80)
+  pi0 <- 0.7
+  out <- pd.adjust(pd = pd, pi0 = pi0)
+
+  cc  <- 0.975
+  cst <- (cc * pi0) / ((1 - pi0) * (1 - cc) + cc * pi0)   # closed-form c_*
+  expect_equal(attr(out, "threshold"),     0.975)
+  expect_equal(attr(out, "threshold.adj"), cst)
+  expect_equal(attr(out, "alpha.nominal"), 2 * (1 - cc))
+  expect_equal(attr(out, "alpha.eff"),     2 * (1 - cst))
+
+  # the model-free equivalence: pd.adj > c  <=>  raw pd > c_*
+  expect_equal(out$pd.adj > 0.975, out$pd > cst)
+})
+
+test_that("pd.adjust() honours a custom threshold and validates it", {
+  pd  <- c(0.999, 0.95, 0.80)
+  out <- pd.adjust(pd = pd, pi0 = 0.7, threshold = 0.95)
+  cst <- (0.95 * 0.7) / ((1 - 0.7) * (1 - 0.95) + 0.95 * 0.7)
+  expect_equal(attr(out, "threshold.adj"), cst)
+  expect_equal(out$pd.adj > 0.95, out$pd > cst)
+
+  expect_error(pd.adjust(pd = pd, pi0 = 0.7, threshold = 0.4),
+               "`threshold`: must be a single number")
+  expect_error(pd.adjust(pd = pd, pi0 = 0.7, threshold = c(0.9, 0.95)),
+               "`threshold`: must be a single number")
+})
+
+test_that("pd.adjust() leaves the threshold unadjusted for non-conservative priors", {
+  pd  <- c(0.9, 0.8, 0.7, 0.6)
+  out <- suppressWarnings(pd.adjust(pd = pd, pi0 = 0.4))   # pi0 <= 0.5: no adjustment
+  expect_equal(attr(out, "threshold.adj"), 0.975)
+  expect_equal(attr(out, "alpha.eff"), attr(out, "alpha.nominal"))
+})
+
+test_that("pd.adjust() reports a family-wise (FWER) cutoff when fwer = TRUE", {
+  pi0 <- 0.7; m <- 9
+  pd  <- setNames(seq(0.99, 0.55, length.out = m), paste0("H", seq_len(m)))
+  out <- pd.adjust(pd = pd, pi0 = pi0, fwer = TRUE)
+
+  a   <- 0.05
+  apt_expected <- (1 - (1 - a)^(1 / m)) / pi0           # affordable per-test rate
+  expect_equal(attr(out, "alpha.fwer.pt"), apt_expected)
+  expect_equal(attr(out, "threshold.fwer"), 1 - apt_expected / 2)
+  # the cutoff controls the prior-averaged FWER at the target level
+  expect_equal(1 - (1 - pi0 * apt_expected)^m, a, tolerance = 1e-8)
+
+  # off by default, and validated
+  expect_true(is.na(attr(pd.adjust(pd = pd, pi0 = pi0), "threshold.fwer")))
+  expect_error(pd.adjust(pd = pd, pi0 = pi0, fwer = "yes"), "must be TRUE or FALSE")
+})
+
+test_that("pd.adjust() accepts alpha as an alternative to threshold", {
+  pd <- c(0.999, 0.95, 0.80)
+
+  # alpha = 0.05 is equivalent to the default threshold = 0.975
+  by_alpha <- pd.adjust(pd = pd, pi0 = 0.7, alpha = 0.05)
+  by_thr   <- pd.adjust(pd = pd, pi0 = 0.7, threshold = 0.975)
+  expect_equal(attr(by_alpha, "threshold"),     attr(by_thr, "threshold"))
+  expect_equal(attr(by_alpha, "threshold.adj"), attr(by_thr, "threshold.adj"))
+  expect_equal(attr(by_alpha, "alpha.nominal"), 0.05)
+
+  # alpha overrides threshold:  c = 1 - alpha/2
+  ov <- pd.adjust(pd = pd, pi0 = 0.7, threshold = 0.99, alpha = 0.10)
+  expect_equal(attr(ov, "threshold"), 0.95)
+
+  expect_error(pd.adjust(pd = pd, pi0 = 0.7, alpha = 0),
+               "`alpha`: must be a single number")
+  expect_error(pd.adjust(pd = pd, pi0 = 0.7, alpha = 1),
+               "`alpha`: must be a single number")
+})
+
 test_that("pd.adjust() returns a classed object and keeps $ access", {
   out <- suppressWarnings(pd.adjust(pd = c(0.9, 0.8, 0.7), p0 = 0.4))
   expect_s3_class(out, "pd_adjust")
@@ -169,32 +242,13 @@ test_that("pd.adjust() returns a classed object and keeps $ access", {
   expect_false("p0" %in% names(out))        # global null not returned
 })
 
-test_that("pd.adjust() adds joint_cum only when joint = TRUE", {
-  pd <- c(0.99, 0.9, 0.8)
-  expect_null(suppressWarnings(pd.adjust(pd = pd, p0 = 0.4))$joint_cum)
-  out <- suppressWarnings(pd.adjust(pd = pd, p0 = 0.4, joint = TRUE))
-  expect_true("joint_cum" %in% names(out))
-  # pd-only: joint_cum is the running product of pd (input order)
-  expect_equal(out$joint_cum, round(cumprod(pd), 4))
-})
-
-test_that("pd.adjust() joint from draws is the exact intersection (dependence-aware)", {
-  set.seed(10)
-  Sigma <- matrix(0.4, 4, 4); diag(Sigma) <- 1
-  draws <- MASS::mvrnorm(20000, mu = c(1, 1, 1, 1), Sigma = Sigma)
-  colnames(draws) <- paste0("H", 1:4)
-
-  out <- suppressWarnings(pd.adjust(draws = draws, p0 = 0.4, joint = TRUE))
-  side <- draws > 0                                  # all directional claims are theta > 0 here
-  manual <- mean(rowSums(side) == 4)
-  expect_equal(unname(out$joint_cum[4]), round(manual, 4))
-  # under positive dependence the joint exceeds the independence product
-  expect_gt(out$joint_cum[4], prod(out$pd) - 1e-8)
+test_that("pd.adjust() no longer accepts the removed joint argument", {
+  expect_error(suppressWarnings(pd.adjust(pd = c(0.9, 0.8), p0 = 0.4, joint = TRUE)),
+               "unused argument")
 })
 
 test_that("print.pd_adjust returns invisibly and prints a header", {
-  out <- suppressWarnings(pd.adjust(pd = c(0.9, 0.8), p0 = 0.4, joint = TRUE))
+  out <- suppressWarnings(pd.adjust(pd = c(0.9, 0.8), p0 = 0.4))
   expect_output(print(out), "Prior-odds adjusted probability of direction")
-  expect_output(print(out), "joint_cum")
   expect_identical(suppressWarnings(print(out)), out)
 })

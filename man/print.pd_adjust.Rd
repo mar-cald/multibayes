@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A \code{pd_adjust} object returned by \code{\link{pd.adjust}}.}
 
-\item{digits}{Number of significant digits used when printing. Defaults to 4.}
+\item{digits}{Number of digits used when printing. Defaults to 4.}
 
 \item{...}{Further arguments passed to \code{print.data.frame}.}
 }

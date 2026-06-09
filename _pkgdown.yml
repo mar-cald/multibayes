@@ -15,4 +15,7 @@ reference:
   contents:
     - pd.adjust
     - print.pd_adjust
+- title: Simultaneous credible intervals
+  contents:
+    - joint
 

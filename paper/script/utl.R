@@ -11,7 +11,7 @@ bayes_posterior_analytical <- function(x, sigma = 1, tau0 = 1, mu0=0) {
 }
 
 # Results simulation
-compute_metrics <- function(res_list) {
+compute_metrics <- function(res_list, pi0 = NULL, alpha = 0.05) {
   # Matrix transformation
   # from vectors to matrix with nrow = iter  and ncol = m (n test)
   pd_adj_mat <- do.call(rbind, lapply(res_list, `[[`, "pd_adj"))
@@ -70,14 +70,33 @@ compute_metrics <- function(res_list) {
   # FDR expected FDP
   fdr_adj <- mean(fdp_adj, na.rm = TRUE)
   fdr_pd<- mean(fdp_pd,  na.rm = TRUE)
-  
+
+  # pi0-aware FWER-controlling rule: reject raw pd > c_fwer, where c_fwer
+  # controls the prior-averaged FWER at `alpha` over the m tests given pi0.
+  fwer_fwer <- pw_fwer <- fdr_fwer <- prop_not_sig_fwer <- NA_real_
+  if (!is.null(pi0)) {
+    m_tests <- ncol(pd_mat)
+    apt_fw  <- (1 - (1 - alpha)^(1 / m_tests)) / pi0
+    c_fwer  <- max(0.5, 1 - apt_fw / 2)
+    rej_fwer <- pd_mat > c_fwer
+    fp_fwer  <- rej_fwer & is_null_mat
+    tp_fwer  <- rej_fwer & !is_null_mat
+    fwer_fwer <- mean(rowSums(fp_fwer, na.rm = TRUE) > 0)
+    pw_fwer   <- sum(tp_fwer, na.rm = TRUE) / sum(!is_null_mat)
+    if (is.nan(pw_fwer)) pw_fwer <- NA
+    R_fwer <- rowSums(rej_fwer, na.rm = TRUE)
+    V_fwer <- rowSums(fp_fwer,  na.rm = TRUE)
+    fdr_fwer <- mean(ifelse(R_fwer == 0, 0, V_fwer / R_fwer), na.rm = TRUE)
+    prop_not_sig_fwer <- mean(pd_mat < c_fwer, na.rm = TRUE)
+  }
+
   data.frame(
-    method = c("pd_adj", "pd"),
-    FWER = c(fwer_adj, fwer_pd),
-    pw = c(pw_adj, pw_pd),
-    FDR = c(fdr_adj, fdr_pd),   
-    pi0_est = c(pi0_est_adj, pi0_est_pd),
-    prop_not_sig = c(prop_not_sig_adj, prop_not_sig_pd),
-    pi0_check = c(pi0_check, pi0_check)
+    method = c("pd_adj", "pd", "pd_fwer"),
+    FWER = c(fwer_adj, fwer_pd, fwer_fwer),
+    pw = c(pw_adj, pw_pd, pw_fwer),
+    FDR = c(fdr_adj, fdr_pd, fdr_fwer),
+    pi0_est = c(pi0_est_adj, pi0_est_pd, NA_real_),
+    prop_not_sig = c(prop_not_sig_adj, prop_not_sig_pd, prop_not_sig_fwer),
+    pi0_check = c(pi0_check, pi0_check, pi0_check)
   )
 }

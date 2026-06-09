@@ -41,18 +41,10 @@
 #' and the same prior-odds adjustment is applied uniformly across all
 #' hypotheses regardless of their directionality.
 #'
-#' \strong{Per-test correction and joint statement.} By default the function
-#' returns the per-test correction only (the marginal \code{pd} and its adjusted
-#' value \code{pd.adj}). Setting \code{joint = TRUE} \emph{additionally} returns
-#' \code{joint_cum} and orders the rows by decreasing \code{pd}, so that
-#' \code{joint_cum} is the cumulative joint probability that the \eqn{k} strongest
-#' claims all hold in their claimed direction. When \code{draws} are supplied this joint is computed
-#' directly from the draws by intersecting the per-draw directional events, so it
-#' reflects the posterior dependence among parameters; when only \code{pd} is
-#' supplied it is the running product of the \emph{pd} values, valid only under
-#' independence. The claimed direction for a \code{"two.sided"} test is its
-#' dominant posterior side, and the last entry of \code{joint_cum} is the joint
-#' probability that all \eqn{m} claims hold simultaneously.
+#' \code{pd.adjust} returns the per-test correction only (the marginal \code{pd}
+#' and its adjusted value \code{pd.adj}). Family-wise summaries across hypotheses,
+#' the cumulative joint statement and simultaneous credible intervals, are
+#' provided separately by \code{\link{joint}}.
 #'
 #' @param pd Numeric vector of \emph{pd} values. For direction-agnostic tests,
 #'   values must be in \eqn{[0.5, 1]}. For directional tests, values are raw
@@ -89,14 +81,30 @@
 #'   decreasing \code{pd} (strongest directional evidence first). If \code{FALSE}
 #'   (the default), rows are returned in input order, so the output stays aligned
 #'   with the columns of \code{draws} (or the elements of \code{pd}); use this for
-#'   programmatic work that pairs \code{pd.adj} with external vectors. Ordering is
-#'   enabled automatically when \code{joint = TRUE}.
-#' @param joint Logical. If \code{TRUE}, the output \emph{additionally} includes
-#'   the cumulative joint probability \code{joint_cum} (see Details). Because that
-#'   cumulative joint is only interpretable when accumulated from the strongest
-#'   claim down, \code{joint = TRUE} orders the rows by decreasing \code{pd}
-#'   (i.e. it implies \code{order = TRUE}). Defaults to \code{FALSE}, in which case
-#'   only the per-test correction is returned.
+#'   programmatic work that pairs \code{pd.adj} with external vectors.
+#' @param threshold Numeric scalar in \eqn{(0.5, 1)}. The decision cutoff applied
+#'   to \emph{pd} (default \code{0.975}, a two-sided per-test
+#'   \eqn{\alpha = 0.05}). It does \strong{not} change \code{pd.adj}; it is used
+#'   only to report the equivalent \strong{adjusted threshold on the raw}
+#'   \emph{pd}, since rejecting \eqn{pd_{adj} > c} is identical to rejecting raw
+#'   \eqn{pd > c_*} with
+#'   \eqn{c_* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)}. 
+#' @param alpha Optional numeric scalar in \eqn{(0, 1)}. A convenience
+#'   parameterization of \code{threshold} on the error scale: when supplied, the
+#'   two-sided cutoff is set to \eqn{c = 1 - \alpha/2} (so \code{alpha = 0.05}
+#'   gives \code{threshold = 0.975}), \strong{overriding} any \code{threshold}
+#'   value. Use whichever scale is more natural; the reported nominal per-test
+#'   rate then equals this \code{alpha}.
+#' @param fwer Logical (default \code{FALSE}). If \code{TRUE}, the output also
+#'   reports a \strong{family-wise} cutoff on the raw \emph{pd} that controls the
+#'   prior-averaged FWER at the nominal level over the \eqn{m} tests, given
+#'   \eqn{\pi_0}. Standard corrections (e.g. Bonferroni) implicitly assume every
+#'   test is null (\eqn{\pi_0 = 1}); here the affordable per-test rate is
+#'   \eqn{[1 - (1 - \alpha)^{1/m}] / \pi_0}, relaxing the standard correction by
+#'   \eqn{1/\pi_0} and reducing to it as \eqn{\pi_0 \to 1}. This is a
+#'   prior-averaged (Bayesian) FWER under the assumed \eqn{\pi_0}, \strong{not}
+#'   strong frequentist control. Reported in the header and as
+#'   \code{attr(x, "threshold.fwer")}.
 #'
 #' @return An object of class \code{pd_adjust} (a \code{data.frame} with a
 #'   dedicated \code{\link{print.pd_adjust}} method), with one row per
@@ -107,7 +115,6 @@
 #'   independence, and reporting it alongside per-test results can mislead when
 #'   the tests are dependent; the per-test prior \eqn{\pi_0} is the robust
 #'   quantity (the expected proportion of nulls under exchangeability). When
-#'   \code{joint = TRUE} a \code{joint_cum} column is added; when
 #'   \code{order = TRUE} the rows are sorted by decreasing \code{pd}. For
 #'   direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in
 #'   \eqn{[0.5, 1]}; for directional tests, both are on \eqn{[0, 1]}, with values
@@ -117,6 +124,19 @@
 #'   and \code{direction}. The \code{print} method summarises the constant
 #'   quantities (\code{pi0}, \code{m}) in a header and displays the per-test
 #'   table; the columns themselves remain available for programmatic access.
+#'   The object also carries, as attributes, the decision cutoff \code{threshold}
+#'   (\eqn{c}), the equivalent adjusted cutoff on the raw \emph{pd}
+#'   \code{threshold.adj} (\eqn{c_*}), and the corresponding two-sided per-test
+#'   Type I rates \code{alpha.nominal} (\eqn{2(1-c)}) and \code{alpha.eff}
+#'   (\eqn{2(1-c_*)}); retrieve them with, e.g., \code{attr(x, "threshold.adj")}.
+#'   The cutoffs \code{threshold.adj} and \code{threshold.fwer} are exact
+#'   transformations of the decision rule, but the reported per-test \emph{rates}
+#'   (\code{alpha.eff}, and the \code{fwer} calibration) use the identity
+#'   \eqn{\alpha = 2(1 - c)}, which holds only for a diffuse within-model prior or
+#'   large \eqn{n} (when the null \emph{pd} is approximately uniform on
+#'   \eqn{[0.5, 1]}). Under an informative prior the true per-test rate is
+#'   smaller, so these rates are conservative and \code{threshold.fwer} controls
+#'   the FWER at or below the stated level.
 #'
 #' @examples
 #' # From a vector of pd values
@@ -136,8 +156,12 @@
 #' # Per-test correction only (default)
 #' pd.adjust(draws = draws, p0 = 0.4, null.value = 0)
 #'
-#' # Also return the cumulative joint statement, ordered by evidence
-#' pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE, joint = TRUE)
+#' # Order the rows by strength of evidence
+#' pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE)
+#'
+#' # Family-wise summaries are obtained separately with joint()
+#' joint(draws, null.value = 0)               # cumulative joint statement
+#' joint(draws, interval = TRUE)              # simultaneous credible intervals
 #'
 #' # Mix of directional and agnostic tests with parameter-specific nulls
 #' pd.adjust(draws = draws, p0 = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
@@ -148,7 +172,8 @@
 #' @export
 pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
                       null.value = 0, direction = NULL,
-                      order = FALSE, joint = FALSE) {
+                      order = FALSE, threshold = 0.975,
+                      alpha = NULL, fwer = FALSE) {
 
   if (is.null(p0) == is.null(pi0)) {
     stop("Specify exactly one of `p0` (global-null prior Pr(H0)) or `pi0` (per-test null prior).")
@@ -159,6 +184,15 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
   if (!is.null(pi0)) {
     stopifnot("`pi0`: must be a single number in (0, 1)" = length(pi0) == 1L && pi0 > 0 && pi0 < 1)
   }
+  if (!is.null(alpha)) {
+    stopifnot("`alpha`: must be a single number in (0, 1)" =
+                length(alpha) == 1L && is.numeric(alpha) && alpha > 0 && alpha < 1)
+    threshold <- 1 - alpha / 2   # two-sided cutoff implied by the nominal rate
+  }
+  stopifnot("`threshold`: must be a single number in (0.5, 1)" =
+              length(threshold) == 1L && is.numeric(threshold) &&
+              threshold > 0.5 && threshold < 1)
+  stopifnot("`fwer`: must be TRUE or FALSE" = length(fwer) == 1L && is.logical(fwer))
 
   if (!is.null(pd)) {
     if (!is.numeric(pd) || any(pd < 0.5 | pd > 1, na.rm = TRUE)) {
@@ -232,26 +266,40 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
     pd.adj <- pmax(pd.adj, 0.5)
   }
 
-  # Row order: by decreasing evidence when `order = TRUE`. `joint = TRUE` also
-  # forces this order, since the cumulative joint is only interpretable when
-  # accumulated strongest-first; otherwise rows stay in input order.
-  ord <- if (isTRUE(order) || isTRUE(joint)) order(pd, decreasing = TRUE) else seq_len(m)
-
-  # Optional cumulative joint probability that the first k claims (in row order) hold.
-  if (isTRUE(joint)) {
-    if (from_draws) {
-      # exact, from the draws: respects posterior dependence among parameters
-      joint_cum <- numeric(m)
-      running   <- rep(TRUE, nrow(side_ind))
-      for (k in seq_len(m)) {
-        running      <- running & side_ind[, ord[k]]
-        joint_cum[k] <- mean(running)
-      }
-    } else {
-      # only marginal pd available: running product (valid under independence)
-      joint_cum <- cumprod(pd[ord])
-    }
+  # Model-free decision threshold implied by the prior odds. Rejecting
+  # `pd.adj > threshold` is identical to rejecting the raw `pd > threshold.adj`,
+  # so threshold.adj is the equivalent (stricter) cutoff to apply to the
+  # unadjusted pd. It is a pure transformation of the decision rule and never
+  # uses the shape of the posterior, hence exact for any draws (normal, t, ...).
+  # The two-sided per-test Type I rate at a cutoff `cut` is 2 * (1 - cut).
+  alpha.nominal <- 2 * (1 - threshold)
+  if (prior_H0 > 0.5) {
+    threshold.adj <- (threshold * prior_H0) /
+      ((1 - prior_H0) * (1 - threshold) + threshold * prior_H0)
+  } else {
+    threshold.adj <- threshold   # no adjustment applied (non-conservative prior)
   }
+  alpha.eff <- 2 * (1 - threshold.adj)
+
+  # Optional family-wise (FWER) cutoff. Standard corrections (e.g. Bonferroni)
+  # control the FWER under the worst case that every test is null (pi0 = 1). If a
+  # fraction pi0 of the m tests are null, the prior-averaged FWER of a per-test
+  # rate a is 1 - (1 - pi0 * a)^m; setting this to the family target alpha gives
+  # the affordable per-test rate a = (1 - (1 - alpha)^(1/m)) / pi0 and the
+  # corresponding (two-sided) raw-pd cutoff below. This relaxes the standard
+  # correction by 1/pi0 and reduces to it as pi0 -> 1. It is a prior-averaged
+  # (Bayesian) FWER, not strong frequentist control.
+  if (isTRUE(fwer)) {
+    alpha.fwer    <- alpha.nominal                       # family-wise target
+    apt_fw        <- (1 - (1 - alpha.fwer)^(1 / m)) / prior_H0
+    threshold.fwer <- max(0.5, 1 - apt_fw / 2)
+    alpha.fwer.pt <- 2 * (1 - threshold.fwer)            # implied per-test rate
+  } else {
+    alpha.fwer <- threshold.fwer <- alpha.fwer.pt <- NA_real_
+  }
+
+  # Row order: by decreasing evidence when `order = TRUE`; otherwise input order.
+  ord <- if (isTRUE(order)) order(pd, decreasing = TRUE) else seq_len(m)
 
   if (from_draws) {
     out <- data.frame(
@@ -280,9 +328,15 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
   if (!is.null(nm) && length(nm) == m) rownames(out) <- nm
 
   out <- out[ord, , drop = FALSE]
-  if (isTRUE(joint)) out$joint_cum <- round(joint_cum, 4)   # aligned with the rows shown
 
   class(out) <- c("pd_adjust", "data.frame")
+  attr(out, "threshold")     <- threshold
+  attr(out, "threshold.adj") <- threshold.adj
+  attr(out, "alpha.nominal") <- alpha.nominal
+  attr(out, "alpha.eff")     <- alpha.eff
+  attr(out, "threshold.fwer") <- threshold.fwer
+  attr(out, "alpha.fwer")     <- alpha.fwer
+  attr(out, "alpha.fwer.pt")  <- alpha.fwer.pt
   out
 }
 
@@ -293,7 +347,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
 #' programmatic access via the usual \code{$} and \code{[}.
 #'
 #' @param x A \code{pd_adjust} object returned by \code{\link{pd.adjust}}.
-#' @param digits Number of significant digits used when printing. Defaults to 4.
+#' @param digits Number of digits used when printing. Defaults to 4.
 #' @param ... Further arguments passed to \code{print.data.frame}.
 #'
 #' @return \code{x}, invisibly.
@@ -302,16 +356,29 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
 print.pd_adjust <- function(x, digits = 4, ...) {
   df <- as.data.frame(x)
   cat("Prior-odds adjusted probability of direction\n")
-  cat(sprintf("Tests: %d  | pi0 = %.4g\n\n",
+  cat(sprintf("Tests: %d  |  pi0 = %.4g\n",
               as.integer(df$m[1]), df$pi0[1]))
+
+  # Wrap header lines at the console width so they never overflow (e.g. in PDF
+  # output); plain cat() would print a single long line that runs off the page.
+  hdr <- function(s) cat(strwrap(s, width = getOption("width", 80L)), "", sep = "\n")
+
+  cadj <- attr(x, "threshold.adj")
+  if (!is.null(cadj)) {
+    hdr(sprintf("Decision: raw pd > %.4g (adjusted from %.4g); effective per-test alpha %.3g (from %.3g)",
+                cadj, attr(x, "threshold"), attr(x, "alpha.eff"), attr(x, "alpha.nominal")))
+  }
+  cfw <- attr(x, "threshold.fwer")
+  if (!is.null(cfw) && !is.na(cfw)) {
+    hdr(sprintf("Family-wise: raw pd > %.4g (FWER %.3g over m = %d under the assumed pi0; per-test alpha %.3g)",
+                cfw, attr(x, "alpha.fwer"), as.integer(df$m[1]), attr(x, "alpha.fwer.pt")))
+  }
+  cat("\n")
 
   show <- df[, setdiff(names(df), c("pi0", "m")), drop = FALSE]
   # drop columns that are entirely NA (e.g. mean.est / null.value for pd input)
   keep <- !vapply(show, function(col) all(is.na(col)), logical(1))
   print(show[, keep, drop = FALSE], digits = digits, ...)
 
-  if (!is.null(df$joint_cum)) {
-    cat("\njoint_cum: cumulative joint Pr(first k claims hold), in the order shown.\n")
-  }
   invisible(x)
 }

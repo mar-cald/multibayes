@@ -12,7 +12,9 @@ pd.adjust(
   null.value = 0,
   direction = NULL,
   order = FALSE,
-  joint = FALSE
+  threshold = 0.975,
+  alpha = NULL,
+  fwer = FALSE
 )
 }
 \arguments{
@@ -57,15 +59,33 @@ parameters).}
 decreasing \code{pd} (strongest directional evidence first). If \code{FALSE}
 (the default), rows are returned in input order, so the output stays aligned
 with the columns of \code{draws} (or the elements of \code{pd}); use this for
-programmatic work that pairs \code{pd.adj} with external vectors. Ordering is
-enabled automatically when \code{joint = TRUE}.}
+programmatic work that pairs \code{pd.adj} with external vectors.}
 
-\item{joint}{Logical. If \code{TRUE}, the output \emph{additionally} includes
-the cumulative joint probability \code{joint_cum} (see Details). Because that
-cumulative joint is only interpretable when accumulated from the strongest
-claim down, \code{joint = TRUE} orders the rows by decreasing \code{pd}
-(i.e. it implies \code{order = TRUE}). Defaults to \code{FALSE}, in which case
-only the per-test correction is returned.}
+\item{threshold}{Numeric scalar in \eqn{(0.5, 1)}. The decision cutoff applied
+to \emph{pd} (default \code{0.975}, a two-sided per-test
+\eqn{\alpha = 0.05}). It does \strong{not} change \code{pd.adj}; it is used
+only to report the equivalent \strong{adjusted threshold on the raw}
+\emph{pd}, since rejecting \eqn{pd_{adj} > c} is identical to rejecting raw
+\eqn{pd > c_*} with
+\eqn{c_* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)}.}
+
+\item{alpha}{Optional numeric scalar in \eqn{(0, 1)}. A convenience
+parameterization of \code{threshold} on the error scale: when supplied, the
+two-sided cutoff is set to \eqn{c = 1 - \alpha/2} (so \code{alpha = 0.05}
+gives \code{threshold = 0.975}), \strong{overriding} any \code{threshold}
+value. Use whichever scale is more natural; the reported nominal per-test
+rate then equals this \code{alpha}.}
+
+\item{fwer}{Logical (default \code{FALSE}). If \code{TRUE}, the output also
+reports a \strong{family-wise} cutoff on the raw \emph{pd} that controls the
+prior-averaged FWER at the nominal level over the \eqn{m} tests, given
+\eqn{\pi_0}. Standard corrections (e.g. Bonferroni) implicitly assume every
+test is null (\eqn{\pi_0 = 1}); here the affordable per-test rate is
+\eqn{[1 - (1 - \alpha)^{1/m}] / \pi_0}, relaxing the standard correction by
+\eqn{1/\pi_0} and reducing to it as \eqn{\pi_0 \to 1}. This is a
+prior-averaged (Bayesian) FWER under the assumed \eqn{\pi_0}, \strong{not}
+strong frequentist control. Reported in the header and as
+\code{attr(x, "threshold.fwer")}.}
 }
 \value{
 An object of class \code{pd_adjust} (a \code{data.frame} with a
@@ -77,7 +97,6 @@ hypothesis. Columns: \code{pd} (values used in the adjustment),
 independence, and reporting it alongside per-test results can mislead when
 the tests are dependent; the per-test prior \eqn{\pi_0} is the robust
 quantity (the expected proportion of nulls under exchangeability). When
-\code{joint = TRUE} a \code{joint_cum} column is added; when
 \code{order = TRUE} the rows are sorted by decreasing \code{pd}. For
 direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in
 \eqn{[0.5, 1]}; for directional tests, both are on \eqn{[0, 1]}, with values
@@ -87,6 +106,19 @@ includes \code{median.est} (posterior median per parameter), \code{null.value},
 and \code{direction}. The \code{print} method summarises the constant
 quantities (\code{pi0}, \code{m}) in a header and displays the per-test
 table; the columns themselves remain available for programmatic access.
+The object also carries, as attributes, the decision cutoff \code{threshold}
+(\eqn{c}), the equivalent adjusted cutoff on the raw \emph{pd}
+\code{threshold.adj} (\eqn{c_*}), and the corresponding two-sided per-test
+Type I rates \code{alpha.nominal} (\eqn{2(1-c)}) and \code{alpha.eff}
+(\eqn{2(1-c_*)}); retrieve them with, e.g., \code{attr(x, "threshold.adj")}.
+The cutoffs \code{threshold.adj} and \code{threshold.fwer} are exact
+transformations of the decision rule, but the reported per-test \emph{rates}
+(\code{alpha.eff}, and the \code{fwer} calibration) use the identity
+\eqn{\alpha = 2(1 - c)}, which holds only for a diffuse within-model prior or
+large \eqn{n} (when the null \emph{pd} is approximately uniform on
+\eqn{[0.5, 1]}). Under an informative prior the true per-test rate is
+smaller, so these rates are conservative and \code{threshold.fwer} controls
+the FWER at or below the stated level.
 }
 \description{
 The function accepts either a vector of pre-computed \emph{pd} values or
@@ -130,18 +162,10 @@ is supported: each element of \code{direction} is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.
 
-\strong{Per-test correction and joint statement.} By default the function
-returns the per-test correction only (the marginal \code{pd} and its adjusted
-value \code{pd.adj}). Setting \code{joint = TRUE} \emph{additionally} returns
-\code{joint_cum} and orders the rows by decreasing \code{pd}, so that
-\code{joint_cum} is the cumulative joint probability that the \eqn{k} strongest
-claims all hold in their claimed direction. When \code{draws} are supplied this joint is computed
-directly from the draws by intersecting the per-draw directional events, so it
-reflects the posterior dependence among parameters; when only \code{pd} is
-supplied it is the running product of the \emph{pd} values, valid only under
-independence. The claimed direction for a \code{"two.sided"} test is its
-dominant posterior side, and the last entry of \code{joint_cum} is the joint
-probability that all \eqn{m} claims hold simultaneously.
+\code{pd.adjust} returns the per-test correction only (the marginal \code{pd}
+and its adjusted value \code{pd.adj}). Family-wise summaries across hypotheses,
+the cumulative joint statement and simultaneous credible intervals, are
+provided separately by \code{\link{joint}}.
 }
 \examples{
 # From a vector of pd values
@@ -161,8 +185,12 @@ colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 # Per-test correction only (default)
 pd.adjust(draws = draws, p0 = 0.4, null.value = 0)
 
-# Also return the cumulative joint statement, ordered by evidence
-pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE, joint = TRUE)
+# Order the rows by strength of evidence
+pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE)
+
+# Family-wise summaries are obtained separately with joint()
+joint(draws, null.value = 0)               # cumulative joint statement
+joint(draws, interval = TRUE)              # simultaneous credible intervals
 
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(draws = draws, p0 = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
