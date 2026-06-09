@@ -5,17 +5,17 @@ internally. Both direction-agnostic and directional tests are supported:
 the direction argument controls which formulation is applied per
 hypothesis. The adjustment is governed by the per-test prior probability
 that an individual effect is null, \(\pi_0\) (argument pi0).
-Equivalently, one may supply the global null \(\Pi_0\) (argument
+Equivalently, one may supply the global null \(\Pr(H_0)\) (argument
 p0), the prior that all \(m\) hypotheses are null, from which
-\(\pi_0 = \Pi_0^{1/m}\) is recovered under independence."><meta property="og:description" content="The function accepts either a vector of pre-computed pd values or
+\(\pi_0 = \Pr(H_0)^{1/m}\) is recovered under independence."><meta property="og:description" content="The function accepts either a vector of pre-computed pd values or
 a matrix of posterior draws, from which pd values are computed
 internally. Both direction-agnostic and directional tests are supported:
 the direction argument controls which formulation is applied per
 hypothesis. The adjustment is governed by the per-test prior probability
 that an individual effect is null, \(\pi_0\) (argument pi0).
-Equivalently, one may supply the global null \(\Pi_0\) (argument
+Equivalently, one may supply the global null \(\Pr(H_0)\) (argument
 p0), the prior that all \(m\) hypotheses are null, from which
-\(\pi_0 = \Pi_0^{1/m}\) is recovered under independence."><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script></head><body>
+\(\pi_0 = \Pr(H_0)^{1/m}\) is recovered under independence."><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -55,9 +55,9 @@ internally. Both direction-agnostic and directional tests are supported:
 the <code>direction</code> argument controls which formulation is applied per
 hypothesis. The adjustment is governed by the per-test prior probability
 that an individual effect is null, \(\pi_0\) (argument <code>pi0</code>).
-Equivalently, one may supply the global null \(\Pi_0\) (argument
+Equivalently, one may supply the global null \(\Pr(H_0)\) (argument
 <code>p0</code>), the prior that all \(m\) hypotheses are null, from which
-\(\pi_0 = \Pi_0^{1/m}\) is recovered under independence.</p>
+\(\pi_0 = \Pr(H_0)^{1/m}\) is recovered under independence.</p>
     </div>
 
     <div class="section level2">
@@ -96,16 +96,14 @@ according to <code>direction</code> and <code>null.value</code>.</p></dd>
 <dt id="arg-p-">p0<a class="anchor" aria-label="anchor" href="#arg-p-"></a></dt>
 <dd><p>Numeric scalar in \((0, 1)\). The prior probability that
 <strong>all</strong> hypotheses are null simultaneously (the global null,
-\(\Pi_0\)). Supply <strong>either</strong> <code>pi0</code> <strong>or</strong> <code>p0</code>,
+\(\Pr(H_0)\)). Supply <strong>either</strong> <code>pi0</code> <strong>or</strong> <code>p0</code>,
 not both. When <code>p0</code> is given, the per-test prior is derived under
-independence as \(\pi_0 = \Pi_0^{1/m}\).</p></dd>
+independence as \(\pi_0 = \Pr(H_0)^{1/m}\).</p></dd>
 
 
 <dt id="arg-pi-">pi0<a class="anchor" aria-label="anchor" href="#arg-pi-"></a></dt>
 <dd><p>Numeric scalar in \((0, 1)\). The per-test prior probability that
-an individual effect is null, applied to every test. Supply <strong>either</strong> <code>pi0</code> <strong>or</strong> <code>p0</code>, not both. When
-<code>pi0</code> is given, the implied global null is \(\Pi_0 = \pi_0^{m}\)
-(valid under independence) and is returned in <code>p0</code>.</p></dd>
+an individual effect is null, applied to every test. Supply <strong>either</strong> <code>pi0</code> <strong>or</strong> <code>p0</code>, not both.</p></dd>
 
 
 <dt id="arg-null-value">null.value<a class="anchor" aria-label="anchor" href="#arg-null-value"></a></dt>
@@ -133,8 +131,7 @@ parameters).</p></dd>
 <dd><p>Logical. If <code>TRUE</code>, the returned rows are ordered by
 decreasing <code>pd</code> (strongest directional evidence first). If <code>FALSE</code>
 (the default), rows are returned in input order, so the output stays aligned
-with the columns of <code>draws</code> (or the elements of <code>pd</code>); use this for
-programmatic work that pairs <code>pd.adj</code> with external vectors.</p></dd>
+with the columns of <code>draws</code> (or the elements of <code>pd</code>).</p></dd>
 
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
@@ -152,8 +149,7 @@ only to report the equivalent <strong>adjusted threshold on the raw</strong>
 parameterization of <code>threshold</code> on the error scale: when supplied, the
 two-sided cutoff is set to \(c = 1 - \alpha/2\) (so <code>alpha = 0.05</code>
 gives <code>threshold = 0.975</code>), <strong>overriding</strong> any <code>threshold</code>
-value. Use whichever scale is more natural; the reported nominal per-test
-rate then equals this <code>alpha</code>.</p></dd>
+value.</p></dd>
 
 
 <dt id="arg-fwer">fwer<a class="anchor" aria-label="anchor" href="#arg-fwer"></a></dt>
@@ -165,8 +161,7 @@ test is null (\(\pi_0 = 1\)); here the affordable per-test rate is
 \([1 - (1 - \alpha)^{1/m}] / \pi_0\), relaxing the standard correction by
 \(1/\pi_0\) and reducing to it as \(\pi_0 \to 1\). This is a
 prior-averaged (Bayesian) FWER under the assumed \(\pi_0\), <strong>not</strong>
-strong frequentist control. Reported in the header and as
-<code>attr(x, "threshold.fwer")</code>.</p></dd>
+strong frequentist control.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -175,11 +170,7 @@ strong frequentist control. Reported in the header and as
 dedicated <code><a href="print.pd_adjust.html">print.pd_adjust</a></code> method), with one row per
 hypothesis. Columns: <code>pd</code> (values used in the adjustment),
 <code>pd.adj</code> (adjusted values), <code>pi0</code> (per-test null prior
-\(\pi_0\)), and <code>m</code> (number of tests). The global null
-\(\Pi_0 = \pi_0^m\) is <strong>not</strong> returned: it is exact only under
-independence, and reporting it alongside per-test results can mislead when
-the tests are dependent; the per-test prior \(\pi_0\) is the robust
-quantity (the expected proportion of nulls under exchangeability). When
+\(\pi_0\)), and <code>m</code> (number of tests). When
 <code>order = TRUE</code> the rows are sorted by decreasing <code>pd</code>. For
 direction-agnostic tests, both <code>pd</code> and <code>pd.adj</code> are bounded in
 \([0.5, 1]\); for directional tests, both are on \([0, 1]\), with values
@@ -197,8 +188,8 @@ Type I rates <code>alpha.nominal</code> (\(2(1-c)\)) and <code>alpha.eff</code>
 The cutoffs <code>threshold.adj</code> and <code>threshold.fwer</code> are exact
 transformations of the decision rule, but the reported per-test <em>rates</em>
 (<code>alpha.eff</code>, and the <code>fwer</code> calibration) use the identity
-\(\alpha = 2(1 - c)\), which holds only for a diffuse within-model prior or
-large \(n\) (when the null <em>pd</em> is approximately uniform on
+\(\alpha = 2(1 - c)\), which holds <strong>only for a diffuse within-model prior</strong> or
+<strong>large \(n\)</strong> (when the null <em>pd</em> is approximately uniform on
 \([0.5, 1]\)). Under an informative prior the true per-test rate is
 smaller, so these rates are conservative and <code>threshold.fwer</code> controls
 the FWER at or below the stated level.</p>
@@ -206,7 +197,7 @@ the FWER at or below the stated level.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
-\(\pi_0 = \Pi_0^{1/m}\) and its complement \(\pi_1 = 1 - \pi_0\),
+\(\pi_0\) and its complement \(\pi_1 = 1 - \pi_0\),
 the adjusted <em>pd</em> is:
 $$
    pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + (1-pd)\pi_0}
@@ -234,6 +225,20 @@ hypotheses regardless of their directionality.</p>
 and its adjusted value <code>pd.adj</code>). Family-wise summaries across hypotheses,
 the cumulative joint statement and simultaneous credible intervals, are
 provided separately by <code><a href="joint.html">joint</a></code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Westfall, P. H., Johnson, W. O., &amp; Utts, J. M. (1997). A bayesian perspective on the bonferroni adjustment.
+<em>Biometrika</em>, 84(2), 419–427.</p>
+<p>Jeffreys, H. (1938). Significance tests when several degrees of freedom arise simultaneously. <em>Proceedings
+of the Royal Society of London. Series A. Mathematical and Physical Sciences</em>, 165(921), 161–198.
+https://doi.org/10.1098/rspa.1938.0052</p>
+<p>Storey, J. D. (2003). The positive false discovery rate: A bayesian interpretation and the q-value. <em>The Annals
+of Statistics</em>, 31(6), 2013–2035. https://doi.org/10.1214/aos/1074290335</p>
+<p>Scott, J. G., &amp; Berger, J. O. (2006). An exploration of aspects of bayesian multiple testing.
+<em>Journal of Statistical Planning and Inference</em>, 136(7), 2144–2162.</p>
+<p>Scott, J. G., &amp; Berger, J. O. (2010). Bayes and empirical-Bayes multiplicity adjustment in the variable-
+selection problem. <em>The Annals of Statistics</em>, 38(5), 2587–2619. https://doi.org/10.1214/10-AOS792</p>
     </div>
 
     <div class="section level2">

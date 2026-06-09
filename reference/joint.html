@@ -109,8 +109,7 @@ parameter ordered by decreasing <em>pd</em>, with columns <code>median.est</code
 <code>null.value</code>, <code>pd</code>, <code>direction</code>, and <code>joint_cum</code>
 (cumulative joint probability that the first \(k\) claims hold). For
 <code>interval = TRUE</code>, one row per parameter with columns <code>lower</code>,
-<code>est</code>, <code>upper</code>, <code>prob</code>, and <code>cq</code> (the calibrated tail
-quantile).</p>
+<code>est</code>, <code>upper</code>, and <code>prob</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -126,8 +125,7 @@ those \(k\) claims is mis-signed (a family-wise, Type S, statement).</p>
 <p><strong>Simultaneous credible intervals</strong> (<code>interval = TRUE</code>). Equitailed
 intervals calibrated so that <strong>all</strong> parameters lie within their bounds
 simultaneously with probability <code>prob</code>, via the quantile-based
-simultaneous credible band (Besag et al., 1995; Held, 2004). Coverage is set
-by examining how extreme each draw is across all parameters jointly: for every
+simultaneous credible band. Coverage is set by examining how extreme each draw is across all parameters jointly: for every
 draw the minimum (nearer) tail probability across parameters is taken, and the
 threshold is the \((1 - \texttt{prob})\)-quantile of these minima. An effect
 can be declared when its band excludes the null value. A closely related
@@ -143,6 +141,9 @@ computation and stochastic systems. <em>Statistical Science</em>, 10(1), 3–41.
 <p>Held, L. (2004). Simultaneous posterior probability statements from Monte
 Carlo output. <em>Journal of Computational and Graphical Statistics</em>,
 13(1), 20–35.</p>
+<p>Gelman, A., Tuerlinckx, F. (2000). Type S error rates for classical
+and Bayesian single and multiple comparison procedures.
+<em>Computational Statistics</em> 15, 373–390 (2000). https://doi.org/10.1007/s001800000040</p>
 <p>Schnell, P. et al. (2020). <span class="pkg">credsubs</span>: Credible Subsets. R package.
 <a href="https://CRAN.R-project.org/package=credsubs" class="external-link">https://CRAN.R-project.org/package=credsubs</a>.</p>
     </div>

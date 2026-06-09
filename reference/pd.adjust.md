@@ -6,9 +6,9 @@ internally. Both direction-agnostic and directional tests are supported:
 the `direction` argument controls which formulation is applied per
 hypothesis. The adjustment is governed by the per-test prior probability
 that an individual effect is null, \\\pi_0\\ (argument `pi0`).
-Equivalently, one may supply the global null \\\Pi_0\\ (argument `p0`),
-the prior that all \\m\\ hypotheses are null, from which \\\pi_0 =
-\Pi_0^{1/m}\\ is recovered under independence.
+Equivalently, one may supply the global null \\\Pr(H_0)\\ (argument
+`p0`), the prior that all \\m\\ hypotheses are null, from which \\\pi_0
+= \Pr(H_0)^{1/m}\\ is recovered under independence.
 
 ## Usage
 
@@ -45,18 +45,16 @@ pd.adjust(
 - p0:
 
   Numeric scalar in \\(0, 1)\\. The prior probability that **all**
-  hypotheses are null simultaneously (the global null, \\\Pi_0\\).
+  hypotheses are null simultaneously (the global null, \\\Pr(H_0)\\).
   Supply **either** `pi0` **or** `p0`, not both. When `p0` is given, the
   per-test prior is derived under independence as \\\pi_0 =
-  \Pi_0^{1/m}\\.
+  \Pr(H_0)^{1/m}\\.
 
 - pi0:
 
   Numeric scalar in \\(0, 1)\\. The per-test prior probability that an
   individual effect is null, applied to every test. Supply **either**
-  `pi0` **or** `p0`, not both. When `pi0` is given, the implied global
-  null is \\\Pi_0 = \pi_0^{m}\\ (valid under independence) and is
-  returned in `p0`.
+  `pi0` **or** `p0`, not both.
 
 - null.value:
 
@@ -83,8 +81,7 @@ pd.adjust(
   Logical. If `TRUE`, the returned rows are ordered by decreasing `pd`
   (strongest directional evidence first). If `FALSE` (the default), rows
   are returned in input order, so the output stays aligned with the
-  columns of `draws` (or the elements of `pd`); use this for
-  programmatic work that pairs `pd.adj` with external vectors.
+  columns of `draws` (or the elements of `pd`).
 
 - threshold:
 
@@ -100,9 +97,7 @@ pd.adjust(
   Optional numeric scalar in \\(0, 1)\\. A convenience parameterization
   of `threshold` on the error scale: when supplied, the two-sided cutoff
   is set to \\c = 1 - \alpha/2\\ (so `alpha = 0.05` gives
-  `threshold = 0.975`), **overriding** any `threshold` value. Use
-  whichever scale is more natural; the reported nominal per-test rate
-  then equals this `alpha`.
+  `threshold = 0.975`), **overriding** any `threshold` value.
 
 - fwer:
 
@@ -114,8 +109,7 @@ pd.adjust(
   is \\\[1 - (1 - \alpha)^{1/m}\] / \pi_0\\, relaxing the standard
   correction by \\1/\pi_0\\ and reducing to it as \\\pi_0 \to 1\\. This
   is a prior-averaged (Bayesian) FWER under the assumed \\\pi_0\\,
-  **not** strong frequentist control. Reported in the header and as
-  `attr(x, "threshold.fwer")`.
+  **not** strong frequentist control.
 
 ## Value
 
@@ -123,39 +117,34 @@ An object of class `pd_adjust` (a `data.frame` with a dedicated
 [`print.pd_adjust`](https://mar-cald.github.io/multibayes/reference/print.pd_adjust.md)
 method), with one row per hypothesis. Columns: `pd` (values used in the
 adjustment), `pd.adj` (adjusted values), `pi0` (per-test null prior
-\\\pi_0\\), and `m` (number of tests). The global null \\\Pi_0 =
-\pi_0^m\\ is **not** returned: it is exact only under independence, and
-reporting it alongside per-test results can mislead when the tests are
-dependent; the per-test prior \\\pi_0\\ is the robust quantity (the
-expected proportion of nulls under exchangeability). When `order = TRUE`
-the rows are sorted by decreasing `pd`. For direction-agnostic tests,
-both `pd` and `pd.adj` are bounded in \\\[0.5, 1\]\\; for directional
-tests, both are on \\\[0, 1\]\\, with values below \\0.5\\ indicating
-that the data (and the adjustment) favoured the opposite direction. When
-`draws` are supplied, the output additionally includes `median.est`
-(posterior median per parameter), `null.value`, and `direction`. The
-`print` method summarises the constant quantities (`pi0`, `m`) in a
-header and displays the per-test table; the columns themselves remain
-available for programmatic access. The object also carries, as
-attributes, the decision cutoff `threshold` (\\c\\), the equivalent
-adjusted cutoff on the raw *pd* `threshold.adj` (\\c\_\*\\), and the
-corresponding two-sided per-test Type I rates `alpha.nominal`
-(\\2(1-c)\\) and `alpha.eff` (\\2(1-c\_\*)\\); retrieve them with, e.g.,
+\\\pi_0\\), and `m` (number of tests). When `order = TRUE` the rows are
+sorted by decreasing `pd`. For direction-agnostic tests, both `pd` and
+`pd.adj` are bounded in \\\[0.5, 1\]\\; for directional tests, both are
+on \\\[0, 1\]\\, with values below \\0.5\\ indicating that the data (and
+the adjustment) favoured the opposite direction. When `draws` are
+supplied, the output additionally includes `median.est` (posterior
+median per parameter), `null.value`, and `direction`. The `print` method
+summarises the constant quantities (`pi0`, `m`) in a header and displays
+the per-test table; the columns themselves remain available for
+programmatic access. The object also carries, as attributes, the
+decision cutoff `threshold` (\\c\\), the equivalent adjusted cutoff on
+the raw *pd* `threshold.adj` (\\c\_\*\\), and the corresponding
+two-sided per-test Type I rates `alpha.nominal` (\\2(1-c)\\) and
+`alpha.eff` (\\2(1-c\_\*)\\); retrieve them with, e.g.,
 `attr(x, "threshold.adj")`. The cutoffs `threshold.adj` and
 `threshold.fwer` are exact transformations of the decision rule, but the
 reported per-test *rates* (`alpha.eff`, and the `fwer` calibration) use
-the identity \\\alpha = 2(1 - c)\\, which holds only for a diffuse
-within-model prior or large \\n\\ (when the null *pd* is approximately
-uniform on \\\[0.5, 1\]\\). Under an informative prior the true per-test
-rate is smaller, so these rates are conservative and `threshold.fwer`
-controls the FWER at or below the stated level.
+the identity \\\alpha = 2(1 - c)\\, which holds **only for a diffuse
+within-model prior** or **large \\n\\** (when the null *pd* is
+approximately uniform on \\\[0.5, 1\]\\). Under an informative prior the
+true per-test rate is smaller, so these rates are conservative and
+`threshold.fwer` controls the FWER at or below the stated level.
 
 ## Details
 
 The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
-\\\pi_0 = \Pi_0^{1/m}\\ and its complement \\\pi_1 = 1 - \pi_0\\, the
-adjusted *pd* is: \$\$ pd\_{adj} = \frac{pd \pi_1}{pd \pi_1 +
-(1-pd)\pi_0} \$\$
+\\\pi_0\\ and its complement \\\pi_1 = 1 - \pi_0\\, the adjusted *pd*
+is: \$\$ pd\_{adj} = \frac{pd \pi_1}{pd \pi_1 + (1-pd)\pi_0} \$\$
 
 Because the prior is conservative (\\\pi_0 \> \pi_1\\), the adjustment
 always shrinks *pd* toward its lower bound.
@@ -185,6 +174,28 @@ its adjusted value `pd.adj`). Family-wise summaries across hypotheses,
 the cumulative joint statement and simultaneous credible intervals, are
 provided separately by
 [`joint`](https://mar-cald.github.io/multibayes/reference/joint.md).
+
+## References
+
+Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A bayesian
+perspective on the bonferroni adjustment. *Biometrika*, 84(2), 419–427.
+
+Jeffreys, H. (1938). Significance tests when several degrees of freedom
+arise simultaneously. *Proceedings of the Royal Society of London.
+Series A. Mathematical and Physical Sciences*, 165(921), 161–198.
+https://doi.org/10.1098/rspa.1938.0052
+
+Storey, J. D. (2003). The positive false discovery rate: A bayesian
+interpretation and the q-value. *The Annals of Statistics*, 31(6),
+2013–2035. https://doi.org/10.1214/aos/1074290335
+
+Scott, J. G., & Berger, J. O. (2006). An exploration of aspects of
+bayesian multiple testing. *Journal of Statistical Planning and
+Inference*, 136(7), 2144–2162.
+
+Scott, J. G., & Berger, J. O. (2010). Bayes and empirical-Bayes
+multiplicity adjustment in the variable- selection problem. *The Annals
+of Statistics*, 38(5), 2587–2619. https://doi.org/10.1214/10-AOS792
 
 ## Examples
 
