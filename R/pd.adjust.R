@@ -6,13 +6,13 @@
 #' the \code{direction} argument controls which formulation is applied per
 #' hypothesis. The adjustment is governed by the per-test prior probability
 #' that an individual effect is null, \eqn{\pi_0} (argument \code{pi0}).
-#' Equivalently, one may supply the global null \eqn{\Pi_0} (argument
+#' Equivalently, one may supply the global null \eqn{\Pr(H_0)} (argument
 #' \code{p0}), the prior that all \eqn{m} hypotheses are null, from which
-#' \eqn{\pi_0 = \Pi_0^{1/m}} is recovered under independence.
+#' \eqn{\pi_0 = \Pr(H_0)^{1/m}} is recovered under independence.
 #'
 #' @details
 #' The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
-#' \eqn{\pi_0 = \Pi_0^{1/m}} and its complement \eqn{\pi_1 = 1 - \pi_0},
+#' \eqn{\pi_0} and its complement \eqn{\pi_1 = 1 - \pi_0},
 #' the adjusted \emph{pd} is:
 #' \deqn{
 #'    pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + (1-pd)\pi_0}
@@ -55,13 +55,11 @@
 #'   according to \code{direction} and \code{null.value}.
 #' @param p0 Numeric scalar in \eqn{(0, 1)}. The prior probability that
 #'   \strong{all} hypotheses are null simultaneously (the global null,
-#'   \eqn{\Pi_0}). Supply \strong{either} \code{pi0} \strong{or} \code{p0},
+#'   \eqn{\Pr(H_0)}). Supply \strong{either} \code{pi0} \strong{or} \code{p0},
 #'   not both. When \code{p0} is given, the per-test prior is derived under
-#'   independence as \eqn{\pi_0 = \Pi_0^{1/m}}.
+#'   independence as \eqn{\pi_0 = \Pr(H_0)^{1/m}}.
 #' @param pi0 Numeric scalar in \eqn{(0, 1)}. The per-test prior probability that
-#'   an individual effect is null, applied to every test. Supply \strong{either} \code{pi0} \strong{or} \code{p0}, not both. When
-#'   \code{pi0} is given, the implied global null is \eqn{\Pi_0 = \pi_0^{m}}
-#'   (valid under independence) and is returned in \code{p0}.
+#'   an individual effect is null, applied to every test. Supply \strong{either} \code{pi0} \strong{or} \code{p0}, not both.
 #' @param null.value Numeric scalar or vector. The null (reference) value against
 #'  which the posterior is evaluated, specified on the scale of the posterior.
 #'  A single scalar applies the same null to all parameters; a vector of length \code{ncol(draws)}
@@ -80,8 +78,7 @@
 #' @param order Logical. If \code{TRUE}, the returned rows are ordered by
 #'   decreasing \code{pd} (strongest directional evidence first). If \code{FALSE}
 #'   (the default), rows are returned in input order, so the output stays aligned
-#'   with the columns of \code{draws} (or the elements of \code{pd}); use this for
-#'   programmatic work that pairs \code{pd.adj} with external vectors.
+#'   with the columns of \code{draws} (or the elements of \code{pd}).
 #' @param threshold Numeric scalar in \eqn{(0.5, 1)}. The decision cutoff applied
 #'   to \emph{pd} (default \code{0.975}, a two-sided per-test
 #'   \eqn{\alpha = 0.05}). It does \strong{not} change \code{pd.adj}; it is used
@@ -93,8 +90,7 @@
 #'   parameterization of \code{threshold} on the error scale: when supplied, the
 #'   two-sided cutoff is set to \eqn{c = 1 - \alpha/2} (so \code{alpha = 0.05}
 #'   gives \code{threshold = 0.975}), \strong{overriding} any \code{threshold}
-#'   value. Use whichever scale is more natural; the reported nominal per-test
-#'   rate then equals this \code{alpha}.
+#'   value. 
 #' @param fwer Logical (default \code{FALSE}). If \code{TRUE}, the output also
 #'   reports a \strong{family-wise} cutoff on the raw \emph{pd} that controls the
 #'   prior-averaged FWER at the nominal level over the \eqn{m} tests, given
@@ -103,18 +99,13 @@
 #'   \eqn{[1 - (1 - \alpha)^{1/m}] / \pi_0}, relaxing the standard correction by
 #'   \eqn{1/\pi_0} and reducing to it as \eqn{\pi_0 \to 1}. This is a
 #'   prior-averaged (Bayesian) FWER under the assumed \eqn{\pi_0}, \strong{not}
-#'   strong frequentist control. Reported in the header and as
-#'   \code{attr(x, "threshold.fwer")}.
+#'   strong frequentist control.
 #'
 #' @return An object of class \code{pd_adjust} (a \code{data.frame} with a
 #'   dedicated \code{\link{print.pd_adjust}} method), with one row per
 #'   hypothesis. Columns: \code{pd} (values used in the adjustment),
 #'   \code{pd.adj} (adjusted values), \code{pi0} (per-test null prior
-#'   \eqn{\pi_0}), and \code{m} (number of tests). The global null
-#'   \eqn{\Pi_0 = \pi_0^m} is \strong{not} returned: it is exact only under
-#'   independence, and reporting it alongside per-test results can mislead when
-#'   the tests are dependent; the per-test prior \eqn{\pi_0} is the robust
-#'   quantity (the expected proportion of nulls under exchangeability). When
+#'   \eqn{\pi_0}), and \code{m} (number of tests). When
 #'   \code{order = TRUE} the rows are sorted by decreasing \code{pd}. For
 #'   direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in
 #'   \eqn{[0.5, 1]}; for directional tests, both are on \eqn{[0, 1]}, with values
@@ -132,12 +123,29 @@
 #'   The cutoffs \code{threshold.adj} and \code{threshold.fwer} are exact
 #'   transformations of the decision rule, but the reported per-test \emph{rates}
 #'   (\code{alpha.eff}, and the \code{fwer} calibration) use the identity
-#'   \eqn{\alpha = 2(1 - c)}, which holds only for a diffuse within-model prior or
-#'   large \eqn{n} (when the null \emph{pd} is approximately uniform on
+#'   \eqn{\alpha = 2(1 - c)}, which holds **only for a diffuse within-model prior** or
+#'   **large \eqn{n}** (when the null \emph{pd} is approximately uniform on
 #'   \eqn{[0.5, 1]}). Under an informative prior the true per-test rate is
 #'   smaller, so these rates are conservative and \code{threshold.fwer} controls
 #'   the FWER at or below the stated level.
 #'
+#' @references
+#' Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A bayesian perspective on the bonferroni adjustment.
+#' \emph{Biometrika}, 84(2), 419–427.
+#' 
+#' Jeffreys, H. (1938). Significance tests when several degrees of freedom arise simultaneously. \emph{Proceedings
+#' of the Royal Society of London. Series A. Mathematical and Physical Sciences}, 165(921), 161–198.
+#' https://doi.org/10.1098/rspa.1938.0052
+#' 
+#' Storey, J. D. (2003). The positive false discovery rate: A bayesian interpretation and the q-value. \emph{The Annals
+#' of Statistics}, 31(6), 2013–2035. https://doi.org/10.1214/aos/1074290335
+#'
+#' Scott, J. G., & Berger, J. O. (2006). An exploration of aspects of bayesian multiple testing. 
+#' \emph{Journal of Statistical Planning and Inference}, 136(7), 2144–2162.
+#'
+#' Scott, J. G., & Berger, J. O. (2010). Bayes and empirical-Bayes multiplicity adjustment in the variable-
+#' selection problem. \emph{The Annals of Statistics}, 38(5), 2587–2619. https://doi.org/10.1214/10-AOS792
+#' 
 #' @examples
 #' # From a vector of pd values
 #' pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763,

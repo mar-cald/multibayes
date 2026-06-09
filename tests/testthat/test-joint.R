@@ -57,7 +57,7 @@ test_that("joint(interval = TRUE) returns simultaneous intervals", {
   colnames(d) <- c("a", "b", "c")
   out <- joint(d, interval = TRUE, prob = 0.95)
 
-  expect_equal(names(out), c("lower", "est", "upper", "prob", "cq"))
+  expect_equal(names(out), c("lower", "est", "upper", "prob"))
   expect_equal(rownames(out), c("a", "b", "c"))
   expect_true(all(out$lower < out$upper))
   expect_true(all(out$prob == 0.95))

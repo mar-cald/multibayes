@@ -21,8 +21,7 @@
 #' \strong{Simultaneous credible intervals} (\code{interval = TRUE}). Equitailed
 #' intervals calibrated so that \strong{all} parameters lie within their bounds
 #' simultaneously with probability \code{prob}, via the quantile-based
-#' simultaneous credible band (Besag et al., 1995; Held, 2004). Coverage is set
-#' by examining how extreme each draw is across all parameters jointly: for every
+#' simultaneous credible band. Coverage is set by examining how extreme each draw is across all parameters jointly: for every
 #' draw the minimum (nearer) tail probability across parameters is taken, and the
 #' threshold is the \eqn{(1 - \texttt{prob})}-quantile of these minima. An effect
 #' can be declared when its band excludes the null value. A closely related
@@ -64,6 +63,10 @@
 #' Held, L. (2004). Simultaneous posterior probability statements from Monte
 #' Carlo output. \emph{Journal of Computational and Graphical Statistics},
 #' 13(1), 20--35.
+#' 
+#' Gelman, A., Tuerlinckx, F. (2000). Type S error rates for classical 
+#' and Bayesian single and multiple comparison procedures. 
+#' \emph{Computational Statistics} 15, 373–390 (2000). https://doi.org/10.1007/s001800000040
 #'
 #' Schnell, P. et al. (2020). \pkg{credsubs}: Credible Subsets. R package.
 #' \url{https://CRAN.R-project.org/package=credsubs}.

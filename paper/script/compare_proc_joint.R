@@ -1,5 +1,5 @@
 # Per-test prior-odds procedure vs the cumulative joint statement vs simultaneous
-# credible intervals, scored on the Type I error (declaring a true point null).
+# credible intervals.
 
 set.seed(2026)
 
@@ -54,4 +54,4 @@ df_compare <- do.call(rbind, lapply(ms, function(m) {
 }))
 
 save(df_compare, file = "paper/script/output/df_compare.rda")
-print(df_compare, digits = 3)
+
