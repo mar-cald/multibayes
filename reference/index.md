@@ -11,3 +11,8 @@
   :
 
   Print method for `pd_adjust` objects
+
+## Simultaneous credible intervals
+
+- [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md)
+  : Family-wise summaries from joint posterior draws

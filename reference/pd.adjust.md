@@ -21,7 +21,9 @@ pd.adjust(
   null.value = 0,
   direction = NULL,
   order = FALSE,
-  joint = FALSE
+  threshold = 0.975,
+  alpha = NULL,
+  fwer = FALSE
 )
 ```
 
@@ -82,17 +84,38 @@ pd.adjust(
   (strongest directional evidence first). If `FALSE` (the default), rows
   are returned in input order, so the output stays aligned with the
   columns of `draws` (or the elements of `pd`); use this for
-  programmatic work that pairs `pd.adj` with external vectors. Ordering
-  is enabled automatically when `joint = TRUE`.
+  programmatic work that pairs `pd.adj` with external vectors.
 
-- joint:
+- threshold:
 
-  Logical. If `TRUE`, the output *additionally* includes the cumulative
-  joint probability `joint_cum` (see Details). Because that cumulative
-  joint is only interpretable when accumulated from the strongest claim
-  down, `joint = TRUE` orders the rows by decreasing `pd` (i.e. it
-  implies `order = TRUE`). Defaults to `FALSE`, in which case only the
-  per-test correction is returned.
+  Numeric scalar in \\(0.5, 1)\\. The decision cutoff applied to *pd*
+  (default `0.975`, a two-sided per-test \\\alpha = 0.05\\). It does
+  **not** change `pd.adj`; it is used only to report the equivalent
+  **adjusted threshold on the raw** *pd*, since rejecting \\pd\_{adj} \>
+  c\\ is identical to rejecting raw \\pd \> c\_\*\\ with \\c\_\* =
+  c\\\pi_0 / ((1-\pi_0)(1-c) + c\\\pi_0)\\.
+
+- alpha:
+
+  Optional numeric scalar in \\(0, 1)\\. A convenience parameterization
+  of `threshold` on the error scale: when supplied, the two-sided cutoff
+  is set to \\c = 1 - \alpha/2\\ (so `alpha = 0.05` gives
+  `threshold = 0.975`), **overriding** any `threshold` value. Use
+  whichever scale is more natural; the reported nominal per-test rate
+  then equals this `alpha`.
+
+- fwer:
+
+  Logical (default `FALSE`). If `TRUE`, the output also reports a
+  **family-wise** cutoff on the raw *pd* that controls the
+  prior-averaged FWER at the nominal level over the \\m\\ tests, given
+  \\\pi_0\\. Standard corrections (e.g. Bonferroni) implicitly assume
+  every test is null (\\\pi_0 = 1\\); here the affordable per-test rate
+  is \\\[1 - (1 - \alpha)^{1/m}\] / \pi_0\\, relaxing the standard
+  correction by \\1/\pi_0\\ and reducing to it as \\\pi_0 \to 1\\. This
+  is a prior-averaged (Bayesian) FWER under the assumed \\\pi_0\\,
+  **not** strong frequentist control. Reported in the header and as
+  `attr(x, "threshold.fwer")`.
 
 ## Value
 
@@ -104,17 +127,28 @@ adjustment), `pd.adj` (adjusted values), `pi0` (per-test null prior
 \pi_0^m\\ is **not** returned: it is exact only under independence, and
 reporting it alongside per-test results can mislead when the tests are
 dependent; the per-test prior \\\pi_0\\ is the robust quantity (the
-expected proportion of nulls under exchangeability). When `joint = TRUE`
-a `joint_cum` column is added; when `order = TRUE` the rows are sorted
-by decreasing `pd`. For direction-agnostic tests, both `pd` and `pd.adj`
-are bounded in \\\[0.5, 1\]\\; for directional tests, both are on \\\[0,
-1\]\\, with values below \\0.5\\ indicating that the data (and the
-adjustment) favoured the opposite direction. When `draws` are supplied,
-the output additionally includes `median.est` (posterior median per
-parameter), `null.value`, and `direction`. The `print` method summarises
-the constant quantities (`pi0`, `m`) in a header and displays the
-per-test table; the columns themselves remain available for programmatic
-access.
+expected proportion of nulls under exchangeability). When `order = TRUE`
+the rows are sorted by decreasing `pd`. For direction-agnostic tests,
+both `pd` and `pd.adj` are bounded in \\\[0.5, 1\]\\; for directional
+tests, both are on \\\[0, 1\]\\, with values below \\0.5\\ indicating
+that the data (and the adjustment) favoured the opposite direction. When
+`draws` are supplied, the output additionally includes `median.est`
+(posterior median per parameter), `null.value`, and `direction`. The
+`print` method summarises the constant quantities (`pi0`, `m`) in a
+header and displays the per-test table; the columns themselves remain
+available for programmatic access. The object also carries, as
+attributes, the decision cutoff `threshold` (\\c\\), the equivalent
+adjusted cutoff on the raw *pd* `threshold.adj` (\\c\_\*\\), and the
+corresponding two-sided per-test Type I rates `alpha.nominal`
+(\\2(1-c)\\) and `alpha.eff` (\\2(1-c\_\*)\\); retrieve them with, e.g.,
+`attr(x, "threshold.adj")`. The cutoffs `threshold.adj` and
+`threshold.fwer` are exact transformations of the decision rule, but the
+reported per-test *rates* (`alpha.eff`, and the `fwer` calibration) use
+the identity \\\alpha = 2(1 - c)\\, which holds only for a diffuse
+within-model prior or large \\n\\ (when the null *pd* is approximately
+uniform on \\\[0.5, 1\]\\). Under an informative prior the true per-test
+rate is smaller, so these rates are conservative and `threshold.fwer`
+controls the FWER at or below the stated level.
 
 ## Details
 
@@ -146,19 +180,11 @@ call is supported: each element of `direction` is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.
 
-**Per-test correction and joint statement.** By default the function
-returns the per-test correction only (the marginal `pd` and its adjusted
-value `pd.adj`). Setting `joint = TRUE` *additionally* returns
-`joint_cum` and orders the rows by decreasing `pd`, so that `joint_cum`
-is the cumulative joint probability that the \\k\\ strongest claims all
-hold in their claimed direction. When `draws` are supplied this joint is
-computed directly from the draws by intersecting the per-draw
-directional events, so it reflects the posterior dependence among
-parameters; when only `pd` is supplied it is the running product of the
-*pd* values, valid only under independence. The claimed direction for a
-`"two.sided"` test is its dominant posterior side, and the last entry of
-`joint_cum` is the joint probability that all \\m\\ claims hold
-simultaneously.
+`pd.adjust` returns the per-test correction only (the marginal `pd` and
+its adjusted value `pd.adj`). Family-wise summaries across hypotheses,
+the cumulative joint statement and simultaneous credible intervals, are
+provided separately by
+[`joint`](https://mar-cald.github.io/multibayes/reference/joint.md).
 
 ## Examples
 
@@ -169,7 +195,10 @@ H5 = 0.891, H6 = 0.987)
 pd.adjust(pd = pd_values, p0 = 0.4)
 #> Warning: some pd.adj have been floored to 0.5.
 #> Prior-odds adjusted probability of direction
-#> Tests: 6  | pi0 = 0.8584
+#> Tests: 6  |  pi0 = 0.8584
+#> Decision: raw pd > 0.9958 (adjusted from 0.975); effective per-test alpha
+#> 0.00843 (from 0.05)
+#> 
 #> 
 #>       pd pd.adj direction
 #> H1 0.999 0.9940 two.sided
@@ -183,7 +212,10 @@ pd.adjust(pd = pd_values, p0 = 0.4)
 pd.adjust(pd = pd_values, pi0 = 0.4^(1/6))
 #> Warning: some pd.adj have been floored to 0.5.
 #> Prior-odds adjusted probability of direction
-#> Tests: 6  | pi0 = 0.8584
+#> Tests: 6  |  pi0 = 0.8584
+#> Decision: raw pd > 0.9958 (adjusted from 0.975); effective per-test alpha
+#> 0.00843 (from 0.05)
+#> 
 #> 
 #>       pd pd.adj direction
 #> H1 0.999 0.9940 two.sided
@@ -203,31 +235,53 @@ colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 pd.adjust(draws = draws, p0 = 0.4, null.value = 0)
 #> Warning: some pd.adj have been floored to 0.5.
 #> Prior-odds adjusted probability of direction
-#> Tests: 6  | pi0 = 0.8584
+#> Tests: 6  |  pi0 = 0.8584
+#> Decision: raw pd > 0.9958 (adjusted from 0.975); effective per-test alpha
+#> 0.00843 (from 0.05)
+#> 
 #> 
 #>    median.est null.value     pd pd.adj direction
-#> H1     0.9602          0 0.8410 0.5000 two.sided
-#> H2    -0.0793          0 0.5330 0.5000 two.sided
-#> H3     0.7481          0 0.7708 0.5000 two.sided
-#> H4    -0.0349          0 0.5118 0.5000 two.sided
-#> H5     2.0256          0 0.9755 0.8679 two.sided
-#> H6     2.9828          0 0.9998 0.9985 two.sided
+#> H1     0.9860          0 0.8358 0.5000 two.sided
+#> H2    -0.1175          0 0.5350 0.5000 two.sided
+#> H3     0.7761          0 0.7822 0.5000 two.sided
+#> H4    -0.0089          0 0.5030 0.5000 two.sided
+#> H5     1.9500          0 0.9762 0.8715 two.sided
+#> H6     2.9866          0 0.9995 0.9970 two.sided
 
-# Also return the cumulative joint statement, ordered by evidence
-pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE, joint = TRUE)
+# Order the rows by strength of evidence
+pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE)
 #> Warning: some pd.adj have been floored to 0.5.
 #> Prior-odds adjusted probability of direction
-#> Tests: 6  | pi0 = 0.8584
+#> Tests: 6  |  pi0 = 0.8584
+#> Decision: raw pd > 0.9958 (adjusted from 0.975); effective per-test alpha
+#> 0.00843 (from 0.05)
 #> 
-#>    median.est null.value     pd pd.adj direction joint_cum
-#> H6     2.9828          0 0.9998 0.9985 two.sided    0.9998
-#> H5     2.0256          0 0.9755 0.8679 two.sided    0.9752
-#> H1     0.9602          0 0.8410 0.5000 two.sided    0.8202
-#> H3     0.7481          0 0.7708 0.5000 two.sided    0.6328
-#> H2    -0.0793          0 0.5330 0.5000 two.sided    0.3405
-#> H4    -0.0349          0 0.5118 0.5000 two.sided    0.1663
 #> 
-#> joint_cum: cumulative joint Pr(first k claims hold), in the order shown.
+#>    median.est null.value     pd pd.adj direction
+#> H6     2.9866          0 0.9995 0.9970 two.sided
+#> H5     1.9500          0 0.9762 0.8715 two.sided
+#> H1     0.9860          0 0.8358 0.5000 two.sided
+#> H3     0.7761          0 0.7822 0.5000 two.sided
+#> H2    -0.1175          0 0.5350 0.5000 two.sided
+#> H4    -0.0089          0 0.5030 0.5000 two.sided
+
+# Family-wise summaries are obtained separately with joint()
+joint(draws, null.value = 0)               # cumulative joint statement
+#>    median.est null.value     pd direction joint_cum
+#> H6     2.9866          0 0.9995 two.sided    0.9995
+#> H5     1.9500          0 0.9762 two.sided    0.9758
+#> H1     0.9860          0 0.8358 two.sided    0.8155
+#> H3     0.7761          0 0.7822 two.sided    0.6398
+#> H2    -0.1175          0 0.5350 two.sided    0.3420
+#> H4    -0.0089          0 0.5030 two.sided    0.1735
+joint(draws, interval = TRUE)              # simultaneous credible intervals
+#>         lower          est    upper prob
+#> H1 -1.5133941  0.985996121 3.595471 0.95
+#> H2 -2.8220596 -0.117524024 2.471335 0.95
+#> H3 -1.8565114  0.776129478 3.336798 0.95
+#> H4 -2.5959143 -0.008943627 2.611432 0.95
+#> H5 -0.7100979  1.950044477 4.707048 0.95
+#> H6  0.4556620  2.986561857 5.535382 0.95
 
 # Mix of directional and agnostic tests with parameter-specific nulls
 pd.adjust(draws = draws, p0 = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
@@ -235,13 +289,16 @@ pd.adjust(draws = draws, p0 = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           "two.sided", "greater", "greater"))
 #> Warning: some pd.adj have been floored to 0.5.
 #> Prior-odds adjusted probability of direction
-#> Tests: 6  | pi0 = 0.7647
+#> Tests: 6  |  pi0 = 0.7647
+#> Decision: raw pd > 0.9922 (adjusted from 0.975); effective per-test alpha
+#> 0.0157 (from 0.05)
+#> 
 #> 
 #>    median.est null.value     pd pd.adj direction
-#> H1     0.9602        0.2 0.7832 0.5265   greater
-#> H2    -0.0793        0.0 0.5330 0.5000 two.sided
-#> H3     0.7481        0.2 0.7035 0.4220   greater
-#> H4    -0.0349        0.0 0.5118 0.5000 two.sided
-#> H5     2.0256        0.5 0.9368 0.8200   greater
-#> H6     2.9828        0.5 0.9958 0.9863   greater
+#> H1     0.9860        0.2 0.7820 0.5246   greater
+#> H2    -0.1175        0.0 0.5350 0.5000 two.sided
+#> H3     0.7761        0.2 0.7230 0.4454   greater
+#> H4    -0.0089        0.0 0.5030 0.5000 two.sided
+#> H5     1.9500        0.5 0.9285 0.7998   greater
+#> H6     2.9866        0.5 0.9948 0.9831   greater
 ```

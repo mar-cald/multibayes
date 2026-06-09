@@ -20,7 +20,7 @@ print(x, digits = 4, ...)
 
 - digits:
 
-  Number of significant digits used when printing. Defaults to 4.
+  Number of digits used when printing. Defaults to 4.
 
 - ...:
 

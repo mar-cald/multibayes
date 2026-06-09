@@ -70,7 +70,9 @@ Equivalently, one may supply the global null \(\Pi_0\) (argument
 <span>  null.value <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  direction <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  order <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  joint <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  threshold <span class="op">=</span> <span class="fl">0.975</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fwer <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -132,17 +134,39 @@ parameters).</p></dd>
 decreasing <code>pd</code> (strongest directional evidence first). If <code>FALSE</code>
 (the default), rows are returned in input order, so the output stays aligned
 with the columns of <code>draws</code> (or the elements of <code>pd</code>); use this for
-programmatic work that pairs <code>pd.adj</code> with external vectors. Ordering is
-enabled automatically when <code>joint = TRUE</code>.</p></dd>
+programmatic work that pairs <code>pd.adj</code> with external vectors.</p></dd>
 
 
-<dt id="arg-joint">joint<a class="anchor" aria-label="anchor" href="#arg-joint"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, the output <em>additionally</em> includes
-the cumulative joint probability <code>joint_cum</code> (see Details). Because that
-cumulative joint is only interpretable when accumulated from the strongest
-claim down, <code>joint = TRUE</code> orders the rows by decreasing <code>pd</code>
-(i.e. it implies <code>order = TRUE</code>). Defaults to <code>FALSE</code>, in which case
-only the per-test correction is returned.</p></dd>
+<dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
+<dd><p>Numeric scalar in \((0.5, 1)\). The decision cutoff applied
+to <em>pd</em> (default <code>0.975</code>, a two-sided per-test
+\(\alpha = 0.05\)). It does <strong>not</strong> change <code>pd.adj</code>; it is used
+only to report the equivalent <strong>adjusted threshold on the raw</strong>
+<em>pd</em>, since rejecting \(pd_{adj} &gt; c\) is identical to rejecting raw
+\(pd &gt; c_*\) with
+\(c_* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)\).</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>Optional numeric scalar in \((0, 1)\). A convenience
+parameterization of <code>threshold</code> on the error scale: when supplied, the
+two-sided cutoff is set to \(c = 1 - \alpha/2\) (so <code>alpha = 0.05</code>
+gives <code>threshold = 0.975</code>), <strong>overriding</strong> any <code>threshold</code>
+value. Use whichever scale is more natural; the reported nominal per-test
+rate then equals this <code>alpha</code>.</p></dd>
+
+
+<dt id="arg-fwer">fwer<a class="anchor" aria-label="anchor" href="#arg-fwer"></a></dt>
+<dd><p>Logical (default <code>FALSE</code>). If <code>TRUE</code>, the output also
+reports a <strong>family-wise</strong> cutoff on the raw <em>pd</em> that controls the
+prior-averaged FWER at the nominal level over the \(m\) tests, given
+\(\pi_0\). Standard corrections (e.g. Bonferroni) implicitly assume every
+test is null (\(\pi_0 = 1\)); here the affordable per-test rate is
+\([1 - (1 - \alpha)^{1/m}] / \pi_0\), relaxing the standard correction by
+\(1/\pi_0\) and reducing to it as \(\pi_0 \to 1\). This is a
+prior-averaged (Bayesian) FWER under the assumed \(\pi_0\), <strong>not</strong>
+strong frequentist control. Reported in the header and as
+<code>attr(x, "threshold.fwer")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -156,7 +180,6 @@ hypothesis. Columns: <code>pd</code> (values used in the adjustment),
 independence, and reporting it alongside per-test results can mislead when
 the tests are dependent; the per-test prior \(\pi_0\) is the robust
 quantity (the expected proportion of nulls under exchangeability). When
-<code>joint = TRUE</code> a <code>joint_cum</code> column is added; when
 <code>order = TRUE</code> the rows are sorted by decreasing <code>pd</code>. For
 direction-agnostic tests, both <code>pd</code> and <code>pd.adj</code> are bounded in
 \([0.5, 1]\); for directional tests, both are on \([0, 1]\), with values
@@ -165,7 +188,20 @@ opposite direction. When <code>draws</code> are supplied, the output additionall
 includes <code>median.est</code> (posterior median per parameter), <code>null.value</code>,
 and <code>direction</code>. The <code>print</code> method summarises the constant
 quantities (<code>pi0</code>, <code>m</code>) in a header and displays the per-test
-table; the columns themselves remain available for programmatic access.</p>
+table; the columns themselves remain available for programmatic access.
+The object also carries, as attributes, the decision cutoff <code>threshold</code>
+(\(c\)), the equivalent adjusted cutoff on the raw <em>pd</em>
+<code>threshold.adj</code> (\(c_*\)), and the corresponding two-sided per-test
+Type I rates <code>alpha.nominal</code> (\(2(1-c)\)) and <code>alpha.eff</code>
+(\(2(1-c_*)\)); retrieve them with, e.g., <code>attr(x, "threshold.adj")</code>.
+The cutoffs <code>threshold.adj</code> and <code>threshold.fwer</code> are exact
+transformations of the decision rule, but the reported per-test <em>rates</em>
+(<code>alpha.eff</code>, and the <code>fwer</code> calibration) use the identity
+\(\alpha = 2(1 - c)\), which holds only for a diffuse within-model prior or
+large \(n\) (when the null <em>pd</em> is approximately uniform on
+\([0.5, 1]\)). Under an informative prior the true per-test rate is
+smaller, so these rates are conservative and <code>threshold.fwer</code> controls
+the FWER at or below the stated level.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -194,18 +230,10 @@ of the data and the conservative prior against the hypothesis.</p>
 is supported: each element of <code>direction</code> is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.</p>
-<p><strong>Per-test correction and joint statement.</strong> By default the function
-returns the per-test correction only (the marginal <code>pd</code> and its adjusted
-value <code>pd.adj</code>). Setting <code>joint = TRUE</code> <em>additionally</em> returns
-<code>joint_cum</code> and orders the rows by decreasing <code>pd</code>, so that
-<code>joint_cum</code> is the cumulative joint probability that the \(k\) strongest
-claims all hold in their claimed direction. When <code>draws</code> are supplied this joint is computed
-directly from the draws by intersecting the per-draw directional events, so it
-reflects the posterior dependence among parameters; when only <code>pd</code> is
-supplied it is the running product of the <em>pd</em> values, valid only under
-independence. The claimed direction for a <code>"two.sided"</code> test is its
-dominant posterior side, and the last entry of <code>joint_cum</code> is the joint
-probability that all \(m\) claims hold simultaneously.</p>
+<p><code>pd.adjust</code> returns the per-test correction only (the marginal <code>pd</code>
+and its adjusted value <code>pd.adj</code>). Family-wise summaries across hypotheses,
+the cumulative joint statement and simultaneous credible intervals, are
+provided separately by <code><a href="joint.html">joint</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -216,7 +244,10 @@ probability that all \(m\) claims hold simultaneously.</p>
 <span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, p0 <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  |  pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Decision: raw pd &gt; 0.9958 (adjusted from 0.975); effective per-test alpha</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.00843 (from 0.05)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       pd pd.adj direction</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> H1 0.999 0.9940 two.sided</span>
@@ -230,7 +261,10 @@ probability that all \(m\) claims hold simultaneously.</p>
 <span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>pd <span class="op">=</span> <span class="va">pd_values</span>, pi0 <span class="op">=</span> <span class="fl">0.4</span><span class="op">^</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  |  pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Decision: raw pd &gt; 0.9958 (adjusted from 0.975); effective per-test alpha</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.00843 (from 0.05)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       pd pd.adj direction</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> H1 0.999 0.9940 two.sided</span>
@@ -250,31 +284,53 @@ probability that all \(m\) claims hold simultaneously.</p>
 <span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  |  pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Decision: raw pd &gt; 0.9958 (adjusted from 0.975); effective per-test alpha</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.00843 (from 0.05)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    median.est null.value     pd pd.adj direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9602          0 0.8410 0.5000 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.0793          0 0.5330 0.5000 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7481          0 0.7708 0.5000 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0349          0 0.5118 0.5000 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H5     2.0256          0 0.9755 0.8679 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9828          0 0.9998 0.9985 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9860          0 0.8358 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.1175          0 0.5350 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7761          0 0.7822 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0089          0 0.5030 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5     1.9500          0 0.9762 0.8715 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9866          0 0.9995 0.9970 two.sided</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Also return the cumulative joint statement, ordered by evidence</span></span></span>
-<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span>, order <span class="op">=</span> <span class="cn">TRUE</span>, joint <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Order the rows by strength of evidence</span></span></span>
+<span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.4</span>, null.value <span class="op">=</span> <span class="fl">0</span>, order <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  |  pi0 = 0.8584</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Decision: raw pd &gt; 0.9958 (adjusted from 0.975); effective per-test alpha</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.00843 (from 0.05)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    median.est null.value     pd pd.adj direction joint_cum</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9828          0 0.9998 0.9985 two.sided    0.9998</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H5     2.0256          0 0.9755 0.8679 two.sided    0.9752</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9602          0 0.8410 0.5000 two.sided    0.8202</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7481          0 0.7708 0.5000 two.sided    0.6328</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.0793          0 0.5330 0.5000 two.sided    0.3405</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0349          0 0.5118 0.5000 two.sided    0.1663</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> joint_cum: cumulative joint Pr(first k claims hold), in the order shown.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    median.est null.value     pd pd.adj direction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9866          0 0.9995 0.9970 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5     1.9500          0 0.9762 0.8715 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9860          0 0.8358 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7761          0 0.7822 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.1175          0 0.5350 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0089          0 0.5030 0.5000 two.sided</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Family-wise summaries are obtained separately with joint()</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="joint.html">joint</a></span><span class="op">(</span><span class="va">draws</span>, null.value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>               <span class="co"># cumulative joint statement</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    median.est null.value     pd direction joint_cum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9866          0 0.9995 two.sided    0.9995</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5     1.9500          0 0.9762 two.sided    0.9758</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9860          0 0.8358 two.sided    0.8155</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7761          0 0.7822 two.sided    0.6398</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.1175          0 0.5350 two.sided    0.3420</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0089          0 0.5030 two.sided    0.1735</span>
+<span class="r-in"><span><span class="fu"><a href="joint.html">joint</a></span><span class="op">(</span><span class="va">draws</span>, interval <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>              <span class="co"># simultaneous credible intervals</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         lower          est    upper prob</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1 -1.5133941  0.985996121 3.595471 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2 -2.8220596 -0.117524024 2.471335 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3 -1.8565114  0.776129478 3.336798 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4 -2.5959143 -0.008943627 2.611432 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5 -0.7100979  1.950044477 4.707048 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6  0.4556620  2.986561857 5.535382 0.95</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Mix of directional and agnostic tests with parameter-specific nulls</span></span></span>
 <span class="r-in"><span><span class="fu">pd.adjust</span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, p0 <span class="op">=</span> <span class="fl">0.2</span>, null.value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
@@ -282,15 +338,18 @@ probability that all \(m\) claims hold simultaneously.</p>
 <span class="r-in"><span>          <span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"greater"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>some pd.adj have been floored to 0.5.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Prior-odds adjusted probability of direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  | pi0 = 0.7647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tests: 6  |  pi0 = 0.7647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Decision: raw pd &gt; 0.9922 (adjusted from 0.975); effective per-test alpha</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0157 (from 0.05)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    median.est null.value     pd pd.adj direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9602        0.2 0.7832 0.5265   greater</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.0793        0.0 0.5330 0.5000 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7481        0.2 0.7035 0.4220   greater</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0349        0.0 0.5118 0.5000 two.sided</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H5     2.0256        0.5 0.9368 0.8200   greater</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9828        0.5 0.9958 0.9863   greater</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H1     0.9860        0.2 0.7820 0.5246   greater</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H2    -0.1175        0.0 0.5350 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H3     0.7761        0.2 0.7230 0.4454   greater</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H4    -0.0089        0.0 0.5030 0.5000 two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H5     1.9500        0.5 0.9285 0.7998   greater</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> H6     2.9866        0.5 0.9948 0.9831   greater</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

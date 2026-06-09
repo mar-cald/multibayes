@@ -1,14 +1,24 @@
-# Simultaneous credible intervals from joint posterior draws Computes simultaneous equitailed credible intervals for a set of parameters, guaranteeing that **all** parameters stay within their bounds simultaneously with a user specified probability.
+# Family-wise summaries from joint posterior draws
 
-Simultaneous credible intervals from joint posterior draws Computes
-simultaneous equitailed credible intervals for a set of parameters,
-guaranteeing that **all** parameters stay within their bounds
-simultaneously with a user specified probability.
+Two complementary family-wise statements across a set of parameters: the
+**cumulative joint statement** (default), the posterior probability that
+the strongest directional claims hold simultaneously, and **simultaneous
+credible intervals** (`interval = TRUE`). Whereas
+[`pd.adjust`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
+targets a per-test (directional false-discovery) criterion, `joint`
+provides the family-wise counterparts.
 
 ## Usage
 
 ``` r
-joint(draws, prob = 0.95, est.FUN = median, null.value = NULL)
+joint(
+  draws,
+  interval = FALSE,
+  prob = 0.95,
+  null.value = 0,
+  direction = NULL,
+  est.FUN = median
+)
 ```
 
 ## Arguments
@@ -16,71 +26,90 @@ joint(draws, prob = 0.95, est.FUN = median, null.value = NULL)
 - draws:
 
   Numeric matrix or data frame of posterior draws (rows = draws, columns
-  = parameters).
+  = parameters). At least 1000 rows and 2 columns.
+
+- interval:
+
+  Logical (default `FALSE`). If `FALSE`, return the cumulative joint
+  statement; if `TRUE`, return simultaneous credible intervals.
 
 - prob:
 
-  Numeric scalar in \\(0, 1)\\. Joint coverage probability (default
-  `0.95`).
-
-- est.FUN:
-
-  Function for point estimates (default `median`).
+  Numeric scalar in \\(0, 1)\\. Joint coverage probability for the
+  simultaneous intervals (default `0.95`). Used only when
+  `interval = TRUE`.
 
 - null.value:
 
-  Optional numeric vector of null values to test against the
-  simultaneous credible intervals, one per parameter. If `NULL`
-  (default), no test is performed. When provided, a logical column
-  `test` is appended: `TRUE` means the null value is **excluded** from
-  the interval.
+  Numeric scalar or vector giving the null reference value(s) used to
+  define the claimed direction (a scalar is recycled). Used only when
+  `interval = FALSE`. Defaults to `0`.
+
+- direction:
+
+  Character vector of `"greater"`, `"less"`, or `"two.sided"` (or
+  `NULL`), the testing mode per parameter. A scalar is recycled; `NULL`
+  (default) uses `"two.sided"` (dominant side) for all. Used only when
+  `interval = FALSE`.
+
+- est.FUN:
+
+  Function returning a point estimate from a numeric vector (default
+  [`median`](https://rdrr.io/r/stats/median.html)). Used only when
+  `interval = TRUE`.
 
 ## Value
 
-A dataframe with:
-
-- lower:
-
-  Lower bounds, one per parameter.
-
-- est:
-
-  Point estimates via `est.FUN`.
-
-- upper:
-
-  Upper bounds, one per parameter.
-
-- prob:
-
-  Requested joint coverage probability.
-
-- cq:
-
-  Critical value.
-
-- test:
-
-  Logical; `TRUE` if `null.value` is excluded from the interval. Only
-  present when `null.value` is supplied.
+A `data.frame`. For `interval = FALSE`, one row per parameter ordered by
+decreasing *pd*, with columns `median.est`, `null.value`, `pd`,
+`direction`, and `joint_cum` (cumulative joint probability that the
+first \\k\\ claims hold). For `interval = TRUE`, one row per parameter
+with columns `lower`, `est`, `upper`, `prob`, and `cq` (the calibrated
+tail quantile).
 
 ## Details
 
-Simultaneous coverage is calibrated by examining how extreme each draw
-is across all parameters jointly. For each draw, the minimum tail
-probability across all parameters is computed. The simultaneous
-threshold is the \\\alpha\\-quantile of these minima: only \\\alpha\\ of
-draws are more extreme than this value in at least one parameter
-simultaneously.
+**Cumulative joint statement** (`interval = FALSE`, the default). Each
+parameter's claimed direction is its dominant posterior side relative to
+`null.value` (or the side set by `direction`); parameters are ordered by
+decreasing *pd*, and `joint_cum` is the cumulative joint posterior
+probability that the strongest \\k\\ claims hold simultaneously. It is
+computed directly from the draws by intersecting the per-draw
+directional events, so it reflects the posterior dependence among
+parameters; \\1 - \\ `joint_cum` is the posterior probability that at
+least one of those \\k\\ claims is mis-signed (a family-wise, Type S,
+statement).
 
-A closely related implementation is `sim.cred.band` in the credsubs
-package (Schnell et al., 2020).
+**Simultaneous credible intervals** (`interval = TRUE`). Equitailed
+intervals calibrated so that **all** parameters lie within their bounds
+simultaneously with probability `prob`, via the quantile-based
+simultaneous credible band (Besag et al., 1995; Held, 2004). Coverage is
+set by examining how extreme each draw is across all parameters jointly:
+for every draw the minimum (nearer) tail probability across parameters
+is taken, and the threshold is the \\(1 - \texttt{prob})\\-quantile of
+these minima. An effect can be declared when its band excludes the null
+value. A closely related implementation is `sim.cred.band` in the
+credsubs package (Schnell et al., 2020).
 
-## Note
+## References
 
-If you use this function in published research, please cite:
+Box, G. E. P., & Tiao, G. C. (1992). Bayesian inference in statistical
+analysis (1st ed.). *Wiley*.
 
-- The package: <https://github.com/mar-cald/multibayes>.
+Besag, J., Green, P., Higdon, D., & Mengersen, K. (1995). Bayesian
+computation and stochastic systems. *Statistical Science*, 10(1), 3–41.
+
+Held, L. (2004). Simultaneous posterior probability statements from
+Monte Carlo output. *Journal of Computational and Graphical Statistics*,
+13(1), 20–35.
+
+Schnell, P. et al. (2020). credsubs: Credible Subsets. R package.
+<https://CRAN.R-project.org/package=credsubs>.
+
+## See also
+
+[`pd.adjust`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
+for the per-test directional adjustment.
 
 ## Examples
 
@@ -90,14 +119,14 @@ Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 draws <- MASS::mvrnorm(2000, mu, Sigma)
 colnames(draws) <- c("theta1", "theta2", "theta3")
 
-joint(draws, prob = 0.95)
-#>            lower          est     upper prob     cq
-#> theta1  1.704391  4.020594092 6.2265003 0.95 0.0095
-#> theta2 -2.413244  0.002074391 2.2378859 0.95 0.0095
-#> theta3 -4.213334 -1.959627191 0.3455705 0.95 0.0095
-joint(draws, prob = 0.95, null.value = c(0, 0, 0))
-#>            lower          est     upper prob     cq  test
-#> theta1  1.704391  4.020594092 6.2265003 0.95 0.0095  TRUE
-#> theta2 -2.413244  0.002074391 2.2378859 0.95 0.0095 FALSE
-#> theta3 -4.213334 -1.959627191 0.3455705 0.95 0.0095 FALSE
+joint(draws)                    # cumulative joint statement (default)
+#>        median.est null.value     pd direction joint_cum
+#> theta1     4.0206          0 1.0000 two.sided    1.0000
+#> theta3    -1.9596          0 0.9755 two.sided    0.9755
+#> theta2     0.0021          0 0.5005 two.sided    0.4820
+joint(draws, interval = TRUE)   # simultaneous credible intervals
+#>            lower          est     upper prob
+#> theta1  1.704391  4.020594092 6.2265003 0.95
+#> theta2 -2.413244  0.002074391 2.2378859 0.95
+#> theta3 -4.213334 -1.959627191 0.3455705 0.95
 ```
