@@ -167,8 +167,6 @@ Both are pure posterior quantities — they do **not** use `pi0`.
 
 ## Citation
 
-If you use **multibayes** in published research, please cite the **article** (preferred over citing the software itself):
-
 > Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026). 
 A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing
 
