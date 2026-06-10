@@ -2,7 +2,6 @@ rm(list=ls())
 
 # load pkgs
 pkg <- c("dplyr","tidyr","purrr")
-
 invisible(sapply(pkg, require, character.only = T))
 
 # custom functions

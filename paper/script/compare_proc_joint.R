@@ -3,6 +3,7 @@
 
 set.seed(2026)
 
+# load pkg and functions
 source("paper/script/utl.R")
 library(multibayes)
 
@@ -11,9 +12,9 @@ s  <- 2   # prior sd
 pi0 <- 0.7 # per-test null prior (and true null proportion: correct spec)
 c <- 0.975  # pd cutoff (per-test)
 jlev <- 0.95  # cumulative-joint / simultaneous level
-eff <- 0.3 # |effect| of the non-null tests
+eff <- 0.3 # effect of the non-null tests
 B <- 10000  # replications per cell
-ms  <- c(4, 8, 10, 20)
+ms  <- c(4, 8, 10, 20) #numer of tests
 
 one_rep <- function(m) {
   n0 <- rbinom(1, size = m, prob = pi0)
@@ -35,7 +36,8 @@ one_rep <- function(m) {
   kstar <- if (jc[1] > jlev) max(which(jc > jlev)) else 0
   rej_j <- logical(m); if (kstar > 0) rej_j[ord[seq_len(kstar)]] <- TRUE
 
-  rej_s <- pd > 1 - (1 - jlev^(1 / m)) / 2    #simultaneous intervals (Sidak band excludes 0)
+  #simultaneous intervals (Sidak band excludes 0) as test are independent
+  rej_s <- pd > 1 - (1 - jlev^(1 / m)) / 2  
 
   fdp <- function(r) if (sum(r) == 0) 0 else sum(r & is_null) / sum(r)
   nn  <- sum(!is_null)  # average power: correct detections

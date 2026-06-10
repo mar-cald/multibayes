@@ -278,7 +278,6 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
   # `pd.adj > threshold` is identical to rejecting the raw `pd > threshold.adj`,
   # so threshold.adj is the equivalent (stricter) cutoff to apply to the
   # unadjusted pd. It is a pure transformation of the decision rule and never
-  # uses the shape of the posterior, hence exact for any draws (normal, t, ...).
   # The two-sided per-test Type I rate at a cutoff `cut` is 2 * (1 - cut).
   alpha.nominal <- 2 * (1 - threshold)
   if (prior_H0 > 0.5) {
@@ -289,7 +288,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
   }
   alpha.eff <- 2 * (1 - threshold.adj)
 
-  # Optional family-wise (FWER) cutoff. Standard corrections (e.g. Bonferroni)
+  # Optional family-wise (FWER) cutoff. Standard corrections
   # control the FWER under the worst case that every test is null (pi0 = 1). If a
   # fraction pi0 of the m tests are null, the prior-averaged FWER of a per-test
   # rate a is 1 - (1 - pi0 * a)^m; setting this to the family target alpha gives
@@ -369,7 +368,7 @@ print.pd_adjust <- function(x, digits = 4, ...) {
               as.integer(df$m[1]), df$pi0[1]))
 
   # Wrap header lines at the console width so they never overflow (e.g. in PDF
-  # output); plain cat() would print a single long line that runs off the page.
+  # output)
   hdr <- function(s) cat(strwrap(s, width = getOption("width", 80L)), "", sep = "\n")
 
   cadj <- attr(x, "threshold.adj")
