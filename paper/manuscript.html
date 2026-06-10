@@ -294,7 +294,7 @@ pd_{\mathrm{adj},i} = \frac{pd_i\,(1 - \pi_0)}{pd_i\,(1 - \pi_0) + (1 - pd_i)\,\
 </span> which, returned to the probability scale, is a stricter threshold on the raw <span class="math inline">pd_i</span>, <span class="math display">
 pd_i &gt; c^*, \qquad c^* = \frac{c\, \pi_0}{(1 - c)(1 - \pi_0) + c\, \pi_0}.
 </span></p>
-<p>A higher threshold lowers the per-test probability of rejection under the null; this per-test rate equals <span class="math inline">\alpha = 2\bigl(1 - c^*\bigr)</span> when the within-model prior is diffuse or <span class="math inline">n</span> is large (so that the null distribution of <span class="math inline">pd</span> is approximately uniform on <span class="math inline">[0.5, 1]</span>), and is smaller under an informative prior, which shrinks the posterior toward the null. The FDR, by contrast, cannot be reduced to a single number, as it depends on the power of the individual tests, so we make no claim about its absolute level. In summary, the adjustment is equivalent to a stricter per-test threshold <span class="math inline">c_* &gt; c</span>, so for <span class="math inline">\pi_0 &gt; 0.5</span> it lowers the per-test false-positive rate and the expected number of false discoveries relative to the unadjusted rule<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>A higher threshold lowers the per-test probability of rejection under the null; this per-test rate equals <span class="math inline">\alpha = 2\bigl(1 - c^*\bigr)</span> when the within-model prior is diffuse or <span class="math inline">n</span> is large (so that the null distribution of <span class="math inline">pd</span> is approximately uniform on <span class="math inline">[0.5, 1]</span>), and is smaller under an informative prior, which shrinks the posterior toward the null. The FDR, by contrast, cannot be reduced to a single number, as it depends on the power of the individual tests, so we make no claim about its absolute level. In summary, the adjustment is equivalent to a stricter per-test threshold <span class="math inline">c^* &gt; c</span>, so for <span class="math inline">\pi_0 &gt; 0.5</span> it lowers the per-test false-positive rate and the expected number of false discoveries relative to the unadjusted rule<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
 <section id="simulation-study" class="level3">
 <h3 data-anchor-id="simulation-study">Simulation Study</h3>
 <p>We conducted a fully crossed simulation study, with 10,000 replications per cell, to examine the adjustment under both correctly specified and misspecified priors. We varied the per-test null prior supplied to the procedure, <span class="math inline">\pi_0 \in \{0.50, 0.6, \dots, 0.9\}</span>; the true probability that each hypothesis is null, <span class="math inline">\pi_{0\text{true}} \in \{0.5, 0.6, \dots, 1.0\}</span>; the family size <span class="math inline">m \in \{4, 8, 10, 20\}</span>; and the sample size <span class="math inline">n \in \{30, 50, 100\}</span>. At each replication the number of true null effects (<span class="math inline">\theta_i = 0</span>) was drawn from <span class="math inline">\mathrm{Binomial}(m, \pi_{0\text{true}})</span> and the remaining effects set to <span class="math inline">\theta_i = 0.3</span>; observations were generated as <span class="math inline">y_i \sim \mathcal{N}(\theta_i, 1)</span>, and the posterior obtained from a conjugate normal–normal model with <span class="math inline">y_i \mid \theta \sim \mathcal{N}(\theta, 1)</span> and prior <span class="math inline">\theta \sim \mathcal{N}(0, 2)</span>. We declared support for the alternative when <span class="math inline">pd &gt; 0.975</span> and evaluated the FDR, the FWER, and average power, the proportion of true effects detected <span class="citation" data-cites="Benjamini1995 Grant2025">(<a href="#ref-Benjamini1995" role="doc-biblioref">Benjamini &amp; Hochberg, 1995</a>; <a href="#ref-Grant2025" role="doc-biblioref">Izmirlian et al., 2025</a>)</span>. The diagonal <span class="math inline">\pi_0 = \pi_{0\text{true}}</span> corresponds to a correctly specified prior.</p>
@@ -303,9 +303,9 @@ pd_i &gt; c^*, \qquad c^* = \frac{c\, \pi_0}{(1 - c)(1 - \pi_0) + c\, \pi_0}.
 </section>
 <section id="comparison-with-other-bayesian-methods" class="level3">
 <h3 data-anchor-id="comparison-with-other-bayesian-methods">Comparison with other Bayesian methods</h3>
-<p>Two further Bayesian summaries have been proposed to address multiplicity. The first constructs a cumulative joint posterior probability: one accepts the strongest <span class="math inline">k</span> claims whose joint posterior probability is at least <span class="math inline">1 - \alpha</span> <span class="citation" data-cites="Gelman2000 Pruzek2016">(<a href="#ref-Gelman2000" role="doc-biblioref">Gelman &amp; Tuerlinckx, 2000</a>; <a href="#ref-Pruzek2016" role="doc-biblioref">Pruzek, 2016</a>)</span>. The second relies on simultaneous credible intervals, declaring an effect whenever its <span class="math inline">1 - \alpha</span> simultaneous band excludes the null value <span class="citation" data-cites="Schnell2020 Schnell2016 Box1992">(<a href="#ref-Box1992" role="doc-biblioref">Box &amp; Tiao, 1992</a>; <a href="#ref-Schnell2016" role="doc-biblioref">Schnell et al., 2016</a>; <a href="#ref-Schnell2020" role="doc-biblioref">Schnell et al., 2020</a>)</span>. To benchmark all three approaches, we replicate the simulation described above with <span class="math inline">n = 50</span> and <span class="math inline">\pi_{0\text{true}} = 0.7</span> held fixed, and vary the family size <span class="math inline">m</span>; the prior-odds adjustment is evaluated at <span class="math inline">\pi_0 = \pi_{0\text{true}}</span>, representing best-case calibration. Figure <a href="#fig-compare" class="quarto-xref" aria-expanded="false">Figure&nbsp;6</a> displays the resulting FDR, FWER, and power for each rule across values of <span class="math inline">m</span>.</p>
-<p>The simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as <span class="math inline">\pi_{0\text{true}} = 0.7</span>, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching <span class="math inline">0.21</span>, and FWER <span class="math inline">0.55</span>. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compare to Type I error control.</p>
-<p>These choices trade off against power (rightmost panel): the cumulative joint detects the most true effects (around <span class="math inline">0.63</span>), the prior-odds procedure’s power is essentially constant in <span class="math inline">m</span> (around <span class="math inline">0.42</span>), and the strict simultaneous intervals lose power as the family grows (from <span class="math inline">0.36</span> at <span class="math inline">m = 2</span> to <span class="math inline">0.18</span> at <span class="math inline">m = 20</span>). The choice among them is thus a deliberate trade between power and the error one most wants to limit.</p>
+<p>Two further Bayesian summaries have been proposed to address multiplicity. The first constructs a cumulative joint posterior probability: one accepts the strongest <span class="math inline">k</span> claims whose joint posterior probability is at least <span class="math inline">1 - \alpha</span> <span class="citation" data-cites="Gelman2000 Pruzek2016">(<a href="#ref-Gelman2000" role="doc-biblioref">Gelman &amp; Tuerlinckx, 2000</a>; <a href="#ref-Pruzek2016" role="doc-biblioref">Pruzek, 2016</a>)</span>. The second relies on simultaneous credible intervals, declaring an effect whenever its <span class="math inline">1 - \alpha</span> simultaneous band excludes the null value <span class="citation" data-cites="Schnell2020 Schnell2016 Box1992">(<a href="#ref-Box1992" role="doc-biblioref">Box &amp; Tiao, 1992</a>; <a href="#ref-Schnell2016" role="doc-biblioref">Schnell et al., 2016</a>; <a href="#ref-Schnell2020" role="doc-biblioref">Schnell et al., 2020</a>)</span>. To benchmark all three approaches, we replicate the simulation described above with <span class="math inline">n = 50</span> and <span class="math inline">\pi_{0\text{true}} = 0.7</span> held fixed, and vary the family size <span class="math inline">m</span>; the prior-odds adjustment is evaluated at <span class="math inline">\pi_0 = \pi_{0\text{true}}</span>, representing best-case calibration. <a href="#fig-compare" class="quarto-xref" aria-expanded="false">Figure&nbsp;6</a> displays the resulting FDR, FWER, and power for each rule across values of <span class="math inline">m</span>.</p>
+<p>The simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as <span class="math inline">\pi_{0\text{true}} = 0.7</span>, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching <span class="math inline">0.21</span>, and FWER <span class="math inline">0.55</span>. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compared to Type I error control.</p>
+<p>These choices trade off against power (rightmost panel): the cumulative joint detects the most true effects (around <span class="math inline">0.63</span>), the prior-odds procedure’s power is essentially constant in <span class="math inline">m</span> (around <span class="math inline">0.42</span>), and the strict simultaneous intervals lose power as the family grows (from <span class="math inline">0.36</span> at <span class="math inline">m = 4</span> to <span class="math inline">0.18</span> at <span class="math inline">m = 20</span>). The choice among them is thus a deliberate trade between power and the error one most wants to limit.</p>
 </section>
 </section>
 </section>
@@ -424,7 +424,7 @@ b_congruency1:trial:condition1    -0.0028          0 0.5961 0.5000 two.sided</co
 </div>
 <p>The function was called with a per-test null prior of <span class="math inline">\pi_0 = 0.7</span> (shown in the printed header), encoding the skeptical expectation that roughly 70% of the tested effects are null. The header also reports the equivalent decision this implies: at the default cutoff <span class="math inline">c = 0.975</span>, a raw <span class="math inline">pd</span> must now exceed the stricter adjusted threshold <span class="math inline">c^* = 0.989</span>.</p>
 <p>The adjustment’s effect varies with the strength of the underlying evidence. The predictor <code>b_congruency1</code> carries <span class="math inline">pd = 1</span> and is left untouched (<span class="math inline">pd_\text{adj} = 1</span>). Terms with lower but still substantial evidence are pulled down only mildly: <code>b_prev_cong1</code> (<span class="math inline">0.980 \to 0.955</span>), <code>b_trial</code> (<span class="math inline">0.937 \to 0.864</span>), <code>b_congruency1:prev_cong1</code> (<span class="math inline">0.958 \to 0.908</span>), <code>b_congruency1:condition1</code> (<span class="math inline">0.929 \to 0.849</span>), and <code>b_trial:condition1</code> (<span class="math inline">0.894 \to 0.783</span>). In contrast, parameters with weak evidence are shrunk substantially toward <span class="math inline">0.5</span>: <code>b_condition1</code> (<span class="math inline">0.651 \to 0.500</span>), <code>b_congruency1:trial</code> (<span class="math inline">0.721 \to 0.525</span>), and the three-way interaction <code>b_congruency1:trial:condition1</code> (<span class="math inline">0.596 \to 0.500</span>).</p>
-<p>The “family-wise” picture can be obtained separately with <code>joint()</code>, default compute joint cumulative probabilities:</p>
+<p>The family-wise picture is obtained separately with <code>joint()</code>, which by default computes the cumulative joint probabilities:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">joint</span>(draws_rt, <span class="at">null.value =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -441,7 +441,7 @@ b_congruency1:trial:condition1    -0.0028          0 0.5961 two.sided    0.2232<
 </div>
 </div>
 <p>With the rows sorted by decreasing <span class="math inline">pd</span>, the <code>joint_cum</code> column reports the cumulative joint posterior probability that the strongest <span class="math inline">k</span> directional claims hold simultaneously, the posterior probability that every claimed direction is correct at once. A high value therefore licenses accepting that whole set of claims together. Here the two strongest hold jointly with probability <span class="math inline">0.98</span> and the three strongest with <span class="math inline">0.94</span>, after which the joint confidence lowers as weaker claims are added, indicating how many of the leading effects can be reported as a jointly supported set.</p>
-<p>For simultanoues equi-tailed intervals <code>joint(interval = TRUE)</code></p>
+<p>Simultaneous equi-tailed credible intervals are obtained with <code>joint(interval = TRUE)</code>:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">joint</span>(draws_rt, <span class="at">interval =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -457,6 +457,7 @@ b_trial:condition1             -0.008945797  0.007125574  0.023144055 0.95
 b_congruency1:trial:condition1 -0.034805697 -0.002829134  0.028034847 0.95</code></pre>
 </div>
 </div>
+<p>Under this strictest criterion only <code>b_congruency1</code> excludes zero (simultaneous band <span class="math inline">[-0.19, -0.10]</span>), consistent with the ordering of the three rules shown in <a href="#fig-compare" class="quarto-xref" aria-expanded="false">Figure&nbsp;6</a>.</p>
 </section>
 <section id="discussion" class="level1">
 <h1>Discussion</h1>
@@ -469,7 +470,7 @@ b_congruency1:trial:condition1 -0.034805697 -0.002829134  0.028034847 0.95</code
 <p>As Bayesian methods become increasingly common in psychological research, often in pragmatic workflows relying on default priors and fixed decision thresholds, the implications of multiplicity should be explicitly recognized. Additionally, although priors may be well-calibrated at the level of individual parameters, they do not by themselves account for multiplicity when many parameters are considered simultaneously. Ignoring this aspect leads fixed <span class="math inline">pd</span> thresholds to systematically overstate evidence for directional effects, especially as the number of tests grows. The adjustment proposed here addresses this gap by incorporating prior beliefs about the prevalence of null effects directly into <span class="math inline">pd</span>-based decisions. By doing so, it provides a principled and transparent way to account for multiplicity without altering the estimation model, yielding more reliable inferences in multi-parameter settings and reducing the risk that apparent effects reflect chance rather than substantive signals.</p>
 <section id="acknowledgements" class="level3">
 <h3 data-anchor-id="acknowledgements">Acknowledgements</h3>
-<p>We are grateful to Giovanni Parmigiani, Enrico Toffalini and Jelle Goeman for insightful comments and discussion throughout the development of this work. We also thank Laura Sità and Matteo Manente for helpful feedback on earlier versions of the manuscript.</p>
+<p>We are grateful to Jelle Goeman, Enrico Toffalini and Giovanni Parmigiani for insightful comments and discussion throughout the development of this work. We also thank Laura Sità and Matteo Manente for helpful feedback on earlier versions of the manuscript.</p>
 </section>
 </section>
 <section id="refs" class="level1">
@@ -691,7 +692,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-pd-ci" class="quarto-float quarto-figure quarto-figure-left" data-fig-align="left" prefix="" data-fignum="1">
+<div id="fig-pd-ci" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="1">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-pd-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -710,7 +711,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-uniform-pd" class="quarto-float quarto-figure quarto-figure-left" data-fig-align="left" prefix="" data-fignum="2">
+<div id="fig-uniform-pd" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="2">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-uniform-pd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -729,7 +730,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-prior-adj" class="quarto-float quarto-figure quarto-figure-left" data-fig-align="left" prefix="" data-fignum="3">
+<div id="fig-prior-adj" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="3">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-prior-adj-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -748,7 +749,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-ind-fdr-pw" class="quarto-float quarto-figure quarto-figure-left" data-fig-align="left" prefix="" data-fignum="4">
+<div id="fig-ind-fdr-pw" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="4">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-ind-fdr-pw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -767,7 +768,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-ind-fwer" class="quarto-float quarto-figure quarto-figure-left" data-fig-align="left" prefix="" data-fignum="5">
+<div id="fig-ind-fwer" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="5">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-ind-fwer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -786,7 +787,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="center" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-compare" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" prefix="" data-fignum="6">
+<div id="fig-compare" class="quarto-float quarto-figure quarto-figure-center" prefix="" data-fig-align="center" data-fignum="6">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">

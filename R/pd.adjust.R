@@ -385,7 +385,7 @@ print.pd_adjust <- function(x, digits = 4, ...) {
   cat("\n")
 
   show <- df[, setdiff(names(df), c("pi0", "m")), drop = FALSE]
-  # drop columns that are entirely NA (e.g. mean.est / null.value for pd input)
+  # drop columns that are entirely NA (e.g. median.est / null.value for pd input)
   keep <- !vapply(show, function(col) all(is.na(col)), logical(1))
   print(show[, keep, drop = FALSE], digits = digits, ...)
 

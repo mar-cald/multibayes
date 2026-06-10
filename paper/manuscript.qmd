@@ -469,7 +469,7 @@ $$
 pd_i > c^*, \qquad c^* = \frac{c\, \pi_0}{(1 - c)(1 - \pi_0) + c\, \pi_0}.
 $$
 
-A higher threshold lowers the per-test probability of rejection under the null; this per-test rate equals $\alpha = 2\bigl(1 - c^*\bigr)$ when the within-model prior is diffuse or $n$ is large (so that the null distribution of $pd$ is approximately uniform on $[0.5, 1]$), and is smaller under an informative prior, which shrinks the posterior toward the null. The FDR, by contrast, cannot be reduced to a single number, as it depends on the power of the individual tests, so we make no claim about its absolute level. In summary, the adjustment is equivalent to a stricter per-test threshold $c_* > c$, so for $\pi_0 > 0.5$ it lowers the per-test false-positive rate and the expected number of false discoveries relative to the unadjusted rule^[The adjustment targets the FDR, not the FWER (the probability of at least one false positive). A test produces a false positive only when it is both null and rejected, with probability $\pi_0\,\alpha^*$, so across $m$ independent tests $\mathrm{FWER} = 1 - (1 - \pi_0\,\alpha^*)^{m}$. Controlling it at a target $\alpha$ gives $\alpha^* = \frac{1 - (1 - \alpha)^{1/m}}{\pi_0}$. Because the two-sided rule $pd > c$ has per-test Type I rate $\alpha^* = 2(1 - c)$ (the convention $c = 1 - \alpha/2$ used throughout), inverting this relation turns the family-wise correction into a single cutoff on the raw $pd$, $c_{\mathrm{fwer}} = 1 - \alpha^*/2 = 1 - \tfrac{1 - (1 - \alpha)^{1/m}}{2\,\pi_0}$. This uses the same identity $\alpha^* = 2(1-c)$, so it likewise assumes a diffuse prior or large $n$ and independent tests; an informative prior lowers the per-test rate and makes $c_{\mathrm{fwer}}$ conservative, controlling the FWER at or below the target.]. 
+A higher threshold lowers the per-test probability of rejection under the null; this per-test rate equals $\alpha = 2\bigl(1 - c^*\bigr)$ when the within-model prior is diffuse or $n$ is large (so that the null distribution of $pd$ is approximately uniform on $[0.5, 1]$), and is smaller under an informative prior, which shrinks the posterior toward the null. The FDR, by contrast, cannot be reduced to a single number, as it depends on the power of the individual tests, so we make no claim about its absolute level. In summary, the adjustment is equivalent to a stricter per-test threshold $c^* > c$, so for $\pi_0 > 0.5$ it lowers the per-test false-positive rate and the expected number of false discoveries relative to the unadjusted rule^[The adjustment targets the FDR, not the FWER (the probability of at least one false positive). A test produces a false positive only when it is both null and rejected, with probability $\pi_0\,\alpha^*$, so across $m$ independent tests $\mathrm{FWER} = 1 - (1 - \pi_0\,\alpha^*)^{m}$. Controlling it at a target $\alpha$ gives $\alpha^* = \frac{1 - (1 - \alpha)^{1/m}}{\pi_0}$. Because the two-sided rule $pd > c$ has per-test Type I rate $\alpha^* = 2(1 - c)$ (the convention $c = 1 - \alpha/2$ used throughout), inverting this relation turns the family-wise correction into a single cutoff on the raw $pd$, $c_{\mathrm{fwer}} = 1 - \alpha^*/2 = 1 - \tfrac{1 - (1 - \alpha)^{1/m}}{2\,\pi_0}$. This uses the same identity $\alpha^* = 2(1-c)$, so it likewise assumes a diffuse prior or large $n$ and independent tests; an informative prior lowers the per-test rate and makes $c_{\mathrm{fwer}}$ conservative, controlling the FWER at or below the target.]. 
 
 ### Simulation Study
 
@@ -589,12 +589,12 @@ df_pi0 |>
 
 ### Comparison with other Bayesian methods
 
-Two further Bayesian summaries have been proposed to address multiplicity. The first constructs a cumulative joint posterior probability: one accepts the strongest $k$ claims whose joint posterior probability is at least $1 - \alpha$ [@Gelman2000; @Pruzek2016]. The second relies on simultaneous credible intervals, declaring an effect whenever its $1 - \alpha$ simultaneous band excludes the null value [@Schnell2020; @Schnell2016; @Box1992]. To benchmark all three approaches, we replicate the simulation described above with $n = 50$ and $\pi_{0\text{true}} = 0.7$ held fixed, and vary the family size $m$; the prior-odds adjustment is evaluated at $\pi_0 = \pi_{0\text{true}}$, representing best-case calibration. Figure @fig-compare displays the resulting FDR, FWER, and power for each rule across values of $m$.
+Two further Bayesian summaries have been proposed to address multiplicity. The first constructs a cumulative joint posterior probability: one accepts the strongest $k$ claims whose joint posterior probability is at least $1 - \alpha$ [@Gelman2000; @Pruzek2016]. The second relies on simultaneous credible intervals, declaring an effect whenever its $1 - \alpha$ simultaneous band excludes the null value [@Schnell2020; @Schnell2016; @Box1992]. To benchmark all three approaches, we replicate the simulation described above with $n = 50$ and $\pi_{0\text{true}} = 0.7$ held fixed, and vary the family size $m$; the prior-odds adjustment is evaluated at $\pi_0 = \pi_{0\text{true}}$, representing best-case calibration. @fig-compare displays the resulting FDR, FWER, and power for each rule across values of $m$.
 
 
-The simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as $\pi_{0\text{true}} = 0.7$, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching $0.21$, and FWER $0.55$. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compare to Type I error control. 
+The simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as $\pi_{0\text{true}} = 0.7$, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching $0.21$, and FWER $0.55$. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compared to Type I error control.
 
-These choices trade off against power (rightmost panel): the cumulative joint detects the most true effects (around $0.63$), the prior-odds procedure's power is essentially constant in $m$ (around $0.42$), and the strict simultaneous intervals lose power as the family grows (from $0.36$ at $m = 2$ to $0.18$ at $m = 20$). The choice among them is thus a deliberate trade between power and the error one most wants to limit.
+These choices trade off against power (rightmost panel): the cumulative joint detects the most true effects (around $0.63$), the prior-odds procedure's power is essentially constant in $m$ (around $0.42$), and the strict simultaneous intervals lose power as the family grows (from $0.36$ at $m = 4$ to $0.18$ at $m = 20$). The choice among them is thus a deliberate trade between power and the error one most wants to limit.
 
 ```{r}
 #| label: fig-compare
@@ -719,7 +719,7 @@ The function was called with a per-test null prior of $\pi_0 = 0.7$ (shown in th
 
 The adjustment's effect varies with the strength of the underlying evidence. The predictor `b_congruency1` carries $pd = 1$ and is left untouched ($pd_\text{adj} = 1$). Terms with lower but still substantial evidence are pulled down only mildly: `b_prev_cong1` ($0.980 \to 0.955$), `b_trial` ($0.937 \to 0.864$), `b_congruency1:prev_cong1` ($0.958 \to 0.908$), `b_congruency1:condition1` ($0.929 \to 0.849$), and `b_trial:condition1` ($0.894 \to 0.783$). In contrast, parameters with weak evidence are shrunk substantially toward $0.5$: `b_condition1` ($0.651 \to 0.500$), `b_congruency1:trial` ($0.721 \to 0.525$), and the three-way interaction `b_congruency1:trial:condition1` ($0.596 \to 0.500$).
 
-The "family-wise" picture can be obtained separately with `joint()`, default compute joint cumulative probabilities:
+The family-wise picture is obtained separately with `joint()`, which by default computes the cumulative joint probabilities:
 
 ```{r, echo=TRUE}
 joint(draws_rt, null.value = 0)
@@ -727,10 +727,13 @@ joint(draws_rt, null.value = 0)
 
 With the rows sorted by decreasing $pd$, the `joint_cum` column reports the cumulative joint posterior probability that the strongest $k$ directional claims hold simultaneously, the posterior probability that every claimed direction is correct at once. A high value therefore licenses accepting that whole set of claims together. Here the two strongest hold jointly with probability $0.98$ and the three strongest with $0.94$, after which the joint confidence lowers as weaker claims are added, indicating how many of the leading effects can be reported as a jointly supported set.
 
-For simultanoues equi-tailed intervals `joint(interval = TRUE)`
+Simultaneous equi-tailed credible intervals are obtained with `joint(interval = TRUE)`:
+
 ```{r, echo=TRUE}
 joint(draws_rt, interval = TRUE)
 ```
+
+Under this strictest criterion only `b_congruency1` excludes zero (simultaneous band $[-0.19, -0.10]$), consistent with the ordering of the three rules shown in @fig-compare.
 
 # Discussion
 
@@ -749,7 +752,7 @@ Second, it does not provide evidence for a point null hypothesis. The procedure 
 As Bayesian methods become increasingly common in psychological research, often in pragmatic workflows relying on default priors and fixed decision thresholds, the implications of multiplicity should be explicitly recognized. Additionally, although priors may be well-calibrated at the level of individual parameters, they do not by themselves account for multiplicity when many parameters are considered simultaneously. Ignoring this aspect leads fixed $pd$ thresholds to systematically overstate evidence for directional effects, especially as the number of tests grows. The adjustment proposed here addresses this gap by incorporating prior beliefs about the prevalence of null effects directly into $pd$-based decisions. By doing so, it provides a principled and transparent way to account for multiplicity without altering the estimation model, yielding more reliable inferences in multi-parameter settings and reducing the risk that apparent effects reflect chance rather than substantive signals.
 
 ### Acknowledgements
-We are grateful to Giovanni Parmigiani, Enrico Toffalini and Jelle Goeman for insightful comments and discussion throughout the development of this work. We also thank Laura Sità and Matteo Manente for helpful feedback on earlier versions of the manuscript.
+We are grateful to Jelle Goeman, Enrico Toffalini and Giovanni Parmigiani for insightful comments and discussion throughout the development of this work. We also thank Laura Sità and Matteo Manente for helpful feedback on earlier versions of the manuscript.
 
 # References {#refs}
 
