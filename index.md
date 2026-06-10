@@ -207,8 +207,8 @@ when its band excludes the null value.
 ``` r
 
 joint(draws, interval = TRUE, prob = 0.95)
-#>         lower    est  upper prob    cq
-#> theta1  ...      ...  ...   0.95   ...
+#>         lower    est  upper prob
+#> theta1  ...      ...  ...   0.95
 #> ...
 ```
 
@@ -218,10 +218,15 @@ Both are pure posterior quantities — they do **not** use `pi0`.
 
 ## Citation
 
-If you use **multibayes** in published research, please cite:
+If you use **multibayes** in published research, please cite the
+**article** (preferred over citing the software itself):
 
-> Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026). Adjusting
-> the Probability of Direction for Multiple Testing.
+> Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026). A
+> Prior-Odds Adjustment for the Probability of Direction in Multiple
+> Testing
+
+Run `citation("multibayes")` in R for the full reference (article and
+package entries).
 
 ------------------------------------------------------------------------
 

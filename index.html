@@ -232,8 +232,8 @@
 <p><strong>Simultaneous credible intervals (<code>interval = TRUE</code>).</strong> Equitailed intervals such that <strong>all</strong> parameters lie within their bounds <em>simultaneously</em> with probability <code>prob</code> (the quantile-based simultaneous credible band; closely related to <code>credsubs::sim.cred.band()</code>, Schnell et al., 2020). Declare an effect when its band excludes the null value.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/joint.html">joint</a></span><span class="op">(</span><span class="va">draws</span>, interval <span class="op">=</span> <span class="cn">TRUE</span>, prob <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span>
-<span><span class="co">#&gt;         lower    est  upper prob    cq</span></span>
-<span><span class="co">#&gt; theta1  ...      ...  ...   0.95   ...</span></span>
+<span><span class="co">#&gt;         lower    est  upper prob</span></span>
+<span><span class="co">#&gt; theta1  ...      ...  ...   0.95</span></span>
 <span><span class="co">#&gt; ...</span></span></code></pre></div>
 <p>Both are pure posterior quantities — they do <strong>not</strong> use <code>pi0</code>.</p>
 <hr>
@@ -241,10 +241,11 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If you use <strong>multibayes</strong> in published research, please cite:</p>
+<p>If you use <strong>multibayes</strong> in published research, please cite the <strong>article</strong> (preferred over citing the software itself):</p>
 <blockquote>
-<p>Calderan, M., Gambarota, F., Finos, L., &amp; Altoè, G. (2026). Adjusting the Probability of Direction for Multiple Testing.</p>
+<p>Calderan, M., Gambarota, F., Finos, L., &amp; Altoè, G. (2026). A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing</p>
 </blockquote>
+<p>Run <code>citation("multibayes")</code> in R for the full reference (article and package entries).</p>
 <hr>
 </div>
 <div class="section level2">

@@ -11,11 +11,23 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/mar-cald/multibayes/blob/main/DESCRIPTION)
+[`inst/CITATION`](https://github.com/mar-cald/multibayes/blob/main/inst/CITATION)
 
-Calderan M, Gambarota F (2026). *multibayes: Bayesian Multiplicity
-Adjustments*. R package version 0.1.0,
-<https://github.com/mar-cald/multibayes>.
+Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026). A Prior-Odds
+Adjustment for the Probability of Direction in Multiple Testing.
+Preprint. https://github.com/mar-cald/multibayes
+
+    @Unpublished{,
+      title = {A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing},
+      author = {Margherita Calderan and Filippo Gambarota and Livio Finos and Gianmarco Altoè},
+      year = {2026},
+      note = {Preprint},
+      url = {https://github.com/mar-cald/multibayes},
+    }
+
+Calderan, M., & Gambarota, F. (2026). multibayes: Bayesian Multiplicity
+Adjustments. R package version 0.1.0.
+https://github.com/mar-cald/multibayes
 
     @Manual{,
       title = {multibayes: Bayesian Multiplicity Adjustments},
