@@ -74,25 +74,28 @@ author-note:
 abstract: "The probability of direction ($pd$) has seen rapid adoption in psychological research as an intuitive posterior summary that quantifies how strongly the posterior distribution favors one direction of an effect over the other. In practice, researchers often turn $pd$ into a binary decision rule by applying fixed thresholds (e.g., $pd>0.975$), declaring evidence for an effect when posterior mass concentrates strongly on one side. When this rule is applied across many parameters, it can substantially increase the risk of misleading conclusions. We argue that this problem stems from neglecting the prior probability that for every tested effect, the data-favored direction does not reflect a genuine effect. This quantity, often left implicit, becomes increasingly consequential as the number of tested effects grows. To address this, we propose a prior-odds adjustment to $pd$ that requires researchers to explicitly specify the proportion of tested effects they expect to be null. The adjustment accounts for multiplicity without modifying the model used in parameter estimation, offers a transparent mechanism for incorporating prior skepticism about the existence of effects, and reduces the risk of false discoveries in multi-parameter settings. We evaluate its behavior through simulation across varying sample sizes and proportions of null effects, and provide an R package to facilitate applied use."
 
 keywords: [probability of direction, multiple testing, prior-odds, FDR]
-bibliography: "biblio.bib"
+bibliography: "bibliography.bib"
 reference-section-title: References
+
 format:
+  apaquarto-html: 
+    sidebar:
+      tools:
+        - id: other-formats
+      title: "Other Formats"
+      links:
+        - text: "PDF"
+          href: "paper/manuscript.pdf"
+  
   apaquarto-pdf:
     documentmode: doc
+    fontsize: 12pt
     floatsintext: true
     word-count: true
     fig-pos: "H"
     header-includes:
+      - \usepackage{float}
       - \raggedbottom
-         
-  apaquarto-html:
-    toc: true
-    toc-depth: 3
-    out-width: "95%"
-    fig-pos: "H"
-    
-  
-
     
 execute:
   eval: true
@@ -173,7 +176,7 @@ In practice, the $pd$ is often used to summarize both the direction and existenc
 #| fig-cap: > 
 #|  Posterior distributions illustrating the relationship between
 #|  the probability of direction (pd) and 95% Credible Interval (CI), using c = 0.975 and $\theta_{null} = 0$. 
-#| fig-height: 3
+#| fig-height: 3.5
 #| fig-width: 10
 #| echo: false
 #| message: false
@@ -285,7 +288,7 @@ Under the null hypothesis, $p$-values are uniformly distributed on $[0, 1]$. Bec
 #| dev: cairo_pdf
 #| fig-cap: >
 #|   Distribution of the probability of direction (pd) stratified by sample size ($n = 30, 50, 100$; rows) and prior scale ($\theta \sim \mathcal{N}(0, \tau^2)$ with $\tau \in \{0.2, 0.5, 1, 1.5\}$; columns). Bin width = 0.025. 
-#| fig-height:  5
+#| fig-height:  5.5
 #| fig-width: 12 
 #| echo: false
 #| message: false
@@ -480,7 +483,7 @@ We conducted a fully crossed simulation study, with 10,000 replications per cell
 #| fig-cap: >
 #|   False Discovery Rate (FDR, Panel A) and average power (Panel B) of the adjusted $pd$ procedure as a function of the specified per-test null prior $\pi_0$ (x-axis) and the true null probability $\pi_{0_{true}}$ (y-axis), by family size m (rows, for Panel A) and sample size n (columns). The column $\pi_0 = 0.5$ is the unadjusted rule, where the prior odds are one and no correction is applied ($pd_{adj} = pd$); the diagonal $\pi_0 = \pi_{0_{true}}$ is a correctly specified prior. Each cell is the empirical FDR/power over 10,000 replications.
 #| fig-width: 21
-#| fig-height: 25
+#| fig-height: 24
 #| echo: false
 #| message: false
 #| warning: false
@@ -524,9 +527,9 @@ p_pw_heat <- df_pi0 |>
               size = 8, color = "black", fontface = "bold") +
     facet_grid(facet_label_m ~ facet_label_n) +
     scale_fill_gradient2(
-    low      = "#B2182B", # Viridis-style blue
-    mid      = "#FFFFBFFF", # Pale yellow
-    high     = "green4",    # Deep redgreen4
+    low      = "#B2182B", 
+    mid      = "#FFFFBFFF",
+    high     = "green4", 
     midpoint = 0.5,
     limits   = c(0, 1),
     oob      = scales::squish,
@@ -541,7 +544,7 @@ p_pw_heat <- df_pi0 |>
           strip.text = element_text(face = "bold"))
 
 (fdr_heat/p_pw_heat)+
-  plot_layout(heights = c(4, 1))+
+  plot_layout(heights = c(4, 0.8))+
   plot_annotation(tag_levels = c('A', '1'))
 ```
 
@@ -555,8 +558,8 @@ p_pw_heat <- df_pi0 |>
 #| dev: cairo_pdf
 #| fig-cap: >
 #|   Family-wise error rate (FWER) of the adjusted $pd$ procedure as a function of the specified per-test null prior $\pi_0$ (x-axis) and the true null probability $\pi_{0_{true}}$ (y-axis), by family size m (columns). The column $\pi_0 = 0.5$ is the unadjusted rule. Each cell is the empirical FWER over 10,000 replications. Because the per-test adjustment targets the FDR, the FWER is reduced by larger $\pi_0$ but still grows with the family size $m$.
-#| fig-width:  21 
-#| fig-height: 6 
+#| fig-width:  22
+#| fig-height: 6.5 
 #| echo: false
 #| message: false
 #| warning: false
@@ -625,7 +628,7 @@ hl <- data.frame(metric = factor(c("FDR", "FWER"), levels = levels(dat$metric)),
 
 ggplot(dat, aes(m, rate, colour = Method, shape = Method)) +
   geom_hline(data = hl, aes(yintercept = y), linetype = 2, colour = "grey50") +
-  geom_line(linewidth = 1.1) +
+  geom_line(linewidth = 2) +
   geom_point(size = 3.2) +
   facet_wrap(~ metric, scales = "free_y") +
   scale_colour_manual(values = c("Prior-odds"  = "#1b9e77",

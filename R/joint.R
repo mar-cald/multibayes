@@ -1,7 +1,6 @@
 #' Family-wise summaries from joint posterior draws
 #'
-#' Two complementary family-wise statements across a set of parameters: the
-#' \strong{cumulative joint statement} (default), the posterior probability that
+#' The \strong{cumulative joint statement} (default), the posterior probability that
 #' the strongest directional claims hold simultaneously, and \strong{simultaneous
 #' credible intervals} (\code{interval = TRUE}). Whereas \code{\link{pd.adjust}}
 #' targets a per-test (directional false-discovery) criterion, \code{joint}

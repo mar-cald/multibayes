@@ -1,0 +1,11 @@
+dplyr
+MASS
+tidyr
+shape
+ggplot2
+tibble
+multibayes
+kableExtra
+mvtnorm
+patchwork
+scales

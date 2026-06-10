@@ -63,8 +63,8 @@ to \emph{pd} (default \code{0.975}, a two-sided per-test
 \eqn{\alpha = 0.05}). It does \strong{not} change \code{pd.adj}; it is used
 only to report the equivalent \strong{adjusted threshold on the raw}
 \emph{pd}, since rejecting \eqn{pd_{adj} > c} is identical to rejecting raw
-\eqn{pd > c_*} with
-\eqn{c_* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)}.}
+\eqn{pd > c^*} with
+\eqn{c^* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)}.}
 
 \item{alpha}{Optional numeric scalar in \eqn{(0, 1)}. A convenience
 parameterization of \code{threshold} on the error scale: when supplied, the
@@ -99,9 +99,9 @@ quantities (\code{pi0}, \code{m}) in a header and displays the per-test
 table; the columns themselves remain available for programmatic access.
 The object also carries, as attributes, the decision cutoff \code{threshold}
 (\eqn{c}), the equivalent adjusted cutoff on the raw \emph{pd}
-\code{threshold.adj} (\eqn{c_*}), and the corresponding two-sided per-test
+\code{threshold.adj} (\eqn{c^*}), and the corresponding two-sided per-test
 Type I rates \code{alpha.nominal} (\eqn{2(1-c)}) and \code{alpha.eff}
-(\eqn{2(1-c_*)}); retrieve them with, e.g., \code{attr(x, "threshold.adj")}.
+(\eqn{2(1-c^*)}); retrieve them with, e.g., \code{attr(x, "threshold.adj")}.
 The cutoffs \code{threshold.adj} and \code{threshold.fwer} are exact
 transformations of the decision rule, but the reported per-test \emph{rates}
 (\code{alpha.eff}, and the \code{fwer} calibration) use the identity
