@@ -77,7 +77,7 @@ keywords: [probability of direction, multiple testing, prior-odds, FDR]
 bibliography: "bibliography.bib"
 reference-section-title: References
 
-format:
+format: # quarto render paper/manuscript.qmd --to all
   apaquarto-html: 
     sidebar:
       tools:
@@ -589,18 +589,18 @@ df_pi0 |>
 
 ### Comparison with other Bayesian methods
 
-Two further Bayesian summaries have been proposed to address multiplicity. The first constructs a cumulative joint posterior probability: one accepts the strongest $k$ claims whose joint posterior probability is at least $1 - \alpha$ [@Gelman2000; @Pruzek2016]. The second relies on simultaneous credible intervals, declaring an effect whenever its $1 - \alpha$ simultaneous band excludes the null value [@Schnell2020; @Schnell2016; @Box1992]. To benchmark all three approaches, we replicate the simulation described above with $n = 50$ and $\pi_{0\text{true}} = 0.7$ held fixed, and vary the family size $m$; the prior-odds adjustment is evaluated at $\pi_0 = \pi_{0\text{true}}$, representing best-case calibration. @fig-compare displays the resulting FDR, FWER, and power for each rule across values of $m$.
+Two further Bayesian summaries have been proposed to address multiplicity. The first constructs a cumulative joint posterior probability: one accepts the strongest $k$ claims whose joint posterior probability is at least $1 - \alpha$ [@Gelman2000; @Pruzek2016]. The second relies on simultaneous credible intervals, declaring an effect whenever its $1 - \alpha$ simultaneous band excludes the null value [@Schnell2020; @Schnell2016; @Box1992]. To benchmark all three approaches, we replicate the simulation described above with $n = 50$ and $\pi_{0\text{true}} = 0.7$ held fixed, and vary the family size $m$; the prior-odds adjustment is evaluated at $\pi_0 = \pi_{0\text{true}}$, representing best-case calibration. All three rules are evaluated at $\alpha = 0.05$: the per-test rule rejects when the adjusted $pd$ exceeds $c = 1 - \alpha/2 = 0.975$, the cumulative joint accepts the strongest claims while their joint probability is at least $1 - \alpha = 0.95$, and the simultaneous bands have $95\%$ joint coverage. @fig-compare displays the resulting FDR, FWER, and power for each rule across values of $m$.
 
 
-The simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as $\pi_{0\text{true}} = 0.7$, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching $0.21$, and FWER $0.55$. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compared to Type I error control.
+The simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as $\pi_{0\text{true}} = 0.7$, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching $0.22$, and FWER $0.57$. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compared to Type I error control.
 
-These choices trade off against power (rightmost panel): the cumulative joint detects the most true effects (around $0.63$), the prior-odds procedure's power is essentially constant in $m$ (around $0.42$), and the strict simultaneous intervals lose power as the family grows (from $0.36$ at $m = 4$ to $0.18$ at $m = 20$). The choice among them is thus a deliberate trade between power and the error one most wants to limit.
+These choices trade off against power (rightmost panel): the cumulative joint detects the most true effects (around $0.62$), the prior-odds procedure's power is essentially constant in $m$ (around $0.43$), and the strict simultaneous intervals lose power as the family grows (from $0.36$ at $m = 4$ to $0.18$ at $m = 20$). The choice among them is thus a deliberate trade between power and the error one most wants to limit.
 
 ```{r}
 #| label: fig-compare
 #| dev: cairo_pdf
 #| fig-cap: >
-#|   False Discovery Rate (FDR), Family-Wise Error Rate (FWER) and average power of three Bayesian rules as a function of the number of tests $m$: the prior-odds procedure, the cumulative joint statement, and simultaneous credible intervals. Sample size $n = 50$; 10,000 replications per cell.
+#|   False Discovery Rate (FDR), Family-Wise Error Rate (FWER) and average power of three Bayesian rules as a function of the number of tests $m$, all at $\alpha = 0.05$: the prior-odds procedure (adjusted $pd > 0.975$, $\pi_0 = 0.7$), the cumulative joint statement (strongest claims accepted while their joint probability is at least $0.95$), and simultaneous credible intervals ($95\%$ band excluding zero). Sample size $n = 50$; 10,000 replications per cell.
 #| fig-width: 16
 #| fig-height: 5.2
 #| echo: false
@@ -752,7 +752,7 @@ Second, it does not provide evidence for a point null hypothesis. The procedure 
 As Bayesian methods become increasingly common in psychological research, often in pragmatic workflows relying on default priors and fixed decision thresholds, the implications of multiplicity should be explicitly recognized. Additionally, although priors may be well-calibrated at the level of individual parameters, they do not by themselves account for multiplicity when many parameters are considered simultaneously. Ignoring this aspect leads fixed $pd$ thresholds to systematically overstate evidence for directional effects, especially as the number of tests grows. The adjustment proposed here addresses this gap by incorporating prior beliefs about the prevalence of null effects directly into $pd$-based decisions. By doing so, it provides a principled and transparent way to account for multiplicity without altering the estimation model, yielding more reliable inferences in multi-parameter settings and reducing the risk that apparent effects reflect chance rather than substantive signals.
 
 ### Acknowledgements
-We are grateful to Jelle Goeman, Enrico Toffalini and Giovanni Parmigiani for insightful comments and discussion throughout the development of this work. We also thank Laura Sità and Matteo Manente for helpful feedback on earlier versions of the manuscript.
+We are grateful to Jelle Goeman, Giovanni Parmigiani and Enrico Toffalini for insightful comments and discussion throughout the development of this work. We also thank Laura Sità and Matteo Manente for helpful feedback on earlier versions of the manuscript.
 
 # References {#refs}
 
