@@ -21,3 +21,4 @@ Summarises the constant quantities (\code{pi0}, \code{m}) in a header and
 prints the per-test table. The full set of columns remains available for
 programmatic access via the usual \code{$} and \code{[}.
 }
+\keyword{internal}

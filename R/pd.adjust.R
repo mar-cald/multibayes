@@ -359,7 +359,8 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
 #' @param ... Further arguments passed to \code{print.data.frame}.
 #'
 #' @return \code{x}, invisibly.
-#'
+#' 
+#' @keywords internal
 #' @export
 print.pd_adjust <- function(x, digits = 4, ...) {
   df <- as.data.frame(x)
