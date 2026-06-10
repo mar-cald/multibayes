@@ -109,7 +109,7 @@ shows the per-test table. With `draws`, it has one row per hypothesis:
 
 | Column | Description |
 |----|----|
-| `median.est` | Posterior median per parameter (the sign of `median.est − null.value` matches `pd`’s dominant direction) |
+| `median.est` | Posterior median per parameter |
 | `null.value` | Null reference value used |
 | `pd` | *pd* used in the adjustment; in $`[0.5, 1]`$ for agnostic tests, $`[0, 1]`$ for directional tests |
 | `pd.adj` | Adjusted *pd* after prior-odds correction; same bounds as `pd` |
@@ -117,25 +117,18 @@ shows the per-test table. With `draws`, it has one row per hypothesis:
 | `m` | Family size used |
 | `direction` | Testing mode: `"greater"`, `"less"`, or `"two.sided"` |
 
-The global null $`\Pi_0 = \pi_0^m`$ is **not** reported as a column: it
-holds only under independence and can mislead when tests are dependent,
-so the per-test prior $`\pi_0`$ (`pi0`) is reported instead. You may
-still *supply* the prior as `p0`; it is converted to `pi0` internally.
-
 [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
 returns the **per-test correction only**. **`order = TRUE`** sorts the
 rows by decreasing `pd`; when a `pd` vector is supplied directly,
 `median.est`, `null.value`, and `direction` are not returned.
 
-### The adjusted threshold (what your `pi0` *exactly* implies)
+### The adjusted threshold (what your `pi0` implies)
 
-A simulated false-discovery rate would depend on the posterior shape and
-the unknown effect sizes, so it is not reported. What **is** exact is
-the **equivalent decision threshold**. Rejecting `pd.adj > c` is
-identical to rejecting the raw `pd > c*`, where
+Rejecting `pd.adj > c` is identical to rejecting the raw `pd > c*`,
+where
 
 ``` math
-c_* = \frac{c\,\pi_0}{(1-\pi_0)(1-c) + c\,\pi_0}.
+c^* = \frac{c\,\pi_0}{(1-\pi_0)(1-c) + c\,\pi_0}.
 ```
 
 The print header reports this: e.g. with `pi0 = 0.7` and the default
@@ -143,7 +136,7 @@ The print header reports this: e.g. with `pi0 = 0.7` and the default
 
     Decision: raw pd > 0.9891 (adjusted from 0.975);  effective per-test alpha 0.0217 (from 0.05)
 
-> **Note.** The *cutoff* $`c_*`$ is an exact transformation of the rule,
+> **Note.** The *cutoff* $`c^*`$ is an exact transformation of the rule,
 > but the per-test *rate* (the `0.022`) uses $`\alpha = 2(1-c)`$, which
 > holds for a diffuse prior or large $`n`$. Under an informative prior
 > the true per-test rate is smaller, so the reported rate is
@@ -157,9 +150,9 @@ pd.adjust(pd = pd_values, pi0 = 0.7, alpha = 0.05)   # same as threshold = 0.975
 **Family-wise mode.** Set `fwer = TRUE` to additionally report a
 **family-wise** conservative cutoff on the raw *pd* that controls the
 (prior-averaged $`\pi_0`$) FWER over the *m* tests. Standard corrections
-(e.g. Bonferroni) assume every test is null ($`\pi_0 = 1`$); using your
-$`\pi_0`$ relaxes that by $`1/\pi_0`$. It is a prior-averaged (Bayesian)
-FWER, *not* strong frequentist control.
+assume every test is null ($`\pi_0 = 1`$); using your $`\pi_0`$ relaxes
+that by $`1/\pi_0`$. It is a prior-averaged (Bayesian) FWER, *not*
+strong frequentist control.
 
 ``` r
 
@@ -227,10 +220,8 @@ Both are pure posterior quantities — they do **not** use `pi0`.
 
 If you use **multibayes** in published research, please cite:
 
-> Calderan, M., Gambarota, F., Toffalini, E., & Altoè, G. (2026).
-> Adjusting the Probability of Direction for Multiple Testing.
-
-Pre-print …
+> Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026). Adjusting
+> the Probability of Direction for Multiple Testing.
 
 ------------------------------------------------------------------------
 

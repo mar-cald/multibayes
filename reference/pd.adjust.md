@@ -89,7 +89,7 @@ pd.adjust(
   (default `0.975`, a two-sided per-test \\\alpha = 0.05\\). It does
   **not** change `pd.adj`; it is used only to report the equivalent
   **adjusted threshold on the raw** *pd*, since rejecting \\pd\_{adj} \>
-  c\\ is identical to rejecting raw \\pd \> c\_\*\\ with \\c\_\* =
+  c\\ is identical to rejecting raw \\pd \> c^\*\\ with \\c^\* =
   c\\\pi_0 / ((1-\pi_0)(1-c) + c\\\pi_0)\\.
 
 - alpha:
@@ -128,17 +128,17 @@ summarises the constant quantities (`pi0`, `m`) in a header and displays
 the per-test table; the columns themselves remain available for
 programmatic access. The object also carries, as attributes, the
 decision cutoff `threshold` (\\c\\), the equivalent adjusted cutoff on
-the raw *pd* `threshold.adj` (\\c\_\*\\), and the corresponding
-two-sided per-test Type I rates `alpha.nominal` (\\2(1-c)\\) and
-`alpha.eff` (\\2(1-c\_\*)\\); retrieve them with, e.g.,
-`attr(x, "threshold.adj")`. The cutoffs `threshold.adj` and
-`threshold.fwer` are exact transformations of the decision rule, but the
-reported per-test *rates* (`alpha.eff`, and the `fwer` calibration) use
-the identity \\\alpha = 2(1 - c)\\, which holds **only for a diffuse
-within-model prior** or **large \\n\\** (when the null *pd* is
-approximately uniform on \\\[0.5, 1\]\\). Under an informative prior the
-true per-test rate is smaller, so these rates are conservative and
-`threshold.fwer` controls the FWER at or below the stated level.
+the raw *pd* `threshold.adj` (\\c^\*\\), and the corresponding two-sided
+per-test Type I rates `alpha.nominal` (\\2(1-c)\\) and `alpha.eff`
+(\\2(1-c^\*)\\); retrieve them with, e.g., `attr(x, "threshold.adj")`.
+The cutoffs `threshold.adj` and `threshold.fwer` are exact
+transformations of the decision rule, but the reported per-test *rates*
+(`alpha.eff`, and the `fwer` calibration) use the identity \\\alpha =
+2(1 - c)\\, which holds **only for a diffuse within-model prior** or
+**large \\n\\** (when the null *pd* is approximately uniform on \\\[0.5,
+1\]\\). Under an informative prior the true per-test rate is smaller, so
+these rates are conservative and `threshold.fwer` controls the FWER at
+or below the stated level.
 
 ## Details
 

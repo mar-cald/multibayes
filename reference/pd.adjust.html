@@ -140,8 +140,8 @@ to <em>pd</em> (default <code>0.975</code>, a two-sided per-test
 \(\alpha = 0.05\)). It does <strong>not</strong> change <code>pd.adj</code>; it is used
 only to report the equivalent <strong>adjusted threshold on the raw</strong>
 <em>pd</em>, since rejecting \(pd_{adj} &gt; c\) is identical to rejecting raw
-\(pd &gt; c_*\) with
-\(c_* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)\).</p></dd>
+\(pd &gt; c^*\) with
+\(c^* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)\).</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
@@ -182,9 +182,9 @@ quantities (<code>pi0</code>, <code>m</code>) in a header and displays the per-t
 table; the columns themselves remain available for programmatic access.
 The object also carries, as attributes, the decision cutoff <code>threshold</code>
 (\(c\)), the equivalent adjusted cutoff on the raw <em>pd</em>
-<code>threshold.adj</code> (\(c_*\)), and the corresponding two-sided per-test
+<code>threshold.adj</code> (\(c^*\)), and the corresponding two-sided per-test
 Type I rates <code>alpha.nominal</code> (\(2(1-c)\)) and <code>alpha.eff</code>
-(\(2(1-c_*)\)); retrieve them with, e.g., <code>attr(x, "threshold.adj")</code>.
+(\(2(1-c^*)\)); retrieve them with, e.g., <code>attr(x, "threshold.adj")</code>.
 The cutoffs <code>threshold.adj</code> and <code>threshold.fwer</code> are exact
 transformations of the decision rule, but the reported per-test <em>rates</em>
 (<code>alpha.eff</code>, and the <code>fwer</code> calibration) use the identity

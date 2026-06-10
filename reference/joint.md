@@ -1,9 +1,8 @@
 # Family-wise summaries from joint posterior draws
 
-Two complementary family-wise statements across a set of parameters: the
-**cumulative joint statement** (default), the posterior probability that
-the strongest directional claims hold simultaneously, and **simultaneous
-credible intervals** (`interval = TRUE`). Whereas
+The **cumulative joint statement** (default), the posterior probability
+that the strongest directional claims hold simultaneously, and
+**simultaneous credible intervals** (`interval = TRUE`). Whereas
 [`pd.adjust`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
 targets a per-test (directional false-discovery) criterion, `joint`
 provides the family-wise counterparts.
