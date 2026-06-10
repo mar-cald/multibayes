@@ -118,8 +118,8 @@ This manuscript is a **preprint** and has not yet been peer-reviewed. As the con
 #| include: false
 #| cache: false
 
-knitr::opts_chunk$set(tidy = TRUE, tidy.opts = list(width.cutoff = 80))
-options(width = 80)
+knitr::opts_chunk$set(tidy = TRUE, tidy.opts = list(width.cutoff = 70))
+options(width = 70)
 
 pkg = c("dplyr","MASS","tidyr","shape","ggplot2",
         "tibble", "multibayes","kableExtra",
@@ -363,7 +363,7 @@ pd_{\mathrm{adj},i} = \frac{pd_i\,(1 - \pi_0)}{pd_i\,(1 - \pi_0) + (1 - pd_i)\,\
 $$
 Because the prior is symmetric and $pd_i$ is always the posterior probability of the dominant direction, the factor $(1-\pi_0)/\pi_0$ acts as a single scalar penalty applied identically regardless of the effect's sign.
 
-We emphasize that $H_{0,i}$ is a *directional* null, the disfavored region $\theta_i \le \theta_{\text{null}}$ (taking the favored side as positive) covers both a truly null effect and an effect of the opposite sign that the data have mis-signed. Consequently $\pi_0$ equals the expected proportion of true (point) nulls only when such sign errors are negligible. Additionally, $\pi_0$ is a *family-level* prior, distinct from the continuous within-model prior on each $\theta_i$, under which the point $\theta_i = \theta_{\text{null}}$ has zero mass; the procedure accordingly does not quantify evidence for the point null at any individual test, it only adjusts the weight given to directional claims in light of the expected proportion of genuine discoveries in the family. 
+We emphasize that $H_{0,i}$ is a *directional* null, the disfavored region $\theta_i \le \theta_{\text{null}}$ (taking the favored side as positive) covers both a truly null effect and an effect of the opposite sign that the data have mis-signed. Consequently $\pi_0$ can be interpreted as the expected proportion of true (point) nulls under the assumption that sign errors are negligible. Additionally, $\pi_0$ is a *family-level* prior, distinct from the continuous within-model prior on each $\theta_i$, under which the point $\theta_i = \theta_{\text{null}}$ has zero mass; the procedure accordingly does not quantify evidence for the point null at any individual test, it only adjusts the weight given to directional claims in light of the expected proportion of genuine discoveries in the family. 
 
 Researchers encode their expectations through $\pi_0$ or, equivalently under independence, through the global-null prior $\Pr(H_0) = \pi_0^m$: lower values when effects are well established, higher values when uncertainty is greater, as in exploratory research. For fixed $\Pr(H_0)$, larger families imply higher $\pi_0$, then the correction acts nonlinearly on the posterior evidence, leaving larger $pd_i$ values comparatively less affected (@fig-prior-adj).
 
@@ -544,7 +544,7 @@ p_pw_heat <- df_pi0 |>
           strip.text = element_text(face = "bold"))
 
 (fdr_heat/p_pw_heat)+
-  plot_layout(heights = c(4, 0.8))+
+  plot_layout(heights = c(4, 0.9))+
   plot_annotation(tag_levels = c('A', '1'))
 ```
 
@@ -629,7 +629,7 @@ hl <- data.frame(metric = factor(c("FDR", "FWER"), levels = levels(dat$metric)),
 ggplot(dat, aes(m, rate, colour = Method, shape = Method)) +
   geom_hline(data = hl, aes(yintercept = y), linetype = 2, colour = "grey50") +
   geom_line(linewidth = 2) +
-  geom_point(size = 3.2) +
+  geom_point(size = 4) +
   facet_wrap(~ metric, scales = "free_y") +
   scale_colour_manual(values = c("Prior-odds"  = "#1b9e77",
                                  "Cumulative joint"        = "#d95f02",

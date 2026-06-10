@@ -273,7 +273,7 @@ Preprint
 </span> and solving for the adjusted posterior probability gives: <span class="math display">
 pd_{\mathrm{adj},i} = \frac{pd_i\,(1 - \pi_0)}{pd_i\,(1 - \pi_0) + (1 - pd_i)\,\pi_0}.
 </span> Because the prior is symmetric and <span class="math inline">pd_i</span> is always the posterior probability of the dominant direction, the factor <span class="math inline">(1-\pi_0)/\pi_0</span> acts as a single scalar penalty applied identically regardless of the effect’s sign.</p>
-<p>We emphasize that <span class="math inline">H_{0,i}</span> is a <em>directional</em> null, the disfavored region <span class="math inline">\theta_i \le \theta_{\text{null}}</span> (taking the favored side as positive) covers both a truly null effect and an effect of the opposite sign that the data have mis-signed. Consequently <span class="math inline">\pi_0</span> equals the expected proportion of true (point) nulls only when such sign errors are negligible. Additionally, <span class="math inline">\pi_0</span> is a <em>family-level</em> prior, distinct from the continuous within-model prior on each <span class="math inline">\theta_i</span>, under which the point <span class="math inline">\theta_i = \theta_{\text{null}}</span> has zero mass; the procedure accordingly does not quantify evidence for the point null at any individual test, it only adjusts the weight given to directional claims in light of the expected proportion of genuine discoveries in the family.</p>
+<p>We emphasize that <span class="math inline">H_{0,i}</span> is a <em>directional</em> null, the disfavored region <span class="math inline">\theta_i \le \theta_{\text{null}}</span> (taking the favored side as positive) covers both a truly null effect and an effect of the opposite sign that the data have mis-signed. Consequently <span class="math inline">\pi_0</span> can be interpreted as the expected proportion of true (point) nulls under the assumption that sign errors are negligible. Additionally, <span class="math inline">\pi_0</span> is a <em>family-level</em> prior, distinct from the continuous within-model prior on each <span class="math inline">\theta_i</span>, under which the point <span class="math inline">\theta_i = \theta_{\text{null}}</span> has zero mass; the procedure accordingly does not quantify evidence for the point null at any individual test, it only adjusts the weight given to directional claims in light of the expected proportion of genuine discoveries in the family.</p>
 <p>Researchers encode their expectations through <span class="math inline">\pi_0</span> or, equivalently under independence, through the global-null prior <span class="math inline">\Pr(H_0) = \pi_0^m</span>: lower values when effects are well established, higher values when uncertainty is greater, as in exploratory research. For fixed <span class="math inline">\Pr(H_0)</span>, larger families imply higher <span class="math inline">\pi_0</span>, then the correction acts nonlinearly on the posterior evidence, leaving larger <span class="math inline">pd_i</span> values comparatively less affected (<a href="#fig-prior-adj" class="quarto-xref" aria-expanded="false">Figure&nbsp;3</a>).</p>
 <p>A boundary condition arises when the specified <span class="math inline">\pi_0</span> falls below <span class="math inline">0.5</span> (which, for a fixed global null, occurs when <span class="math inline">m</span> is small and <span class="math inline">\Pr(H_0)</span> is very low), inflating the posterior odds in favor of <span class="math inline">H_1</span> rather than penalizing them. We therefore cap <span class="math inline">\pi_0</span> at <span class="math inline">0.5</span>, ensuring the adjustment acts exclusively as a conservative safeguard; when no penalty is warranted, <span class="math inline">pd_{\mathrm{adj},i} = pd_i</span>. Furthermore, since <span class="math inline">pd \in [0.5, 1]</span>, the adjusted probability of direction is also bounded below by <span class="math inline">0.5</span>.</p>
 </section>
@@ -394,9 +394,9 @@ pd_i &gt; c^*, \qquad c^* = \frac{c\, \pi_0}{(1 - c)(1 - \pi_0) + c\, \pi_0}.
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">contrasts</span>(data_rt<span class="sc">$</span>prev_cong) <span class="ot">&lt;-</span> <span class="fu">contr.sum</span>(<span class="dv">2</span>)<span class="sc">/</span><span class="dv">2</span></span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">contrasts</span>(data_rt<span class="sc">$</span>condition) <span class="ot">&lt;-</span> <span class="fu">contr.sum</span>(<span class="dv">2</span>)<span class="sc">/</span><span class="dv">2</span></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>mod_rt <span class="ot">&lt;-</span> <span class="fu">brm</span>(<span class="at">formula =</span> rt <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> congruency <span class="sc">*</span> prev_cong <span class="sc">+</span> congruency <span class="sc">*</span> trial <span class="sc">*</span> condition <span class="sc">+</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> congruency <span class="sc">+</span> prev_cong <span class="sc">+</span> trial <span class="sc">+</span> condition <span class="sc">||</span> id), <span class="at">family =</span> <span class="fu">lognormal</span>(),</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> data_rt, <span class="at">cores =</span> <span class="dv">3</span>, <span class="at">chains =</span> <span class="dv">3</span>, <span class="at">iter =</span> <span class="dv">8000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>mod_rt <span class="ot">&lt;-</span> <span class="fu">brm</span>(<span class="at">formula =</span> rt <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> congruency <span class="sc">*</span> prev_cong <span class="sc">+</span> congruency <span class="sc">*</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    trial <span class="sc">*</span> condition <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> congruency <span class="sc">+</span> prev_cong <span class="sc">+</span> trial <span class="sc">+</span> condition <span class="sc">||</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    id), <span class="at">family =</span> <span class="fu">lognormal</span>(), <span class="at">data =</span> data_rt, <span class="at">cores =</span> <span class="dv">3</span>, <span class="at">chains =</span> <span class="dv">3</span>, <span class="at">iter =</span> <span class="dv">8000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Since <code>pd.adjust()</code> computes <span class="math inline">pd</span> values automatically from a matrix of posterior draws, we extracted the relevant draws from the model.</p>
 <div class="cell">
@@ -407,19 +407,29 @@ pd_i &gt; c^*, \qquad c^* = \frac{c\, \pi_0}{(1 - c)(1 - \pi_0) + c\, \pi_0}.
 <div class="cell-output cell-output-stdout">
 <pre><code>Prior-odds adjusted probability of direction
 Tests: 9  |  pi0 = 0.7
-Decision: raw pd &gt; 0.9891 (adjusted from 0.975); effective per-test alpha
-0.0217 (from 0.05)
+Decision: raw pd &gt; 0.9891 (adjusted from 0.975); effective per-test
+alpha 0.0217 (from 0.05)
 
-                               median.est null.value     pd pd.adj direction
-b_congruency1                     -0.1439          0 1.0000 1.0000 two.sided
-b_prev_cong1                      -0.0166          0 0.9803 0.9553 two.sided
-b_trial                            0.0119          0 0.9369 0.8642 two.sided
-b_condition1                       0.0063          0 0.6509 0.5000 two.sided
-b_congruency1:prev_cong1           0.0223          0 0.9583 0.9079 two.sided
-b_congruency1:trial               -0.0033          0 0.7206 0.5250 two.sided
-b_congruency1:condition1          -0.0166          0 0.9291 0.8488 two.sided
-b_trial:condition1                 0.0071          0 0.8936 0.7825 two.sided
-b_congruency1:trial:condition1    -0.0028          0 0.5961 0.5000 two.sided</code></pre>
+                               median.est null.value     pd pd.adj
+b_congruency1                     -0.1439          0 1.0000 1.0000
+b_prev_cong1                      -0.0166          0 0.9803 0.9553
+b_trial                            0.0119          0 0.9369 0.8642
+b_condition1                       0.0063          0 0.6509 0.5000
+b_congruency1:prev_cong1           0.0223          0 0.9583 0.9079
+b_congruency1:trial               -0.0033          0 0.7206 0.5250
+b_congruency1:condition1          -0.0166          0 0.9291 0.8488
+b_trial:condition1                 0.0071          0 0.8936 0.7825
+b_congruency1:trial:condition1    -0.0028          0 0.5961 0.5000
+                               direction
+b_congruency1                  two.sided
+b_prev_cong1                   two.sided
+b_trial                        two.sided
+b_condition1                   two.sided
+b_congruency1:prev_cong1       two.sided
+b_congruency1:trial            two.sided
+b_congruency1:condition1       two.sided
+b_trial:condition1             two.sided
+b_congruency1:trial:condition1 two.sided</code></pre>
 </div>
 </div>
 <p>The function was called with a per-test null prior of <span class="math inline">\pi_0 = 0.7</span> (shown in the printed header), encoding the skeptical expectation that roughly 70% of the tested effects are null. The header also reports the equivalent decision this implies: at the default cutoff <span class="math inline">c = 0.975</span>, a raw <span class="math inline">pd</span> must now exceed the stricter adjusted threshold <span class="math inline">c^* = 0.989</span>.</p>
@@ -428,16 +438,26 @@ b_congruency1:trial:condition1    -0.0028          0 0.5961 0.5000 two.sided</co
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">joint</span>(draws_rt, <span class="at">null.value =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                               median.est null.value     pd direction joint_cum
-b_congruency1                     -0.1439          0 1.0000 two.sided    1.0000
-b_prev_cong1                      -0.0166          0 0.9803 two.sided    0.9803
-b_congruency1:prev_cong1           0.0223          0 0.9583 two.sided    0.9412
-b_trial                            0.0119          0 0.9369 two.sided    0.8812
-b_congruency1:condition1          -0.0166          0 0.9291 two.sided    0.8191
-b_trial:condition1                 0.0071          0 0.8936 two.sided    0.7340
-b_congruency1:trial               -0.0033          0 0.7206 two.sided    0.5366
-b_condition1                       0.0063          0 0.6509 two.sided    0.3532
-b_congruency1:trial:condition1    -0.0028          0 0.5961 two.sided    0.2232</code></pre>
+<pre><code>                               median.est null.value     pd direction
+b_congruency1                     -0.1439          0 1.0000 two.sided
+b_prev_cong1                      -0.0166          0 0.9803 two.sided
+b_congruency1:prev_cong1           0.0223          0 0.9583 two.sided
+b_trial                            0.0119          0 0.9369 two.sided
+b_congruency1:condition1          -0.0166          0 0.9291 two.sided
+b_trial:condition1                 0.0071          0 0.8936 two.sided
+b_congruency1:trial               -0.0033          0 0.7206 two.sided
+b_condition1                       0.0063          0 0.6509 two.sided
+b_congruency1:trial:condition1    -0.0028          0 0.5961 two.sided
+                               joint_cum
+b_congruency1                     1.0000
+b_prev_cong1                      0.9803
+b_congruency1:prev_cong1          0.9412
+b_trial                           0.8812
+b_congruency1:condition1          0.8191
+b_trial:condition1                0.7340
+b_congruency1:trial               0.5366
+b_condition1                      0.3532
+b_congruency1:trial:condition1    0.2232</code></pre>
 </div>
 </div>
 <p>With the rows sorted by decreasing <span class="math inline">pd</span>, the <code>joint_cum</code> column reports the cumulative joint posterior probability that the strongest <span class="math inline">k</span> directional claims hold simultaneously, the posterior probability that every claimed direction is correct at once. A high value therefore licenses accepting that whole set of claims together. Here the two strongest hold jointly with probability <span class="math inline">0.98</span> and the three strongest with <span class="math inline">0.94</span>, after which the joint confidence lowers as weaker claims are added, indicating how many of the leading effects can be reported as a jointly supported set.</p>
@@ -445,16 +465,26 @@ b_congruency1:trial:condition1    -0.0028          0 0.5961 two.sided    0.2232<
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">joint</span>(draws_rt, <span class="at">interval =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                                      lower          est        upper prob
-b_congruency1                  -0.191547431 -0.143902841 -0.097013276 0.95
-b_prev_cong1                   -0.040931203 -0.016649556  0.006550712 0.95
-b_trial                        -0.010103453  0.011930699  0.034360234 0.95
-b_condition1                   -0.041911018  0.006263499  0.055382483 0.95
-b_congruency1:prev_cong1       -0.012481840  0.022342004  0.056749925 0.95
-b_congruency1:trial            -0.019082492 -0.003316115  0.012417422 0.95
-b_congruency1:condition1       -0.048854131 -0.016551526  0.015382114 0.95
-b_trial:condition1             -0.008945797  0.007125574  0.023144055 0.95
-b_congruency1:trial:condition1 -0.034805697 -0.002829134  0.028034847 0.95</code></pre>
+<pre><code>                                      lower          est        upper
+b_congruency1                  -0.191547431 -0.143902841 -0.097013276
+b_prev_cong1                   -0.040931203 -0.016649556  0.006550712
+b_trial                        -0.010103453  0.011930699  0.034360234
+b_condition1                   -0.041911018  0.006263499  0.055382483
+b_congruency1:prev_cong1       -0.012481840  0.022342004  0.056749925
+b_congruency1:trial            -0.019082492 -0.003316115  0.012417422
+b_congruency1:condition1       -0.048854131 -0.016551526  0.015382114
+b_trial:condition1             -0.008945797  0.007125574  0.023144055
+b_congruency1:trial:condition1 -0.034805697 -0.002829134  0.028034847
+                               prob
+b_congruency1                  0.95
+b_prev_cong1                   0.95
+b_trial                        0.95
+b_condition1                   0.95
+b_congruency1:prev_cong1       0.95
+b_congruency1:trial            0.95
+b_congruency1:condition1       0.95
+b_trial:condition1             0.95
+b_congruency1:trial:condition1 0.95</code></pre>
 </div>
 </div>
 <p>Under this strictest criterion only <code>b_congruency1</code> excludes zero (simultaneous band <span class="math inline">[-0.19, -0.10]</span>), consistent with the ordering of the three rules shown in <a href="#fig-compare" class="quarto-xref" aria-expanded="false">Figure&nbsp;6</a>.</p>
@@ -692,7 +722,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-pd-ci" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="1">
+<div id="fig-pd-ci" class="quarto-float quarto-figure quarto-figure-left" data-fignum="1" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-pd-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -711,7 +741,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-uniform-pd" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="2">
+<div id="fig-uniform-pd" class="quarto-float quarto-figure quarto-figure-left" data-fignum="2" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-uniform-pd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -730,7 +760,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-prior-adj" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="3">
+<div id="fig-prior-adj" class="quarto-float quarto-figure quarto-figure-left" data-fignum="3" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-prior-adj-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -749,7 +779,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-ind-fdr-pw" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="4">
+<div id="fig-ind-fdr-pw" class="quarto-float quarto-figure quarto-figure-left" data-fignum="4" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-ind-fdr-pw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -768,7 +798,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-ind-fwer" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="5">
+<div id="fig-ind-fwer" class="quarto-float quarto-figure quarto-figure-left" data-fignum="5" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-ind-fwer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -787,7 +817,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="center" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-compare" class="quarto-float quarto-figure quarto-figure-center" prefix="" data-fig-align="center" data-fignum="6">
+<div id="fig-compare" class="quarto-float quarto-figure quarto-figure-center" data-fignum="6" prefix="" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
