@@ -1,8 +1,7 @@
 # multibayes
 
-**multibayes** provides tools for **Bayesian multiplicity adjustments**
-— correcting and summarising decisions taken across many parameters at
-once. It currently offers a prior-odds adjustment of the Probability of
+**multibayes** provides tools for **Bayesian multiplicity adjustments**.
+It currently offers a prior-odds adjustment of the Probability of
 Direction (*pd*) via
 [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md),
 and two family-wise summaries via
