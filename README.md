@@ -1,6 +1,6 @@
 # multibayes
 
-**multibayes** provides tools for **Bayesian multiplicity adjustments** — correcting and summarising decisions taken across many parameters at once. It currently offers a prior-odds adjustment of the Probability of Direction (*pd*) via `pd.adjust()`, and two family-wise summaries via `joint()`: a cumulative **joint statement** (default) and **simultaneous credible intervals** (`interval = TRUE`).
+**multibayes** provides tools for **Bayesian multiplicity adjustments**. It currently offers a prior-odds adjustment of the Probability of Direction (*pd*) via `pd.adjust()`, and two family-wise summaries via `joint()`: a cumulative **joint statement** (default) and **simultaneous credible intervals** (`interval = TRUE`).
 Direction-agnostic and directional tests are supported, and can be mixed freely within a single call.
 
 ## Installation
