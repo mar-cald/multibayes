@@ -2,10 +2,7 @@
 
 The **cumulative joint statement** (default), the posterior probability
 that the strongest directional claims hold simultaneously, and
-**simultaneous credible intervals** (`interval = TRUE`). Whereas
-[`pd.adjust`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
-targets a per-test (directional false-discovery) criterion, `joint`
-provides the family-wise counterparts.
+**simultaneous credible intervals** (`interval = TRUE`).
 
 ## Usage
 
@@ -74,9 +71,7 @@ decreasing *pd*, and `joint_cum` is the cumulative joint posterior
 probability that the strongest \\k\\ claims hold simultaneously. It is
 computed directly from the draws by intersecting the per-draw
 directional events, so it reflects the posterior dependence among
-parameters; \\1 - \\ `joint_cum` is the posterior probability that at
-least one of those \\k\\ claims is mis-signed (a family-wise, Type S,
-statement).
+parameters.
 
 **Simultaneous credible intervals** (`interval = TRUE`). Equitailed
 intervals calibrated so that **all** parameters lie within their bounds
