@@ -48,9 +48,7 @@ parameter ordered by decreasing \emph{pd}, with columns \code{median.est},
 \description{
 The \strong{cumulative joint statement} (default), the posterior probability that
 the strongest directional claims hold simultaneously, and \strong{simultaneous
-credible intervals} (\code{interval = TRUE}). Whereas \code{\link{pd.adjust}}
-targets a per-test (directional false-discovery) criterion, \code{joint}
-provides the family-wise counterparts.
+credible intervals} (\code{interval = TRUE}).
 }
 \details{
 \strong{Cumulative joint statement} (\code{interval = FALSE}, the default).
@@ -59,9 +57,7 @@ Each parameter's claimed direction is its dominant posterior side relative to
 ordered by decreasing \emph{pd}, and \code{joint_cum} is the cumulative joint
 posterior probability that the strongest \eqn{k} claims hold simultaneously.
 It is computed directly from the draws by intersecting the per-draw
-directional events, so it reflects the posterior dependence among parameters;
-\eqn{1 - } \code{joint_cum} is the posterior probability that at least one of
-those \eqn{k} claims is mis-signed (a family-wise, Type S, statement).
+directional events, so it reflects the posterior dependence among parameters.
 
 \strong{Simultaneous credible intervals} (\code{interval = TRUE}). Equitailed
 intervals calibrated so that \strong{all} parameters lie within their bounds
