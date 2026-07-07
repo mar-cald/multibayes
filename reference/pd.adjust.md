@@ -243,73 +243,55 @@ draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
 # Per-test correction only (default)
-pd.adjust(draws = draws, p0 = 0.4, null.value = 0)
+pd.adjust(draws = draws, pi0 = 0.7, null.value = 0)
 #> Warning: some pd.adj have been floored to 0.5.
 #> Prior-odds adjusted probability of direction
-#> Tests: 6  |  pi0 = 0.8584
-#> Decision: raw pd > 0.9958 (adjusted from 0.975); effective per-test alpha
-#> 0.00843 (from 0.05)
+#> Tests: 6  |  pi0 = 0.7
+#> Decision: raw pd > 0.9891 (adjusted from 0.975); effective per-test alpha
+#> 0.0217 (from 0.05)
 #> 
 #> 
 #>    median.est null.value     pd pd.adj direction
-#> H1     0.9860          0 0.8358 0.5000 two.sided
+#> H1     0.9860          0 0.8358 0.6856 two.sided
 #> H2    -0.1175          0 0.5350 0.5000 two.sided
-#> H3     0.7761          0 0.7822 0.5000 two.sided
+#> H3     0.7761          0 0.7822 0.6062 two.sided
 #> H4    -0.0089          0 0.5030 0.5000 two.sided
-#> H5     1.9500          0 0.9762 0.8715 two.sided
-#> H6     2.9866          0 0.9995 0.9970 two.sided
+#> H5     1.9500          0 0.9762 0.9463 two.sided
+#> H6     2.9866          0 0.9995 0.9988 two.sided
 
 # Order the rows by strength of evidence
-pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE)
+pd.adjust(draws = draws, pi0 = 0.7, null.value = 0, order = TRUE)
 #> Warning: some pd.adj have been floored to 0.5.
 #> Prior-odds adjusted probability of direction
-#> Tests: 6  |  pi0 = 0.8584
-#> Decision: raw pd > 0.9958 (adjusted from 0.975); effective per-test alpha
-#> 0.00843 (from 0.05)
+#> Tests: 6  |  pi0 = 0.7
+#> Decision: raw pd > 0.9891 (adjusted from 0.975); effective per-test alpha
+#> 0.0217 (from 0.05)
 #> 
 #> 
 #>    median.est null.value     pd pd.adj direction
-#> H6     2.9866          0 0.9995 0.9970 two.sided
-#> H5     1.9500          0 0.9762 0.8715 two.sided
-#> H1     0.9860          0 0.8358 0.5000 two.sided
-#> H3     0.7761          0 0.7822 0.5000 two.sided
+#> H6     2.9866          0 0.9995 0.9988 two.sided
+#> H5     1.9500          0 0.9762 0.9463 two.sided
+#> H1     0.9860          0 0.8358 0.6856 two.sided
+#> H3     0.7761          0 0.7822 0.6062 two.sided
 #> H2    -0.1175          0 0.5350 0.5000 two.sided
 #> H4    -0.0089          0 0.5030 0.5000 two.sided
 
-# Family-wise summaries are obtained separately with joint()
-joint(draws, null.value = 0)               # cumulative joint statement
-#>    median.est null.value     pd direction joint_cum
-#> H6     2.9866          0 0.9995 two.sided    0.9995
-#> H5     1.9500          0 0.9762 two.sided    0.9758
-#> H1     0.9860          0 0.8358 two.sided    0.8155
-#> H3     0.7761          0 0.7822 two.sided    0.6398
-#> H2    -0.1175          0 0.5350 two.sided    0.3420
-#> H4    -0.0089          0 0.5030 two.sided    0.1735
-joint(draws, interval = TRUE)              # simultaneous credible intervals
-#>         lower          est    upper prob
-#> H1 -1.5133941  0.985996121 3.595471 0.95
-#> H2 -2.8220596 -0.117524024 2.471335 0.95
-#> H3 -1.8565114  0.776129478 3.336798 0.95
-#> H4 -2.5959143 -0.008943627 2.611432 0.95
-#> H5 -0.7100979  1.950044477 4.707048 0.95
-#> H6  0.4556620  2.986561857 5.535382 0.95
-
 # Mix of directional and agnostic tests with parameter-specific nulls
-pd.adjust(draws = draws, p0 = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+pd.adjust(draws = draws, pi0 = 0.6, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater",
           "two.sided", "greater", "greater"))
 #> Warning: some pd.adj have been floored to 0.5.
 #> Prior-odds adjusted probability of direction
-#> Tests: 6  |  pi0 = 0.7647
-#> Decision: raw pd > 0.9922 (adjusted from 0.975); effective per-test alpha
-#> 0.0157 (from 0.05)
+#> Tests: 6  |  pi0 = 0.6
+#> Decision: raw pd > 0.9832 (adjusted from 0.975); effective per-test alpha
+#> 0.0336 (from 0.05)
 #> 
 #> 
 #>    median.est null.value     pd pd.adj direction
-#> H1     0.9860        0.2 0.7820 0.5246   greater
+#> H1     0.9860        0.2 0.7820 0.7051   greater
 #> H2    -0.1175        0.0 0.5350 0.5000 two.sided
-#> H3     0.7761        0.2 0.7230 0.4454   greater
+#> H3     0.7761        0.2 0.7230 0.6350   greater
 #> H4    -0.0089        0.0 0.5030 0.5000 two.sided
-#> H5     1.9500        0.5 0.9285 0.7998   greater
-#> H6     2.9866        0.5 0.9948 0.9831   greater
+#> H5     1.9500        0.5 0.9285 0.8965   greater
+#> H6     2.9866        0.5 0.9948 0.9921   greater
 ```

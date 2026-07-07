@@ -143,21 +143,21 @@ and Bayesian single and multiple comparison procedures.
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">0</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">0</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">Sigma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.8</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MASS/man/mvrnorm.html" class="external-link">mvrnorm</a></span><span class="op">(</span><span class="fl">2000</span>, <span class="va">mu</span>, <span class="va">Sigma</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"theta1"</span>, <span class="st">"theta2"</span>, <span class="st">"theta3"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">joint</span><span class="op">(</span><span class="va">draws</span><span class="op">)</span>                    <span class="co"># cumulative joint statement (default)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        median.est null.value     pd direction joint_cum</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta1     4.0206          0 1.0000 two.sided    1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> theta3    -1.9596          0 0.9755 two.sided    0.9755</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta1     1.5206          0 0.9405 two.sided    0.9160</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> theta2     0.0021          0 0.5005 two.sided    0.4820</span>
 <span class="r-in"><span><span class="fu">joint</span><span class="op">(</span><span class="va">draws</span>, interval <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>   <span class="co"># simultaneous credible intervals</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            lower          est     upper prob</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta1  1.704391  4.020594092 6.2265003 0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta2 -2.413244  0.002074391 2.2378859 0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta3 -4.213334 -1.959627191 0.3455705 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             lower          est     upper prob</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta1 -0.7956087  1.520594092 3.7265003 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta2 -2.4132437  0.002074391 2.2378859 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta3 -4.2133338 -1.959627191 0.3455705 0.95</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -111,19 +111,19 @@ for the per-test directional adjustment.
 ## Examples
 
 ``` r
-mu <- c(4, 0, -2)
+mu <- c(1.5, 0, -2)
 Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 draws <- MASS::mvrnorm(2000, mu, Sigma)
 colnames(draws) <- c("theta1", "theta2", "theta3")
 
 joint(draws)                    # cumulative joint statement (default)
 #>        median.est null.value     pd direction joint_cum
-#> theta1     4.0206          0 1.0000 two.sided    1.0000
 #> theta3    -1.9596          0 0.9755 two.sided    0.9755
+#> theta1     1.5206          0 0.9405 two.sided    0.9160
 #> theta2     0.0021          0 0.5005 two.sided    0.4820
 joint(draws, interval = TRUE)   # simultaneous credible intervals
-#>            lower          est     upper prob
-#> theta1  1.704391  4.020594092 6.2265003 0.95
-#> theta2 -2.413244  0.002074391 2.2378859 0.95
-#> theta3 -4.213334 -1.959627191 0.3455705 0.95
+#>             lower          est     upper prob
+#> theta1 -0.7956087  1.520594092 3.7265003 0.95
+#> theta2 -2.4132437  0.002074391 2.2378859 0.95
+#> theta3 -4.2133338 -1.959627191 0.3455705 0.95
 ```
