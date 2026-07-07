@@ -189,7 +189,7 @@ The paper proceeds as follows. We begin by introducing $pd$ and examining its us
 
 # Probability of direction
 
-The probability of direction ($pd$) is a posterior summary that quantifies how strongly the posterior distribution favors one direction of an effect relative to a reference ($\theta_{null}$) value [@Makowski2019]. For a continuous posterior, it can be defined as the larger of the two one-sided posterior probabilities: $pd = \max(\Pr(\theta < \theta_{null} \mid y),\ \Pr(\theta > \theta_{null} \mid y)),$ and it ranges from 0.50 (no directional preference) to 1 (all on one side).  Under a uniform prior, $pd$ is exactly the complement of the one-sided $p$-value for location parameters of exponential family distributions, and this relationship remains approximately valid under a broader class of priors [@Marsman2017; @Casella1987; @Shi2021]. 
+The probability of direction ($pd$) is a posterior summary that quantifies how strongly the posterior distribution favors one direction of an effect relative to a reference ($\theta_{null}$) value [@Makowski2019]. For a continuous posterior, it can be defined as the larger of the two one-sided posterior probabilities: $pd = \max(\Pr(\theta < \theta_{null} \mid y),\ \Pr(\theta > \theta_{null} \mid y)),$ and it ranges from 0.50 (no directional preference) to 1 (all on one side). The $pd$ equals exactly the complement of the one-sided $p$-value when computed on the posterior of a location parameter in exponential-family models estimated under a uniform prior; under a broader class of priors, this correspondence holds approximately [@Marsman2017; @Casella1987; @Shi2021].
 
 In practice, the $pd$ is often used to summarize both the direction and existence of an effect. This interpretation is clearest when phrased as a decision rule $pd>c$: the posterior must assign more than $c$ probability mass to the side of $\theta_{\text{null}}$ favored by the data. Setting $c=1-\alpha/2$ is convenient because it bounds the posterior mass in the opposite tail by $\alpha/2$. For concreteness, suppose the posterior favors a positive effect so that $pd=\Pr(\theta>0\mid y)$. An $\alpha=0.05$ implies $c=0.975$, therefore the rule $pd>c$ requires that $\Pr(\theta\le 0 \mid y)<0.025$, placing less than 2.5% of posterior mass at or below $0$.
 
@@ -304,13 +304,15 @@ Although we express the decision threshold as $c = 1 - \alpha/2$ (with $\alpha =
 
 # Multiplicity problem
 
-Under the null hypothesis, $p$-values are uniformly distributed on $[0, 1]$. Because $pd$ can be mapped to the $p$-value, this implies a corresponding null reference behavior for $pd$ on $[0.5, 1]$. However, because $pd$ is a posterior probability regarding the sign of $\theta$, its null distribution depends not only on the likelihood but also on how strongly the prior concentrates probability near 0, that is, on how strongly it "expects" near-null effects. To make this concrete, we use a conjugate normal–normal model: the observations are normal with known variance, $y_i \mid \theta \sim \mathcal{N}(\theta, 1)$, and the effect carries a mean-zero normal prior, $\theta \sim \mathcal{N}(0, \tau)$. This pairing yields a normal posterior in which the prior scale governs the degree of skepticism. Varying the sample size ($n \in \{30, 50, 100\}$) and the prior scale ($\tau \in \{0.2, 0.5, 1, 1.5\}$) shows that the probability that $pd$ exceeds 0.975 under the null is not constant (@fig-uniform-pd). Under diffuse priors ($\tau \geq 1$) and/or sufficiently large samples, $pd$ recovers the uniform null reference, with constant density on $[0.5, 1]$. A skeptical prior (e.g., $\tau = 0.2$), by contrast, induces shrinkage toward $0.5$, effectively reducing the error rate.
+Under the null hypothesis, $p$-values are uniformly distributed on $[0, 1]$. Because $pd$ can be mapped to the $p$-value, this implies a corresponding null reference behavior for $pd$ on $[0.5, 1]$. However, because $pd$ is a posterior probability regarding the sign of $\theta$, its null distribution depends not only on the likelihood but also on how strongly the prior concentrates probability near 0, that is, on how strongly it "expects" near-null effects. To make this concrete, we use a conjugate normal–normal model: the observations are normal with known variance, $y_i \mid \theta \sim \mathcal{N}(\theta, 1)$ (with true $\theta = 0$), and the effect carries a mean-zero normal prior, $\theta \sim \mathcal{N}(0, \tau)$, where $\tau$ denotes the prior standard deviation. This pairing yields a normal posterior in which the $\tau$ governs the degree of skepticism. 
+
+Varying the sample size ($n \in \{30, 50, 100\}$) and $\tau$ ($0.2, 0.5, 1, 1.5$) shows that the probability that $pd$ exceeds 0.975 under the null is not constant (@fig-uniform-pd). Under diffuse priors ($\tau \geq 1$) and/or sufficiently large samples, $pd$ recovers the uniform null reference, with constant density on $[0.5, 1]$. A skeptical prior (e.g., $\tau = 0.2$), by contrast, induces shrinkage toward $0.5$, effectively reducing the error rate.
 
 ```{r}
 #| label: fig-uniform-pd
 #| dev: cairo_pdf
 #| fig-cap: >
-#|   Distribution of the probability of direction (pd) stratified by sample size ($n = 30, 50, 100$; rows) and prior scale ($\theta \sim \mathcal{N}(0, \tau)$ with $\tau \in \{0.2, 0.5, 1, 1.5\}$; columns). Bin width = 0.025. 
+#|   Distribution of the probability of direction (pd) stratified by sample size ($n = 30, 50, 100$; rows) and prior standard deviation ($\theta \sim \mathcal{N}(0, \tau)$ with $\tau \in \{0.2, 0.5, 1, 1.5\}$; columns). Bin width = 0.025. 
 #| fig-height:  5.5
 #| fig-width: 12 
 #| echo: false
@@ -366,7 +368,7 @@ $$
 
 For a continuous posterior distribution, the probability of any single value (e.g., $\Pr(\theta = 0 \mid y)$) is 0, which means that one could write $\frac{pd}{1 - pd} = \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-} \mid y)}$. However, we retain the notation $H_{-0}$ in the denominator to explicitly indicate that the hypothesis includes the point null value of zero. Applying Bayes' rule, these posterior odds can be decomposed into a Bayes Factor and prior odds: $$
 \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-0} \mid y)} = \text{BF}_{+/-0} \times \frac{\Pr(H_{+})}{\Pr(H_{-0})}
-$$ where $\text{BF}_{+/-0}$ quantifies the relative likelihood of the data under $H_{+}$ versus $H_{-0}$. Under prior symmetry, $\frac{\Pr(H_{+})}{\Pr(H_{-0})} = 1$, which yields $\frac{pd}{1 - pd} = \text{BF}_{+/-0}$ [@Marsman2017; @Casella1987]. Thus, the odds $\frac{pd}{1 - pd}$ computed from posterior draws can be interpreted directly as evidence favoring $\theta > 0$ over $\theta \le 0$ (or $\theta < 0$ over $\theta \ge 0$).
+$$ where $\text{BF}_{+/-0}$ quantifies the relative likelihood of the data under $H_{+}$ versus $H_{-0}$. Under prior symmetry, $\frac{\Pr(H_{+})}{\Pr(H_{-0})} = 1$, which yields $\frac{pd}{1 - pd} = \text{BF}_{+/-0}$ [@Marsman2017]. Thus, the odds $\frac{pd}{1 - pd}$ computed from posterior draws can be interpreted directly as evidence favoring $\theta > 0$ over $\theta \le 0$ (or $\theta < 0$ over $\theta \ge 0$).
 
 ## Multiplicity adjustment via prior odds
 
@@ -388,7 +390,7 @@ Because the prior is symmetric and $pd_i$ is always the posterior probability of
 
 We emphasize that $H_{0,i}$ is a *directional* null, the disfavored region $\theta_i \le \theta_{\text{null}}$ (taking the favored side as positive) covers both a truly (point) null effect and an effect of the opposite sign that the data have mis-signed. Additionally, $\pi_0$ is a *family-level* prior, distinct from the continuous within-model prior on each $\theta_i$, under which the point $\theta_i = \theta_{\text{null}}$ has zero mass; the procedure accordingly does not quantify evidence for the point null at any individual test, it only adjusts the weight given to directional claims in light of the expected proportion of genuine discoveries in the family. 
 
-Researchers encode their expectations through $\pi_0$ or, equivalently under independence, through the global-null prior $\Pr(H_0) = \pi_0^m$: lower values reflect well-established effects with substantial prior information, higher values when uncertainty is greater, as in exploratory research. For fixed $\Pr(H_0)$, larger families imply higher $\pi_0$, then the correction acts nonlinearly on the posterior evidence, leaving larger $pd_i$ values comparatively less affected (@fig-prior-adj).
+Researchers encode their expectations through $\pi_0$ or, equivalently under independence, through the global-null prior $\Pr(H_0) = \pi_0^m$: lower values are appropriate for well-established effects with substantial prior information, higher values for settings with greater uncertainty, as in exploratory research. For fixed $\Pr(H_0)$, larger families imply higher $\pi_0$, then the correction acts nonlinearly on the posterior evidence, leaving larger $pd_i$ values comparatively less affected (@fig-prior-adj).
 
 ```{r}
 #| label: fig-prior-adj
@@ -464,28 +466,29 @@ A boundary condition arises when the specified $\pi_0$ falls below $0.5$ (which,
 
 ## Error rates under the prior-odds adjustment
 
-For a family of $m$ such tests, let $R$ denote the total number of rejections and $V$ the number of false rejections (true nulls that are rejected). The quantity we want to consider is the False Discovery Rate (FDR),
+For a family of $m$ such tests, let $R$ denote the total number of rejections and $V$ the number of false rejections (true nulls that are rejected). The target error rate is the False Discovery Rate (FDR),
 $$
 \mathrm{FDR} = \mathbb{E}\!\left[\frac{V}{\max(R, 1)}\right],
 $$
-where the $\max(R, 1)$ in the denominator sets the ratio to zero when no hypothesis is rejected [@Benjamini1995]. The FDR can be decomposed as the product of the positive False Discovery Rate (pFDR; which instead conditions on at least one rejection having occurred) [@Storey2003], and the probability of making any rejection, $\mathrm{FDR} = \mathrm{pFDR} \times \Pr(R > 0)$.
-
-If an hypothesis is null with prior probability $\pi_0$ and non-null with probability $1 - \pi_0$, the pFDR can be written as
+where $\max(R, 1)$ sets the ratio to zero when no hypothesis is rejected [@Benjamini1995]. The FDR decomposes as the product of the positive False Discovery Rate [pFDR, @Storey2003] and the probability of making any rejection, $\mathrm{FDR} = \mathrm{pFDR} \times \Pr(R > 0)$. For a single test with prior null probability $\pi_0$, the pFDR can be written as
 $$
-\mathrm{pFDR} = \frac{\pi_0\, \alpha}{\pi_0\, \alpha + (1 - \pi_0)(1 - \beta)},
+\mathrm{pFDR} = \frac{\pi_0\,\alpha}{\pi_0\,\alpha + (1 - \pi_0)(1 - \beta)},
 $$
-where $\alpha$ and $1 - \beta$ are the per-test Type I error rate and power, respectively [@Storey2003; @berger2023]. Here $\pi_0$ is the prior probability that a hypothesis is null, whereas $\alpha$ and $\beta$ describe the operating characteristics of the test.
+where $\alpha$ and $1 - \beta$ are the per-test Type I error rate and power [@Storey2003; @berger2023]. The pFDR is increasing in $\alpha$, so lowering the per-test error rate lowers the pFDR and, with it, the FDR.
 
-In the proposed correction the researcher's prior fixes $\pi_0$, while the same adjustment implicitly reduces $\alpha$ (i.e., increases $c$, since $c = 1-\alpha/2$). Indeed, if we write the decision rule $pd_{\mathrm{adj},i} > c$ in odds form, $\frac{pd_{\mathrm{adj},i}}{1 - pd_{\mathrm{adj},i}} > \frac{c}{1 - c}$, and substitute the adjusted odds defined above, the rule reduces to a condition on the unadjusted odds,
+The proposed correction acts on exactly these two quantities: it fixes $\pi_0$ through the researcher's prior and implicitly reduces $\alpha$ by raising the decision threshold. To see this, we can write the adjusted rule $pd_{\mathrm{adj},i} > c$ in odds form and substitute the adjusted odds,
+$$
+\frac{pd_{\mathrm{adj},i}}{1 - pd_{\mathrm{adj},i}} = \frac{pd_i}{1 - pd_i} \cdot \frac{1 - \pi_0}{\pi_0}.
+$$
+The rule reduces to a condition on the unadjusted odds,
 $$
 \frac{pd_i}{1 - pd_i} > \frac{c}{1 - c} \cdot \frac{\pi_0}{1 - \pi_0},
 $$
-which, returned to the probability scale, is a stricter threshold on the raw $pd_i$,
+which, on the probability scale, is a stricter threshold on the raw $pd_i$,
 $$
-pd_i > c^*, \qquad c^* = \frac{c\, \pi_0}{(1 - c)(1 - \pi_0) + c\, \pi_0}.
+pd_i > c^*, \qquad c^* = \frac{c\,\pi_0}{(1 - c)(1 - \pi_0) + c\,\pi_0},
 $$
-
-A higher threshold lowers the per-test probability of rejection under the null; this per-test rate equals $\alpha = 2\bigl(1 - c^*\bigr)$ when the within-model prior is diffuse or $n$ is large (so that the null distribution of $pd$ is approximately uniform on $[0.5, 1]$), and is smaller under an informative prior, which shrinks the posterior toward the null. The FDR, by contrast, cannot be reduced to a single number, as it depends on the power of the individual tests, so we make no claim about its absolute level. In summary, the adjustment is equivalent to a stricter per-test threshold $c^* > c$, so for $\pi_0 > 0.5$ it lowers the per-test false-positive rate and the expected number of false discoveries relative to the unadjusted rule^[The adjustment targets the FDR, not the FWER (the probability of at least one false positive). A test produces a false positive only when it is both null and rejected, with probability $\pi_0\,\alpha^*$, so across $m$ independent tests $\mathrm{FWER} = 1 - (1 - \pi_0\,\alpha^*)^{m}$. Controlling it at a target $\alpha$ gives $\alpha^* = \frac{1 - (1 - \alpha)^{1/m}}{\pi_0}$. Because the two-sided rule $pd > c$ has per-test Type I rate $\alpha^* = 2(1 - c)$ (the convention $c = 1 - \alpha/2$ used throughout), inverting this relation turns the family-wise correction into a single cutoff on the raw $pd$, $c_{\mathrm{fwer}} = 1 - \alpha^*/2 = 1 - \tfrac{1 - (1 - \alpha)^{1/m}}{2\,\pi_0}$. This uses the same identity $\alpha^* = 2(1-c)$, so it likewise assumes a diffuse prior or large $n$ and independent tests; an informative prior lowers the per-test rate and makes $c_{\mathrm{fwer}}$ conservative, controlling the FWER at or below the target.]. 
+with $c^* > c$ whenever $\pi_0 > 0.5$. A stricter threshold lowers the per-test probability of rejecting a true null. This rate equals $\alpha^* = 2(1 - c^*)$ when the null distribution of $pd$ is approximately uniform on $[0.5, 1]$ (diffuse within-model prior or large $n$), and is smaller under an informative prior, which shrinks the posterior toward the null. Since $\alpha^* < \alpha$, the adjustment reduces the pFDR, and hence the FDR, relative to the unadjusted rule.^[The adjustment targets the FDR, not the FWER (the probability of at least one false positive). A test produces a false positive only when it is both null and rejected, with probability $\pi_0\,\alpha^*$, so across $m$ independent tests $\mathrm{FWER} = 1 - (1 - \pi_0\,\alpha^*)^{m}$. Controlling it at a target $\alpha$ gives $\alpha^* = \frac{1 - (1 - \alpha)^{1/m}}{\pi_0}$. Because the two-sided rule $pd > c$ has per-test Type I rate $\alpha^* = 2(1 - c)$ (the convention $c = 1 - \alpha/2$ used throughout), inverting this relation turns the family-wise correction into a single cutoff on the raw $pd$, $c_{\mathrm{fwer}} = 1 - \alpha^*/2 = 1 - \tfrac{1 - (1 - \alpha)^{1/m}}{2\,\pi_0}$. This uses the same identity $\alpha^* = 2(1-c)$, so it likewise assumes a diffuse prior or large $n$ and independent tests; an informative prior lowers the per-test rate and makes $c_{\mathrm{fwer}}$ conservative, controlling the FWER at or below the target.] 
 
 ### Simulation Study
 
