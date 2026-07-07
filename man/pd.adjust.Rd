@@ -174,17 +174,13 @@ draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
 # Per-test correction only (default)
-pd.adjust(draws = draws, p0 = 0.4, null.value = 0)
+pd.adjust(draws = draws, pi0 = 0.7, null.value = 0)
 
 # Order the rows by strength of evidence
-pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE)
-
-# Family-wise summaries are obtained separately with joint()
-joint(draws, null.value = 0)               # cumulative joint statement
-joint(draws, interval = TRUE)              # simultaneous credible intervals
+pd.adjust(draws = draws, pi0 = 0.7, null.value = 0, order = TRUE)
 
 # Mix of directional and agnostic tests with parameter-specific nulls
-pd.adjust(draws = draws, p0 = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+pd.adjust(draws = draws, pi0 = 0.6, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater",
           "two.sided", "greater", "greater"))
 

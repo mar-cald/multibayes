@@ -72,7 +72,7 @@
 #' @importFrom matrixStats colRanks rowMins colQuantiles
 #' @export
 #' @examples
-#' mu <- c(4, 0, -2)
+#' mu <- c(1.5, 0, -2)
 #' Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 #' draws <- MASS::mvrnorm(2000, mu, Sigma)
 #' colnames(draws) <- c("theta1", "theta2", "theta3")
@@ -98,8 +98,8 @@ joint <- function(draws, interval = FALSE, prob = 0.95,
       "`est.FUN`: must be a function" = is.function(est.FUN)
     )
     S  <- nrow(draws)
-    # Conservative empirical CDF per draw per parameter (max/min ties coincide
-    # for continuous draws); nearer tail per draw, most extreme across params.
+    # Conservative empirical CDF per draw per parameter; 
+    # nearer tail per draw, most extreme across params.
     up <- t(matrixStats::colRanks(draws, ties.method = "max") / S)
     lw <- t(matrixStats::colRanks(draws, ties.method = "min") / S)
     tp <- matrixStats::rowMins(pmin(up, 1 - lw))
@@ -136,7 +136,7 @@ joint <- function(draws, interval = FALSE, prob = 0.95,
   side_ind <- matrix(side_ind, nrow = nrow(draws), ncol = nc)
 
   pd  <- colMeans(side_ind)
-  ord <- order(pd, decreasing = TRUE)         # cumulative only meaningful strongest-first
+  ord <- order(pd, decreasing = TRUE) # cumulative only meaningful strongest-first
 
   joint_cum <- numeric(nc)
   running   <- rep(TRUE, nrow(side_ind))
@@ -153,6 +153,6 @@ joint <- function(draws, interval = FALSE, prob = 0.95,
   )
   if (!is.null(nms) && length(nms) == nc) rownames(out) <- nms
   out <- out[ord, , drop = FALSE]
-  out$joint_cum <- round(joint_cum, 4)        # in ord order, aligned with reordered rows
+  out$joint_cum <- round(joint_cum, 4)  # in ord order, aligned with reordered rows
   out
 }

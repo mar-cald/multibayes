@@ -162,17 +162,13 @@
 #' colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 #'
 #' # Per-test correction only (default)
-#' pd.adjust(draws = draws, p0 = 0.4, null.value = 0)
+#' pd.adjust(draws = draws, pi0 = 0.7, null.value = 0)
 #'
 #' # Order the rows by strength of evidence
-#' pd.adjust(draws = draws, p0 = 0.4, null.value = 0, order = TRUE)
-#'
-#' # Family-wise summaries are obtained separately with joint()
-#' joint(draws, null.value = 0)               # cumulative joint statement
-#' joint(draws, interval = TRUE)              # simultaneous credible intervals
+#' pd.adjust(draws = draws, pi0 = 0.7, null.value = 0, order = TRUE)
 #'
 #' # Mix of directional and agnostic tests with parameter-specific nulls
-#' pd.adjust(draws = draws, p0 = 0.2, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+#' pd.adjust(draws = draws, pi0 = 0.6, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
 #'           direction = c("greater", "two.sided", "greater",
 #'           "two.sided", "greater", "greater"))
 #'
@@ -277,8 +273,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
   # Model-free decision threshold implied by the prior odds. Rejecting
   # `pd.adj > threshold` is identical to rejecting the raw `pd > threshold.adj`,
   # so threshold.adj is the equivalent (stricter) cutoff to apply to the
-  # unadjusted pd. It is a pure transformation of the decision rule and never
-  # The two-sided per-test Type I rate at a cutoff `cut` is 2 * (1 - cut).
+  # unadjusted pd. It is a pure transformation of the decision rule.
   alpha.nominal <- 2 * (1 - threshold)
   if (prior_H0 > 0.5) {
     threshold.adj <- (threshold * prior_H0) /
@@ -367,8 +362,6 @@ print.pd_adjust <- function(x, digits = 4, ...) {
   cat(sprintf("Tests: %d  |  pi0 = %.4g\n",
               as.integer(df$m[1]), df$pi0[1]))
 
-  # Wrap header lines at the console width so they never overflow (e.g. in PDF
-  # output)
   hdr <- function(s) cat(strwrap(s, width = getOption("width", 80L)), "", sep = "\n")
 
   cadj <- attr(x, "threshold.adj")

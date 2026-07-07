@@ -6,6 +6,13 @@ author:
     corresponding: true
     orcid: 0009-0005-5668-5162
     email: margherita.calderan@unipd.it
+    roles:
+       - conceptualization
+       - formal analysis
+       - methodology
+       - software
+       - visualization
+       - writing – original draft
     affiliations:
       - name: University of Padova
         department: Department of Developmental Psychology and Socialization
@@ -25,6 +32,10 @@ author:
     corresponding: false
     orcid: 0000-0002-6666-1747
     email: filippo.gambarota@unipd.it
+    roles:
+       - methodology
+       - software
+       - writing – review & editing
     affiliations:
       - name: University of Padova
         department: Department of Developmental Psychology and Socialization
@@ -37,6 +48,9 @@ author:
     corresponding: false
     orcid: 0000-0003-3181-8078
     email: livio.finos@unipd.it
+    roles:
+      - supervision
+      - writing – review & editing
     affiliations:
       - name: University of Padova
         department: Department of Statistical Sciences
@@ -45,8 +59,14 @@ author:
         region: 
         country: Italy
         postal-code: 35131
+      - name: University of Padova
+        department: Padova Neuroscience Center
+        address: Via Giuseppe Orus, 2
+        city: Padova
+        region: 
+        country: Italy
+        postal-code: 35131
   - name: Gianmarco Altoè
-    corresponding: true
     orcid: 0000-0003-1154-9528
     email: gianmarco.altoe@unipd.it
     affiliations:
@@ -57,6 +77,9 @@ author:
         region: 
         country: Italy
         postal-code: 35131
+    roles:
+      - supervision
+      - writing – review & editing
   
 author-note:
   status-changes: 
@@ -281,13 +304,13 @@ Although we express the decision threshold as $c = 1 - \alpha/2$ (with $\alpha =
 
 # Multiplicity problem
 
-Under the null hypothesis, $p$-values are uniformly distributed on $[0, 1]$. Because $pd$ can be mapped to the $p$-value, this implies a corresponding null reference behavior for $pd$ on $[0.5, 1]$. However, because $pd$ is a posterior probability regarding the sign of $\theta$, its null distribution depends not only on the likelihood but also on how strongly the prior concentrates probability near 0, that is, on how strongly it "expects" near-null effects. To make this concrete, we use a conjugate normal–normal model: the observations are normal with known variance, $y_i \mid \theta \sim \mathcal{N}(\theta, 1)$, and the effect carries a mean-zero normal prior, $\theta \sim \mathcal{N}(0, \tau^2)$. This pairing yields a normal posterior in which the prior scale governs the degree of skepticism. Varying the sample size ($n \in \{30, 50, 100\}$) and the prior scale ($\tau \in \{0.2, 0.5, 1, 1.5\}$) shows that the probability that $pd$ exceeds 0.975 under the null is not constant (@fig-uniform-pd). Under diffuse priors ($\tau \geq 1$) and/or sufficiently large samples, $pd$ recovers the uniform null reference, with constant density on $[0.5, 1]$. A skeptical prior (e.g., $\tau = 0.2$), by contrast, induces shrinkage toward $0.5$, effectively reducing the error rate.
+Under the null hypothesis, $p$-values are uniformly distributed on $[0, 1]$. Because $pd$ can be mapped to the $p$-value, this implies a corresponding null reference behavior for $pd$ on $[0.5, 1]$. However, because $pd$ is a posterior probability regarding the sign of $\theta$, its null distribution depends not only on the likelihood but also on how strongly the prior concentrates probability near 0, that is, on how strongly it "expects" near-null effects. To make this concrete, we use a conjugate normal–normal model: the observations are normal with known variance, $y_i \mid \theta \sim \mathcal{N}(\theta, 1)$, and the effect carries a mean-zero normal prior, $\theta \sim \mathcal{N}(0, \tau)$. This pairing yields a normal posterior in which the prior scale governs the degree of skepticism. Varying the sample size ($n \in \{30, 50, 100\}$) and the prior scale ($\tau \in \{0.2, 0.5, 1, 1.5\}$) shows that the probability that $pd$ exceeds 0.975 under the null is not constant (@fig-uniform-pd). Under diffuse priors ($\tau \geq 1$) and/or sufficiently large samples, $pd$ recovers the uniform null reference, with constant density on $[0.5, 1]$. A skeptical prior (e.g., $\tau = 0.2$), by contrast, induces shrinkage toward $0.5$, effectively reducing the error rate.
 
 ```{r}
 #| label: fig-uniform-pd
 #| dev: cairo_pdf
 #| fig-cap: >
-#|   Distribution of the probability of direction (pd) stratified by sample size ($n = 30, 50, 100$; rows) and prior scale ($\theta \sim \mathcal{N}(0, \tau^2)$ with $\tau \in \{0.2, 0.5, 1, 1.5\}$; columns). Bin width = 0.025. 
+#|   Distribution of the probability of direction (pd) stratified by sample size ($n = 30, 50, 100$; rows) and prior scale ($\theta \sim \mathcal{N}(0, \tau)$ with $\tau \in \{0.2, 0.5, 1, 1.5\}$; columns). Bin width = 0.025. 
 #| fig-height:  5.5
 #| fig-width: 12 
 #| echo: false
@@ -329,7 +352,7 @@ ggplot(grid, aes(x = mid, y = density)) +
 ```
 
 
-While skeptical priors reduce the probability that any single test yields an extreme $pd$, they do not address the issue that, as the number of tests $m$ increases, so does the probability of observing at least one extreme value among $pd_1, \dots, pd_m$. The approach presented below addresses this at the level of the testing procedure rather than the within-model prior, by placing a separate prior on the proportion of effects expected to be null. This lets researchers who use uninformative or weakly informative priors for estimation still incorporate substantive beliefs at the family level. 
+While skeptical priors reduce the probability that a single test yields an extreme $pd$, they do not address the issue that, as the number of tests $m$ increases, so does the probability of observing at least one extreme value among $pd_1, \dots, pd_m$. The approach presented below addresses this at the level of the testing procedure rather than the within-model prior, by placing a separate prior on the proportion of effects expected to be null. This lets researchers who use uninformative or weakly informative priors for estimation still incorporate substantive beliefs at the family level. 
 
 As we formalize in the next section, the correction operates on the Bayes Factor comparing one directional hypothesis against the other. For $pd$ to enter this framework, it must coincide with that Bayes Factor, and this holds only under a specific condition. Because $pd$ is the posterior probability mass on one side of $\theta_{\text{null}}$, it maps directly onto the posterior odds between the two directional hypotheses ($\theta > \theta_{\text{null}}$ vs. $\theta < \theta_{\text{null}}$). These posterior odds equal the Bayes Factor only when the within-model prior is symmetric around $\theta_{\text{null}}$: symmetry makes the two directions equally plausible a priori, so the prior odds are unity and the posterior odds reduce to the ratio of marginal likelihoods. This requirement is typically satisfied by the default priors in standard Bayesian software, and it remains compatible with any degree of prior information about effect magnitude, which is expressed through $\theta_{\text{null}}$.
 
@@ -353,7 +376,7 @@ If the tests are independent, the probability of the global null $H_0$, the even
 $$
 \Pr(H_0) = \pi_0^m, \qquad \text{equivalently} \qquad \pi_0 = \Pr(H_0)^{1/m}.
 $$
-In this scenario, setting $\pi_0 = \Pr(H_{1,i}) = \Pr(H_{0,i}) = 0.5$ (the symmetric prior introduced in the previous section) assigns near-certainty to the event that at least one effect lies in its claimed direction, since $\Pr(H_0) = 0.5^m \to 0$ as $m$ grows. A principled response is to redistribute prior probability toward the data-disfavored hypothesis for each claim as a function of family size $m$ [@Jeffreys1938; @Westfall1997]. This adjustment enters through $\pi_0$, which modifies the prior odds. For each test, the adjusted posterior odds are:
+In this scenario, setting $\pi_0 = \Pr(H_{1,i}) = \Pr(H_{0,i}) = 0.5$ (the symmetric prior introduced in the previous section) assigns near-certainty to the event that at least one effect lies in its claimed direction, since $\Pr(H_0) = 0.5^m$ tends to $0$ as $m$ grows. A principled response is to redistribute prior probability toward the data-disfavored hypothesis for each claim as a function of family size $m$ [@Jeffreys1938; @Westfall1997]. This adjustment enters through $\pi_0$, which modifies the prior odds. For each test, the adjusted posterior odds are:
 $$
 \frac{pd_{\mathrm{adj},i}}{1 - pd_{\mathrm{adj},i}} = \frac{pd_i}{1-pd_i} \times \frac{1 - \pi_0}{\pi_0},
 $$
@@ -363,15 +386,15 @@ pd_{\mathrm{adj},i} = \frac{pd_i\,(1 - \pi_0)}{pd_i\,(1 - \pi_0) + (1 - pd_i)\,\
 $$
 Because the prior is symmetric and $pd_i$ is always the posterior probability of the dominant direction, the factor $(1-\pi_0)/\pi_0$ acts as a single scalar penalty applied identically regardless of the effect's sign.
 
-We emphasize that $H_{0,i}$ is a *directional* null, the disfavored region $\theta_i \le \theta_{\text{null}}$ (taking the favored side as positive) covers both a truly null effect and an effect of the opposite sign that the data have mis-signed. Consequently $\pi_0$ can be interpreted as the expected proportion of true (point) nulls under the assumption that sign errors are negligible. Additionally, $\pi_0$ is a *family-level* prior, distinct from the continuous within-model prior on each $\theta_i$, under which the point $\theta_i = \theta_{\text{null}}$ has zero mass; the procedure accordingly does not quantify evidence for the point null at any individual test, it only adjusts the weight given to directional claims in light of the expected proportion of genuine discoveries in the family. 
+We emphasize that $H_{0,i}$ is a *directional* null, the disfavored region $\theta_i \le \theta_{\text{null}}$ (taking the favored side as positive) covers both a truly (point) null effect and an effect of the opposite sign that the data have mis-signed. Additionally, $\pi_0$ is a *family-level* prior, distinct from the continuous within-model prior on each $\theta_i$, under which the point $\theta_i = \theta_{\text{null}}$ has zero mass; the procedure accordingly does not quantify evidence for the point null at any individual test, it only adjusts the weight given to directional claims in light of the expected proportion of genuine discoveries in the family. 
 
-Researchers encode their expectations through $\pi_0$ or, equivalently under independence, through the global-null prior $\Pr(H_0) = \pi_0^m$: lower values when effects are well established, higher values when uncertainty is greater, as in exploratory research. For fixed $\Pr(H_0)$, larger families imply higher $\pi_0$, then the correction acts nonlinearly on the posterior evidence, leaving larger $pd_i$ values comparatively less affected (@fig-prior-adj).
+Researchers encode their expectations through $\pi_0$ or, equivalently under independence, through the global-null prior $\Pr(H_0) = \pi_0^m$: lower values reflect well-established effects with substantial prior information, higher values when uncertainty is greater, as in exploratory research. For fixed $\Pr(H_0)$, larger families imply higher $\pi_0$, then the correction acts nonlinearly on the posterior evidence, leaving larger $pd_i$ values comparatively less affected (@fig-prior-adj).
 
 ```{r}
 #| label: fig-prior-adj
 #| dev: cairo_pdf
 #| fig-cap: >
-#|   The left panel shows that the implied prior probability $\pi_0$ assigned to each hypothesis $H_{0,i}$ increases with family size $m$, depending on the specified global null probability $\Pr(H_0)$. The dotted line marks the boundary condition $\pi_0 = 0.5$, below which the prior would favor $H_1$ a priori. The right panel shows the corresponding prior-odds adjustment of $pd$ for different $\pi_0$ values, highlighting the heterogeneous penalty: weak evidence is shrunk much more than strong evidence. 
+#|   Relationship between the global-null probability, the implied prior probability assigned to individual hypotheses, and the resulting adjustment of the probability of direction (pd). The left panel shows how a specified probability that all tested effects are null, $\Pr(H0)$, translates into the prior probability $\pi_0$ assigned to each individual hypothesis. As the number of tested effects (m) increases, the same global-null assumption implies increasingly skeptical priors for individual tests. The dotted line marks $\pi_0 = 0.5$, below which the prior would favor the alternative hypothesis rather than the null. Because our goal is to introduce a conservative multiplicity adjustment, $\pi_0$ is capped at 0.5 whenever smaller values would arise. The right panel illustrates the practical consequences of this adjustment. For a given $\pi_0$, the adjusted probability of direction ($pd_{adj}$) is always smaller than or equal to the original pd, but the reduction is not uniform. Weak evidence is penalized much more strongly than strong evidence. 
 #| fig-height: 4.5
 #| fig-width: 10
 #| echo: false
@@ -445,20 +468,13 @@ For a family of $m$ such tests, let $R$ denote the total number of rejections an
 $$
 \mathrm{FDR} = \mathbb{E}\!\left[\frac{V}{\max(R, 1)}\right],
 $$
-where the $\max(R, 1)$ in the denominator sets the ratio to zero when no hypothesis is rejected [@Benjamini1995]. The FDR can be decomposed as the product of the positive False Discovery Rate (pFDR) [@Storey2003],
-$$
-\mathrm{pFDR} = \mathbb{E}\!\left[\frac{V}{R} \,\Big|\, R > 0\right],
-$$
-which instead conditions on at least one rejection having occurred, and the probability of making any rejection,
-$$
-\mathrm{FDR} = \mathrm{pFDR} \times \Pr(R > 0).
-$$
+where the $\max(R, 1)$ in the denominator sets the ratio to zero when no hypothesis is rejected [@Benjamini1995]. The FDR can be decomposed as the product of the positive False Discovery Rate (pFDR; which instead conditions on at least one rejection having occurred) [@Storey2003], and the probability of making any rejection, $\mathrm{FDR} = \mathrm{pFDR} \times \Pr(R > 0)$.
 
-If each hypothesis is null with prior probability $\pi_0$ and non-null with probability $1 - \pi_0$, and the tests are independent and identical, the pFDR can be written as
+If an hypothesis is null with prior probability $\pi_0$ and non-null with probability $1 - \pi_0$, the pFDR can be written as
 $$
 \mathrm{pFDR} = \frac{\pi_0\, \alpha}{\pi_0\, \alpha + (1 - \pi_0)(1 - \beta)},
 $$
-where $\alpha$ and $1 - \beta$ are the per-test Type I error rate and power, respectively [@Storey2003; @berger2023]. Here $\pi_0$ is the prior probability that a hypothesis is null, whereas $\alpha$ and $\beta$ describe the operating characteristics of the test. When the tests are heterogeneous, there is no single common $(\alpha, \beta)$ pair; one may then summarize performance by the family-level averages $\bar{\alpha}$ and $\bar{\beta}$, which yield the ratio $\mathbb{E}[V]/\mathbb{E}[R]$.
+where $\alpha$ and $1 - \beta$ are the per-test Type I error rate and power, respectively [@Storey2003; @berger2023]. Here $\pi_0$ is the prior probability that a hypothesis is null, whereas $\alpha$ and $\beta$ describe the operating characteristics of the test.
 
 In the proposed correction the researcher's prior fixes $\pi_0$, while the same adjustment implicitly reduces $\alpha$ (i.e., increases $c$, since $c = 1-\alpha/2$). Indeed, if we write the decision rule $pd_{\mathrm{adj},i} > c$ in odds form, $\frac{pd_{\mathrm{adj},i}}{1 - pd_{\mathrm{adj},i}} > \frac{c}{1 - c}$, and substitute the adjusted odds defined above, the rule reduces to a condition on the unadjusted odds,
 $$
@@ -475,7 +491,7 @@ A higher threshold lowers the per-test probability of rejection under the null; 
 
 We conducted a fully crossed simulation study, with 10,000 replications per cell, to examine the adjustment under both correctly specified and misspecified priors. We varied the per-test null prior supplied to the procedure, $\pi_0 \in \{0.50, 0.6, \dots, 0.9\}$; the true probability that each hypothesis is null, $\pi_{0\text{true}} \in \{0.5, 0.6, \dots, 1.0\}$; the family size $m \in \{4, 8, 10, 20\}$; and the sample size $n \in \{30, 50, 100\}$. At each replication the number of true null effects ($\theta_i = 0$) was drawn from $\mathrm{Binomial}(m, \pi_{0\text{true}})$ and the remaining effects set to $\theta_i = 0.3$; observations were generated as $y_i \sim \mathcal{N}(\theta_i, 1)$, and the posterior obtained from a conjugate normal--normal model with $y_i \mid \theta \sim \mathcal{N}(\theta, 1)$ and prior $\theta \sim \mathcal{N}(0, 2)$. We declared support for the alternative when $pd > 0.975$ and evaluated the FDR, the FWER, and average power, the proportion of true effects detected [@Benjamini1995; @Grant2025]. The diagonal $\pi_0 = \pi_{0\text{true}}$ corresponds to a correctly specified prior.
 
-@fig-ind-fdr-pw shows the FDR of the procedure across the grid. The column $\pi_0 = 0.5$ is the unadjusted rule: there the prior odds are one, no correction is applied ($pd_{\mathrm{adj}} = pd$), and the FDR inflates with the family size $m$ and the true null proportion $\pi_{0\text{true}}$, reaching $0.64$ when the family is large and most effects are null. Increasing $\pi_0$ brings the FDR under control: it is held low whenever the specified $\pi_0$ is at least the true proportion, and inflates only under substantial underestimation, when a small $\pi_0$ is paired with a large $\pi_{0\text{true}}$ at large $m$. This control trades off power, which decreases as $\pi_0$ increases; because average power does not vary with $m$ (for fixed $\pi_{0\text{true}}$ and $\pi_0$), we display $m = 20$ as a representative condition (@fig-ind-fdr-pw).
+@fig-ind-fdr-pw shows the FDR resulting from our procedure across the  grid. The column $\pi_0 = 0.5$ is the unadjusted rule: there the prior odds are one, no correction is applied ($pd_{\mathrm{adj}} = pd$), and the FDR inflates with the family size $m$ and the true null proportion $\pi_{0\text{true}}$, reaching $0.64$ when the family is large and most effects are null. Increasing $\pi_0$ brings the FDR under control: it is held low whenever the specified $\pi_0$ is at least the true proportion, and inflates only under substantial underestimation, when a small $\pi_0$ is paired with a large $\pi_{0\text{true}}$ at large $m$. This control trades off power, which decreases as $\pi_0$ increases; because average power does not vary with $m$ (for fixed $\pi_{0\text{true}}$ and $\pi_0$), we display $m = 20$ as a representative condition (@fig-ind-fdr-pw).
 
 ```{r}
 #| label: fig-ind-fdr-pw
@@ -589,10 +605,12 @@ df_pi0 |>
 
 ### Comparison with other Bayesian methods
 
-Two further Bayesian summaries have been proposed to address multiplicity. The first constructs a cumulative joint posterior probability: one accepts the strongest $k$ claims whose joint posterior probability is at least $1 - \alpha$ [@Gelman2000; @Pruzek2016]. The second relies on simultaneous credible intervals, declaring an effect whenever its $1 - \alpha$ simultaneous band excludes the null value [@Schnell2020; @Schnell2016; @Box1992]. To benchmark all three approaches, we replicate the simulation described above with $n = 50$ and $\pi_{0\text{true}} = 0.7$ held fixed, and vary the family size $m$; the prior-odds adjustment is evaluated at $\pi_0 = \pi_{0\text{true}}$, representing best-case calibration. All three rules are evaluated at $\alpha = 0.05$: the per-test rule rejects when the adjusted $pd$ exceeds $c = 1 - \alpha/2 = 0.975$, the cumulative joint accepts the strongest claims while their joint probability is at least $1 - \alpha = 0.95$, and the simultaneous bands have $95\%$ joint coverage. @fig-compare displays the resulting FDR, FWER, and power for each rule across values of $m$.
+Two further Bayesian methods have been proposed to address multiplicity, differing in the error they aim to control. The first works with directional posterior probabilities: it accepts the $k$ strongest claims whose joint posterior probability is at least $1-\alpha$ [@Gelman2000; @Pruzek2016], thereby bounding the familywise probability of a sign (Type S) error. The second uses simultaneous credible intervals, declaring an effect whenever its $1-\alpha$ simultaneous band excludes the null value [@Schnell2020; @Schnell2016; @Box1992]; this is a two-sided criterion and controls the Type I error instead. Both summaries act on the posterior alone, whereas our method uses both the posterior and the prior odds, with the latter adjusted for the family of hypotheses under test.
+
+To benchmark all three approaches, we replicate the simulation described above with $n = 50$ and $\pi_{0\text{true}} = 0.7$ held fixed, and vary the family size $m$; the prior-odds adjustment is evaluated at $\pi_0 = \pi_{0\text{true}}$, representing best-case calibration. All three rules are evaluated at $\alpha = 0.05$: the per-test rule rejects when the adjusted $pd$ exceeds $c = 1 - \alpha/2 = 0.975$, the cumulative joint accepts the strongest claims while their joint probability is at least $1 - \alpha = 0.95$, and the simultaneous bands have $95\%$ joint coverage. @fig-compare displays the resulting FDR, FWER, and power for each rule across values of $m$.
 
 
-The simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as $\pi_{0\text{true}} = 0.7$, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching $0.22$, and FWER $0.57$. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compared to Type I error control.
+Under this setting, the simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as $\pi_{0\text{true}} = 0.7$, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching $0.22$, and FWER $0.57$. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compared to Type I error control.
 
 These choices trade off against power (rightmost panel): the cumulative joint detects the most true effects (around $0.62$), the prior-odds procedure's power is essentially constant in $m$ (around $0.43$), and the strict simultaneous intervals lose power as the family grows (from $0.36$ at $m = 4$ to $0.18$ at $m = 20$). The choice among them is thus a deliberate trade between power and the error one most wants to limit.
 

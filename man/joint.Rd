@@ -70,7 +70,7 @@ implementation is \code{sim.cred.band} in the \pkg{credsubs} package
 (Schnell et al., 2020).
 }
 \examples{
-mu <- c(4, 0, -2)
+mu <- c(1.5, 0, -2)
 Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 draws <- MASS::mvrnorm(2000, mu, Sigma)
 colnames(draws) <- c("theta1", "theta2", "theta3")
