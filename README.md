@@ -26,6 +26,7 @@ A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing
 
 Run `citation("multibayes")` in R for the full reference (article and package entries).
 
+- [preprint](paper/manuscript.html)
 ---
 
 ## License
