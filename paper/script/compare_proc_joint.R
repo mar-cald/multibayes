@@ -11,15 +11,15 @@ set.seed(2026)
 
 library(multibayes)
 
-n <- 50          # observations per test
-s <- 2           # prior sd, theta ~ N(0, s^2)
-pi0 <- 0.7         # per-test null prior (and true null proportion: correct spec)
-alpha <- 0.05        # nominal level used by all three rules
+n <- 50   # observations per test
+s <- 2   # prior sd, theta ~ N(0, s^2)
+pi0 <- 0.7   # per-test null prior (and true null proportion: correct spec)
+alpha <- 0.05  # nominal level used by all three rules
 c <- 1 - alpha / 2   # pd cutoff (per-test), 0.975
-jlev <- 1 - alpha       # cumulative-joint / simultaneous level, 0.95
+jlev <- 1 - alpha # cumulative-joint / simultaneous level, 0.95
 eff <- 0.3         # |effect| of the non-null tests
-B <- 10000       # replications per cell
-S <- 4000        # posterior draws per replication (typical MCMC sample size)
+B <- 10000  # replications per cell
+S <- 4000   # posterior draws per replication (typical MCMC sample size)
 ms <- c(4, 8, 10, 20)
 
 kap <- n / (n + 1 / s^2)
@@ -52,7 +52,7 @@ one_rep <- function(m) {
   bd <- joint(draws, interval = TRUE, prob = jlev)
   rej_s <- setNames(bd$lower > 0 | bd$upper < 0, rownames(bd))
 
-  err <- function(r) is_null[names(r)] & r      # Type I: declared true null
+  err <- function(r) is_null[names(r)] & r  # Type I: declared true null
   fdp <- function(r) if (sum(r) == 0) 0 else sum(err(r)) / sum(r)
   nn <- sum(!is_null)
   pw <- function(r) if (nn == 0) NA_real_ else sum(r & !is_null[names(r)]) / nn
@@ -67,4 +67,4 @@ df_compare <- do.call(rbind, lapply(ms, function(m) {
 }))
 
 save(df_compare, file = "paper/script/output/df_compare.rda")
-print(df_compare, digits = 3)
+
