@@ -11,11 +11,7 @@ navbar:
     - reference
     - articles
 reference:
-- title: Multiplicity correction
-  contents:
     - pd.adjust
     - print.pd_adjust
-- title: Joint summaries
-  contents:
     - joint
 
