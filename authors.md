@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/mar-cald/multibayes/blob/v1.0.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/mar-cald/multibayes/blob/main/inst/CITATION)
 
 Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026). A Prior-Odds
 Adjustment for the Probability of Direction in Multiple Testing.
