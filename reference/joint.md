@@ -1,4 +1,4 @@
-# Family-wise summaries from joint posterior draws
+# Summaries from joint posterior draws
 
 Computes either the **joint directional statement** (the default): for
 each \\k\\, the joint posterior probability that the \\k\\ strongest

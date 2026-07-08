@@ -10,4 +10,4 @@
 ## Simultaneous credible intervals
 
 - [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md)
-  : Family-wise summaries from joint posterior draws
+  : Summaries from joint posterior draws
