@@ -21,9 +21,9 @@ remotes::install_github("mar-cald/multibayes")
 
 ## Citation
 
-> Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026). A
+> Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (n.d.). A
 > Prior-Odds Adjustment for the Probability of Direction in Multiple
-> Testing
+> Testing. Retrieved from osf.io/preprints/psyarxiv/8zwx2_v1
 
 Run `citation("multibayes")` in R for the full reference (article and
 package entries).
