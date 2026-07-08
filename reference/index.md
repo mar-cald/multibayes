@@ -1,6 +1,6 @@
 # Package index
 
-## Multiplicity correction
+## Probability of Direction
 
 - [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
   :
@@ -12,7 +12,7 @@
 
   Print method for `pd_adjust` objects
 
-## Joint summaries
+## Joint Posterior
 
 - [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md)
   : Summaries from joint posterior draws
