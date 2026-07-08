@@ -28,7 +28,7 @@ remotes::install_github("mar-cald/multibayes")
 Run `citation("multibayes")` in R for the full reference (article and
 package entries).
 
-- ## [preprint](https://mar-cald.github.io/multibayes/paper/manuscript.md)
+------------------------------------------------------------------------
 
 ## License
 
