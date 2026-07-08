@@ -303,7 +303,7 @@ pd_i &gt; c^*, \qquad c^* = \frac{c\,\pi_0}{(1 - c)(1 - \pi_0) + c\,\pi_0},
 <h3 data-anchor-id="comparison-with-other-bayesian-methods">Comparison with other Bayesian methods</h3>
 <p>We compare the proposed method with two Bayesian alternatives that differ both in the form of the claim they license and in the error they aim to control. The first, hereafter the <em>joint directional rule</em>, orders the directional claims by their posterior probability and accepts the largest set whose joint posterior probability is at least <span class="math inline">1-\alpha</span> <span class="citation" data-cites="Gelman2000 Pruzek2016">(<a href="#ref-Gelman2000" role="doc-biblioref">Gelman &amp; Tuerlinckx, 2000</a>; <a href="#ref-Pruzek2016" role="doc-biblioref">Pruzek, 2016</a>)</span>. Its output is a single one-sided statement about signs, that is “all accepted effects lie in their claimed direction”, and the quantity it bounds is the familywise probability of a sign (Type S) error. The second, hereafter the <em>simultaneous-band rule</em>, computes credible intervals with <span class="math inline">1-\alpha</span> joint coverage, meaning that with probability <span class="math inline">1-\alpha</span> every interval contains its parameter, and declares an effect whenever an interval excludes the null value <span class="citation" data-cites="Schnell2020 Schnell2016 Box1992">(<a href="#ref-Box1992" role="doc-biblioref">Box &amp; Tiao, 1992</a>; <a href="#ref-Schnell2016" role="doc-biblioref">Schnell et al., 2016</a>; <a href="#ref-Schnell2020" role="doc-biblioref">Schnell et al., 2020</a>)</span>. Since an interval that covers a truly null parameter cannot exclude it, the probability of any false declaration is at most <span class="math inline">\alpha</span>. Both procedures act on the posterior alone, whereas the proposed method combines the posterior with the prior odds, adjusted for the family of hypotheses under test.</p>
 <p>To benchmark the three procedures, we replicate the simulation described above, holding <span class="math inline">n = 50</span> and <span class="math inline">\pi_{0\text{true}} = 0.7</span> fixed while varying the family size <span class="math inline">m</span>. The prior-odds adjustment is evaluated at <span class="math inline">\pi_0 = \pi_{0\text{true}}</span>, its best-case calibration. All procedures use <span class="math inline">\alpha = 0.05</span>: the prior-odds rule claims a directional effect when the adjusted <span class="math inline">pd</span> exceeds <span class="math inline">c = 1 - \alpha/2 = 0.975</span>, the joint directional rule accepts directional claims as long as their joint posterior probability remains at least <span class="math inline">1 - \alpha = 0.95</span>, and the simultaneous-band rule declares an effect when the <span class="math inline">95\%</span> joint-coverage band excludes zero. <a href="#fig-compare" class="quarto-xref" aria-expanded="false">Figure&nbsp;6</a> reports the resulting FDR, FWER, and power for each procedure across values of <span class="math inline">m</span>.</p>
-<p>In this setting, the simultaneous-band rule is the most stringent: it keeps the FWER, and hence the FDR, below the nominal level at every <span class="math inline">m</span>, since only a proportion <span class="math inline">\pi_{0\text{true}} = 0.7</span> of the effects are truly null. The joint directional rule is the most liberal, with the FDR reaching <span class="math inline">0.22</span> and the FWER <span class="math inline">0.57</span> at the largest family sizes.</p>
+<p>In this setting, the simultaneous-band rule is the most stringent: it keeps the FWER, and hence the FDR, below the nominal level at every <span class="math inline">m</span>, since only a proportion <span class="math inline">\pi_{0\text{true}} = 0.7</span> of the effects are truly null. The joint directional rule is the most liberal, with the FDR reaching <span class="math inline">0.22</span> and the FWER rising to <span class="math inline">0.57</span> at the largest family size.</p>
 <p>The error criteria trade off power (rightmost panel of <a href="#fig-compare" class="quarto-xref" aria-expanded="false">Figure&nbsp;6</a>): the joint directional rule detects the most true effects (around <span class="math inline">0.62</span>), the prior-odds rule maintains nearly constant power across <span class="math inline">m</span> (around <span class="math inline">0.43</span>), and the simultaneous-band rule loses power as the family grows (from <span class="math inline">0.36</span> at <span class="math inline">m = 4</span> to <span class="math inline">0.18</span> at <span class="math inline">m = 20</span>). Choosing among the procedures is therefore a deliberate trade between power and the error one most wants to limit.</p>
 </section>
 </section>
@@ -724,7 +724,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-pd-ci" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="1">
+<div id="fig-pd-ci" class="quarto-float quarto-figure quarto-figure-left" data-fignum="1" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-pd-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -743,7 +743,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-uniform-pd" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="2">
+<div id="fig-uniform-pd" class="quarto-float quarto-figure quarto-figure-left" data-fignum="2" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-uniform-pd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -762,7 +762,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-prior-adj" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="3">
+<div id="fig-prior-adj" class="quarto-float quarto-figure quarto-figure-left" data-fignum="3" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-prior-adj-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -781,7 +781,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-ind-fdr-pw" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="4">
+<div id="fig-ind-fdr-pw" class="quarto-float quarto-figure quarto-figure-left" data-fignum="4" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-ind-fdr-pw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -800,7 +800,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="left" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-ind-fwer" class="quarto-float quarto-figure quarto-figure-left" prefix="" data-fig-align="left" data-fignum="5">
+<div id="fig-ind-fwer" class="quarto-float quarto-figure quarto-figure-left" data-fignum="5" prefix="" data-fig-align="left">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-ind-fwer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
@@ -819,7 +819,7 @@ Zwet, E. van, &amp; Gelman, A. (2022). A proposal for informative default priors
 </div>
 <div class="cell FigureWithoutNote" data-layout-align="center" data-custom-style="FigureWithoutNote">
 <div class="cell-output-display">
-<div id="fig-compare" class="quarto-float quarto-figure quarto-figure-center" prefix="" data-fig-align="center" data-fignum="6">
+<div id="fig-compare" class="quarto-float quarto-figure quarto-figure-center" data-fignum="6" prefix="" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="FigureTitle" data-custom-style="FigureTitle">
