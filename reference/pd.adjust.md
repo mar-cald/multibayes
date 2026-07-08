@@ -134,11 +134,8 @@ per-test Type I rates `alpha.nominal` (\\2(1-c)\\) and `alpha.eff`
 The cutoffs `threshold.adj` and `threshold.fwer` are exact
 transformations of the decision rule, but the reported per-test *rates*
 (`alpha.eff`, and the `fwer` calibration) use the identity \\\alpha =
-2(1 - c)\\, which holds **only for a diffuse within-model prior** or
-**large \\n\\** (when the null *pd* is approximately uniform on \\\[0.5,
-1\]\\). Under an informative prior the true per-test rate is smaller, so
-these rates are conservative and `threshold.fwer` controls the FWER at
-or below the stated level.
+2(1 - c)\\, which holds **only when the null *pd* is approximately
+uniform on \\\[0.5, 1\]\\**.
 
 ## Details
 
@@ -168,12 +165,6 @@ Mixed use of directional and direction-agnostic tests within the same
 call is supported: each element of `direction` is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.
-
-`pd.adjust` returns the per-test correction only (the marginal `pd` and
-its adjusted value `pd.adj`). Family-wise summaries across hypotheses,
-the cumulative joint statement and simultaneous credible intervals, are
-provided separately by
-[`joint`](https://mar-cald.github.io/multibayes/reference/joint.md).
 
 ## References
 

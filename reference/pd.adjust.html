@@ -188,11 +188,8 @@ Type I rates <code>alpha.nominal</code> (\(2(1-c)\)) and <code>alpha.eff</code>
 The cutoffs <code>threshold.adj</code> and <code>threshold.fwer</code> are exact
 transformations of the decision rule, but the reported per-test <em>rates</em>
 (<code>alpha.eff</code>, and the <code>fwer</code> calibration) use the identity
-\(\alpha = 2(1 - c)\), which holds <strong>only for a diffuse within-model prior</strong> or
-<strong>large \(n\)</strong> (when the null <em>pd</em> is approximately uniform on
-\([0.5, 1]\)). Under an informative prior the true per-test rate is
-smaller, so these rates are conservative and <code>threshold.fwer</code> controls
-the FWER at or below the stated level.</p>
+\(\alpha = 2(1 - c)\), which holds <strong>only when the null <em>pd</em> is approximately uniform on
+\([0.5, 1]\)</strong>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -221,10 +218,6 @@ of the data and the conservative prior against the hypothesis.</p>
 is supported: each element of <code>direction</code> is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.</p>
-<p><code>pd.adjust</code> returns the per-test correction only (the marginal <code>pd</code>
-and its adjusted value <code>pd.adj</code>). Family-wise summaries across hypotheses,
-the cumulative joint statement and simultaneous credible intervals, are
-provided separately by <code><a href="joint.html">joint</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -349,7 +342,7 @@ selection problem. <em>The Annals of Statistics</em>, 38(5), 2587–2619. https:
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

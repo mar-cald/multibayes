@@ -1,8 +1,9 @@
 # Family-wise summaries from joint posterior draws
 
-The **cumulative joint statement** (default), the posterior probability
-that the strongest directional claims hold simultaneously, and
-**simultaneous credible intervals** (`interval = TRUE`).
+Computes either the **joint directional statement** (the default): for
+each \\k\\, the joint posterior probability that the \\k\\ strongest
+directional claims hold simultaneously, or **simultaneous credible
+intervals** (`interval = TRUE`).
 
 ## Usage
 
@@ -26,7 +27,7 @@ joint(
 
 - interval:
 
-  Logical (default `FALSE`). If `FALSE`, return the cumulative joint
+  Logical (default `FALSE`). If `FALSE`, return the joint directional
   statement; if `TRUE`, return simultaneous credible intervals.
 
 - prob:
@@ -58,31 +59,31 @@ joint(
 
 A `data.frame`. For `interval = FALSE`, one row per parameter ordered by
 decreasing *pd*, with columns `median.est`, `null.value`, `pd`,
-`direction`, and `joint_cum` (cumulative joint probability that the
-first \\k\\ claims hold). For `interval = TRUE`, one row per parameter
-with columns `lower`, `est`, `upper`, and `prob`.
+`direction`, and `joint_cum` (the joint posterior probability that the
+\\k\\ strongest claims all hold). For `interval = TRUE`, one row per
+parameter with columns `lower`, `est`, `upper`, and `prob`.
 
 ## Details
 
-**Cumulative joint statement** (`interval = FALSE`, the default). Each
+**Joint directional statement** (`interval = FALSE`, the default). Each
 parameter's claimed direction is its dominant posterior side relative to
-`null.value` (or the side set by `direction`); parameters are ordered by
-decreasing *pd*, and `joint_cum` is the cumulative joint posterior
-probability that the strongest \\k\\ claims hold simultaneously. It is
-computed directly from the draws by intersecting the per-draw
-directional events, so it reflects the posterior dependence among
-parameters.
+`null.value` (or the side set by `direction`). Parameters are ordered by
+decreasing *pd*, and the `joint_cum` column reports, for each \\k\\, the
+joint posterior probability that the \\k\\ strongest claims hold
+simultaneously. It is computed directly from the draws by intersecting
+the per-draw directional events, so it reflects the posterior dependence
+among parameters.
 
-**Simultaneous credible intervals** (`interval = TRUE`). Equitailed
+**Simultaneous credible intervals** (`interval = TRUE`). Equi-tailed
 intervals calibrated so that **all** parameters lie within their bounds
 simultaneously with probability `prob`, via the quantile-based
 simultaneous credible band. Coverage is set by examining how extreme
 each draw is across all parameters jointly: for every draw the minimum
 (nearer) tail probability across parameters is taken, and the threshold
 is the \\(1 - \texttt{prob})\\-quantile of these minima. An effect can
-be declared when its band excludes the null value. A closely related
-implementation is `sim.cred.band` in the credsubs package (Schnell et
-al., 2020).
+be declared when a parameter's band excludes the null value. A closely
+related implementation is `sim.cred.band` in the credsubs package
+(Schnell et al., 2020).
 
 ## References
 
@@ -116,7 +117,7 @@ Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 draws <- MASS::mvrnorm(2000, mu, Sigma)
 colnames(draws) <- c("theta1", "theta2", "theta3")
 
-joint(draws)                    # cumulative joint statement (default)
+joint(draws)                    # joint directional statement (default)
 #>        median.est null.value     pd direction joint_cum
 #> theta3    -1.9596          0 0.9755 two.sided    0.9755
 #> theta1     1.5206          0 0.9405 two.sided    0.9160
