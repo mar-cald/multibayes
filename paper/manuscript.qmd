@@ -406,11 +406,11 @@ Researchers encode their expectations through $\pi_0$ or, equivalently under ind
 #| warning: false
 #| fig-align: left
 
-m  <- seq(2, 20, by = 1)
-q  <- seq(0.05, 0.5, by = 0.1)
+m <- seq(2, 20, by = 1)
+q <- seq(0.05, 0.5, by = 0.1)
 
 dd <- expand.grid(m = m, q = q)
-dd$pi      <- with(dd, q^(1/m))
+dd$pi <- with(dd, q^(1/m))
 
 shared <- list(
   theme_clean(base_size = 14),
@@ -419,9 +419,9 @@ shared <- list(
   theme(legend.position = "top", legend.margin = margin(b = 10)),
   guides(color = guide_legend(
     title.position = "top",
-    title.hjust    = 0.5,
-    nrow           = 1,
-    override.aes   = list(linewidth = 2)
+    title.hjust = 0.5,
+    nrow  = 1,
+    override.aes = list(linewidth = 2)
   )),
   labs(color = expression(Pr(H[0])), x = "m", y = "π₀")
 )
@@ -652,8 +652,8 @@ ggplot(dat, aes(m, rate, colour = Method, shape = Method)) +
   geom_line(linewidth = 2) +
   geom_point(size = 4) +
   facet_wrap(~ metric, scales = "free_y") +
-  scale_colour_manual(values = c("Prior-odds"  = "#1b9e77",
-                                 "Joint"        = "#d95f02",
+  scale_colour_manual(values = c("Prior-odds" = "#1b9e77",
+                                 "Joint" = "#d95f02",
                                  "Simultaneous intervals"  = "#7570b3")) +
   scale_x_continuous(breaks = c(4, 8, 10, 20))+
   labs(x = "Number of tests (m)", y = NULL, colour = NULL, shape = NULL) +

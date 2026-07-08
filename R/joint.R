@@ -1,4 +1,4 @@
-#' Family-wise summaries from joint posterior draws
+#' Summaries from joint posterior draws
 #'
 #' Computes either the \strong{joint directional statement} (the default): for
 #' each \eqn{k}, the joint posterior probability that the \eqn{k} strongest

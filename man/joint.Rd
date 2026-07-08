@@ -2,7 +2,7 @@
 % Please edit documentation in R/joint.R
 \name{joint}
 \alias{joint}
-\title{Family-wise summaries from joint posterior draws}
+\title{Summaries from joint posterior draws}
 \usage{
 joint(
   draws,

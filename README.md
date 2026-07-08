@@ -15,7 +15,7 @@ remotes::install_github("mar-cald/multibayes")
 | Function | Input | Correction type |
 |---|---|---|
 | `pd.adjust()` | Posterior draws or *pd* vector | Prior-odds adjustment for *pd* (per-test) |
-| `joint()` | Posterior draws | Cumulative joint statements (default) or simultaneous credible intervals (`interval = TRUE`) |
+| `joint()` | Posterior draws | Joint probability (directional) statements (default) or simultaneous credible intervals (`interval = TRUE`) |
 
 
 

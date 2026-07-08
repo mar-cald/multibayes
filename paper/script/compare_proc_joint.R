@@ -1,7 +1,7 @@
 # Per-test prior-odds procedure vs the cumulative joint statement vs simultaneous
 # credible intervals, all computed with the package functions on posterior draws:
 #   * pd.adjust(draws, pi0) -> per-test rule  pd.adj > c  (c = 1 - alpha/2)
-#   * joint(draws)-> cumulative joint, accept top-k with joint_cum >= 1 - alpha
+#   * joint(draws)-> cumulative joint, accept top-k with joint_cum > 1 - alpha
 #   * joint(draws, interval = TRUE)-> 95% simultaneous band, declare when it excludes 0
 # alpha = 0.05 throughout. Conjugate normal-normal posterior: theta_j | y ~
 # N(kappa * ybar_j, psd^2), independent across tests, from which S draws are
