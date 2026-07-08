@@ -11,7 +11,11 @@ navbar:
     - reference
     - articles
 reference:
+- title: Probability of Direction
+  contents:
     - pd.adjust
     - print.pd_adjust
+- title: Joint Posterior 
+  contents:
     - joint
 
