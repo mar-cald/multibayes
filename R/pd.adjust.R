@@ -41,11 +41,6 @@
 #' and the same prior-odds adjustment is applied uniformly across all
 #' hypotheses regardless of their directionality.
 #'
-#' \code{pd.adjust} returns the per-test correction only (the marginal \code{pd}
-#' and its adjusted value \code{pd.adj}). Family-wise summaries across hypotheses,
-#' the cumulative joint statement and simultaneous credible intervals, are
-#' provided separately by \code{\link{joint}}.
-#'
 #' @param pd Numeric vector of \emph{pd} values. For direction-agnostic tests,
 #'   values must be in \eqn{[0.5, 1]}. For directional tests, values are raw
 #'   one-sided probabilities in \eqn{[0, 1]}. Ignored if \code{draws} is
@@ -123,11 +118,8 @@
 #'   The cutoffs \code{threshold.adj} and \code{threshold.fwer} are exact
 #'   transformations of the decision rule, but the reported per-test \emph{rates}
 #'   (\code{alpha.eff}, and the \code{fwer} calibration) use the identity
-#'   \eqn{\alpha = 2(1 - c)}, which holds **only for a diffuse within-model prior** or
-#'   **large \eqn{n}** (when the null \emph{pd} is approximately uniform on
-#'   \eqn{[0.5, 1]}). Under an informative prior the true per-test rate is
-#'   smaller, so these rates are conservative and \code{threshold.fwer} controls
-#'   the FWER at or below the stated level.
+#'   \eqn{\alpha = 2(1 - c)}, which holds **only when the null \emph{pd} is approximately uniform on
+#'   \eqn{[0.5, 1]}**.
 #'
 #' @references
 #' Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A bayesian perspective on the bonferroni adjustment.

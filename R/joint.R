@@ -1,32 +1,35 @@
 #' Family-wise summaries from joint posterior draws
 #'
-#' The \strong{cumulative joint statement} (default), the posterior probability that
-#' the strongest directional claims hold simultaneously, and \strong{simultaneous
-#' credible intervals} (\code{interval = TRUE}). 
-#' 
-#' @details
-#' \strong{Cumulative joint statement} (\code{interval = FALSE}, the default).
-#' Each parameter's claimed direction is its dominant posterior side relative to
-#' \code{null.value} (or the side set by \code{direction}); parameters are
-#' ordered by decreasing \emph{pd}, and \code{joint_cum} is the cumulative joint
-#' posterior probability that the strongest \eqn{k} claims hold simultaneously.
-#' It is computed directly from the draws by intersecting the per-draw
-#' directional events, so it reflects the posterior dependence among parameters.
+#' Computes either the \strong{joint directional statement} (the default): for
+#' each \eqn{k}, the joint posterior probability that the \eqn{k} strongest
+#' directional claims hold simultaneously, or \strong{simultaneous credible
+#' intervals} (\code{interval = TRUE}).
 #'
-#' \strong{Simultaneous credible intervals} (\code{interval = TRUE}). Equitailed
+#' @details
+#' \strong{Joint directional statement} (\code{interval = FALSE}, the default).
+#' Each parameter's claimed direction is its dominant posterior side relative to
+#' \code{null.value} (or the side set by \code{direction}). Parameters are
+#' ordered by decreasing \emph{pd}, and the \code{joint_cum} column reports, for
+#' each \eqn{k}, the joint posterior probability that the \eqn{k} strongest
+#' claims hold simultaneously. It is computed directly from the draws by
+#' intersecting the per-draw directional events, so it reflects the posterior
+#' dependence among parameters.
+#'
+#' \strong{Simultaneous credible intervals} (\code{interval = TRUE}). Equi-tailed
 #' intervals calibrated so that \strong{all} parameters lie within their bounds
 #' simultaneously with probability \code{prob}, via the quantile-based
-#' simultaneous credible band. Coverage is set by examining how extreme each draw is across all parameters jointly: for every
-#' draw the minimum (nearer) tail probability across parameters is taken, and the
-#' threshold is the \eqn{(1 - \texttt{prob})}-quantile of these minima. An effect
-#' can be declared when its band excludes the null value. A closely related
+#' simultaneous credible band. Coverage is set by examining how extreme each
+#' draw is across all parameters jointly: for every draw the minimum (nearer)
+#' tail probability across parameters is taken, and the threshold is the
+#' \eqn{(1 - \texttt{prob})}-quantile of these minima. An effect can be declared
+#' when a parameter's band excludes the null value. A closely related
 #' implementation is \code{sim.cred.band} in the \pkg{credsubs} package
 #' (Schnell et al., 2020).
 #'
 #' @param draws Numeric matrix or data frame of posterior draws
 #'   (rows = draws, columns = parameters). At least 1000 rows and 2 columns.
 #' @param interval Logical (default \code{FALSE}). If \code{FALSE}, return the
-#'   cumulative joint statement; if \code{TRUE}, return simultaneous credible
+#'   joint directional statement; if \code{TRUE}, return simultaneous credible
 #'   intervals.
 #' @param prob Numeric scalar in \eqn{(0, 1)}. Joint coverage probability for the
 #'   simultaneous intervals (default \code{0.95}). Used only when
@@ -43,10 +46,10 @@
 #'
 #' @return A \code{data.frame}. For \code{interval = FALSE}, one row per
 #'   parameter ordered by decreasing \emph{pd}, with columns \code{median.est},
-#'   \code{null.value}, \code{pd}, \code{direction}, and \code{joint_cum}
-#'   (cumulative joint probability that the first \eqn{k} claims hold). For
-#'   \code{interval = TRUE}, one row per parameter with columns \code{lower},
-#'   \code{est}, \code{upper}, and \code{prob}.
+#'   \code{null.value}, \code{pd}, \code{direction}, and \code{joint_cum} (the
+#'   joint posterior probability that the \eqn{k} strongest claims all hold).
+#'   For \code{interval = TRUE}, one row per parameter with columns
+#'   \code{lower}, \code{est}, \code{upper}, and \code{prob}.
 #'
 #' @references
 #' Box, G. E. P., & Tiao, G. C. (1992). Bayesian inference in statistical
@@ -77,7 +80,7 @@
 #' draws <- MASS::mvrnorm(2000, mu, Sigma)
 #' colnames(draws) <- c("theta1", "theta2", "theta3")
 #'
-#' joint(draws)                    # cumulative joint statement (default)
+#' joint(draws)                    # joint directional statement (default)
 #' joint(draws, interval = TRUE)   # simultaneous credible intervals
 joint <- function(draws, interval = FALSE, prob = 0.95,
                   null.value = 0, direction = NULL, est.FUN = median) {
@@ -98,7 +101,7 @@ joint <- function(draws, interval = FALSE, prob = 0.95,
       "`est.FUN`: must be a function" = is.function(est.FUN)
     )
     S  <- nrow(draws)
-    # Conservative empirical CDF per draw per parameter; 
+    # Empirical CDF per draw per parameter; 
     # nearer tail per draw, most extreme across params.
     up <- t(matrixStats::colRanks(draws, ties.method = "max") / S)
     lw <- t(matrixStats::colRanks(draws, ties.method = "min") / S)
@@ -113,7 +116,7 @@ joint <- function(draws, interval = FALSE, prob = 0.95,
     ))
   }
 
-  ## ---- Cumulative joint statement ------------------------------------------
+  ## ---- joint directional statement ------------------------------------------
   nc <- ncol(draws)
   if (length(null.value) == 1L) null.value <- rep(null.value, nc)
   if (is.null(direction))       direction  <- rep("two.sided", nc)

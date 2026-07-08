@@ -179,7 +179,7 @@ load("~/multibayes/paper/script/example/mod_rt.rda")
 
 Over the past two decades, the use of Bayesian methods in psychological research has grown considerably [@Van2017; @Jevremov2024; @Pfadt2025]. This expansion has, however, been accompanied by practices reminiscent of the "null ritual" in frequentist statistics, where widespread adoption gave way to automatic application rather than principled reasoning [@Gigerenzer2004; @Cohen1994]. Researchers sometimes treat Bayes Factor thresholds (e.g., BF > 3) as dichotomous decision rules, or claim that an effect "exists" because the posterior probability of a directional effect exceeds a conventional benchmark such as 95% [@Heck2023; @Kelter2023; @Tendeiro2024; @Hoijtink2016; @Tendeiro2019; @Kruschke2018]. Such cutoffs are convenient, but they encourage all-or-none interpretations, and when these binary judgments are applied repeatedly across many parameters they generate a multiplicity problem no different in kind from the one long recognized in frequentist statistics.
 
-Frequentists developed methods to address this problem, controlling either the Family-Wise Error Rate (FWER; the probability of at least one false positive) or the False Discovery Rate (FDR; the expected proportion of false positives among rejected hypotheses) [@Benjamini1995; @Westfall1993]. These procedures address whether a spurious result enters the literature, but leave unresolved a subtler consequence of the same selection process. When researchers examine many parameters but highlight only the most extreme estimates, selection systematically inflates reported magnitudes [@Gelman2014; @Zwet2021; @Altoe2020]. Bayesian methods can mitigate this overestimation, pulling extreme estimates toward more plausible values through informative priors [@Zwet2022; @Dawid1994] and hierarchical modeling [@Gelman2012; @GelmanBook; @Kruschke2011; @Berry1999]. Magnitude bias and false-positive accumulation are, however, distinct problems. Shrinkage offers no guarantee about the error properties of a decision rule applied across many parameters: if the same cutoff is used repeatedly (e.g., declaring an effect whenever a posterior probability exceeds 95%), the probability of spurious findings can remain substantial. Bayesian responses to this issue do exist, such as simultaneous credible statements [@Gelman2000; @Pruzek2016; @Schnell2020; @Box1992] or priors over the hypothesis space that scale with the number of tests [@Scott2006; @Scott2010; @Jeffreys1938; @Westfall1997].
+Frequentists developed methods to address this problem, controlling either the Family-Wise Error Rate (FWER; the probability of at least one false positive) or the False Discovery Rate (FDR; the expected proportion of false positives among rejected hypotheses) [@Benjamini1995; @Westfall1993]. These procedures address whether a spurious result enters the literature, but leave unresolved a subtler consequence of the same selection process. When researchers examine many parameters but highlight only the most extreme estimates, selection systematically inflates reported magnitudes [@Gelman2014; @Zwet2021; @Altoe2020]. Bayesian methods can mitigate this overestimation, pulling extreme estimates toward more plausible values through informative priors [@Zwet2022; @Dawid1994] and hierarchical modeling [@Gelman2012; @GelmanBook; @Kruschke2011; @Berry1999]. Magnitude bias and false-positive accumulation are, however, distinct problems. Shrinkage offers no guarantee about the error properties of a decision rule applied across many parameters: if the same cutoff is used repeatedly (e.g., declaring an effect whenever a posterior probability exceeds 95%), the probability of spurious findings can remain substantial. Bayesian responses to this issue do exist, such as joint probability statements [@Gelman2000; @Pruzek2016; @Schnell2020; @Box1992] or priors over the hypothesis space that scale with the number of tests [@Scott2006; @Scott2010; @Jeffreys1938; @Westfall1997].
 
 Here we focus on an increasingly adopted decision rule based on the probability of direction ($pd$) [@Stone2024; @Brissenden2023; @Hochman2025; @Makowski2020; @Brissenden2024; @Ciranka2026; @Schurr2024; @Ben2022; @Bramley2022]. The $pd$ quantifies the probability that an effect lies in its dominant direction [@Makowski2019; @Shi2021]; researchers claim evidence for an effect when it exceeds a fixed threshold (e.g., $pd>0.95$, $pd>0.975$). We examine the frequentist operating characteristics^[Although frequentist and Bayesian frameworks rest on different foundations, examining the frequentist operating characteristics of a Bayesian procedure (how it behaves over repeated use) is a well-established practice [@Zhang2019; @Ventz2015; @Müller2004]. This perspective treats long-run performance as a useful diagnostic for Bayesian inference [@Rubin1984; @GelmanBook].] of such a rule, and consider how the resulting multiplicity problem can be addressed. Following the second strategy noted above, we propose a prior-odds correction for $pd$ grounded in the global null framework of @Jeffreys1938 [see also @Westfall1997] and more recent Bayesian approaches to FDR control [@Scott2006; @Scott2010; @Guo2010; @Abraham2022; @Efron2001; @Storey2003; @Storey2002]. The correction requires the researcher to specify the proportion of tested effects expected to be null.  
 
@@ -366,9 +366,11 @@ $$
 \frac{pd}{1 - pd} = \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-0} \mid y)}
 $$
 
-For a continuous posterior distribution, the probability of any single value (e.g., $\Pr(\theta = 0 \mid y)$) is 0, which means that one could write $\frac{pd}{1 - pd} = \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-} \mid y)}$. However, we retain the notation $H_{-0}$ in the denominator to explicitly indicate that the hypothesis includes the point null value of zero. Applying Bayes' rule, these posterior odds can be decomposed into a Bayes Factor and prior odds: $$
+For a continuous posterior distribution, the probability of any single value (e.g., $\Pr(\theta = 0 \mid y)$) is 0, which means that one could write $\frac{pd}{1 - pd} = \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-} \mid y)}$. However, we retain the notation $H_{-0}$ in the denominator to explicitly indicate that the hypothesis includes the point null value of zero. Applying Bayes' rule, these posterior odds can be decomposed into a Bayes Factor and prior odds: 
+$$
 \frac{\Pr(H_{+} \mid y)}{\Pr(H_{-0} \mid y)} = \text{BF}_{+/-0} \times \frac{\Pr(H_{+})}{\Pr(H_{-0})}
-$$ where $\text{BF}_{+/-0}$ quantifies the relative likelihood of the data under $H_{+}$ versus $H_{-0}$. Under prior symmetry, $\frac{\Pr(H_{+})}{\Pr(H_{-0})} = 1$, which yields $\frac{pd}{1 - pd} = \text{BF}_{+/-0}$ [@Marsman2017]. Thus, the odds $\frac{pd}{1 - pd}$ computed from posterior draws can be interpreted directly as evidence favoring $\theta > 0$ over $\theta \le 0$ (or $\theta < 0$ over $\theta \ge 0$).
+$$ 
+where $\text{BF}_{+/-0}$ quantifies the relative likelihood of the data under $H_{+}$ versus $H_{-0}$. Under prior symmetry, $\frac{\Pr(H_{+})}{\Pr(H_{-0})} = 1$, which yields $\frac{pd}{1 - pd} = \text{BF}_{+/-0}$ [@Marsman2017]. Thus, the odds $\frac{pd}{1 - pd}$ computed from posterior draws can be interpreted directly as evidence favoring $\theta > 0$ over $\theta \le 0$ (or $\theta < 0$ over $\theta \ge 0$).
 
 ## Multiplicity adjustment via prior odds
 
@@ -466,33 +468,33 @@ A boundary condition arises when the specified $\pi_0$ falls below $0.5$ (which,
 
 ## Error rates under the prior-odds adjustment
 
-For a family of $m$ such tests, let $R$ denote the total number of rejections and $V$ the number of false rejections (true nulls that are rejected). The target error rate is the False Discovery Rate (FDR),
+For a family of $m$ such tests, let $R$ denote the total number of rejections and $V$ the number of false rejections (rejected true nulls). The target error rate is the False Discovery Rate (FDR),
 $$
 \mathrm{FDR} = \mathbb{E}\!\left[\frac{V}{\max(R, 1)}\right],
 $$
-where $\max(R, 1)$ sets the ratio to zero when no hypothesis is rejected [@Benjamini1995]. The FDR decomposes as the product of the positive False Discovery Rate [pFDR, @Storey2003] and the probability of making any rejection, $\mathrm{FDR} = \mathrm{pFDR} \times \Pr(R > 0)$. For a single test with prior null probability $\pi_0$, the pFDR can be written as
+where the $\max(R, 1)$ sets the ratio to zero when no hypothesis is rejected [@Benjamini1995]. The FDR factorizes as the product of the positive False Discovery Rate [pFDR, @Storey2003] and the probability of at least one rejection, $\mathrm{FDR} = \mathrm{pFDR} \times \Pr(R > 0)$. For a single test with prior null probability $\pi_0$,
 $$
 \mathrm{pFDR} = \frac{\pi_0\,\alpha}{\pi_0\,\alpha + (1 - \pi_0)(1 - \beta)},
 $$
-where $\alpha$ and $1 - \beta$ are the per-test Type I error rate and power [@Storey2003; @berger2023]. The pFDR is increasing in $\alpha$, so lowering the per-test error rate lowers the pFDR and, with it, the FDR.
-
-The proposed correction acts on exactly these two quantities: it fixes $\pi_0$ through the researcher's prior and implicitly reduces $\alpha$ by raising the decision threshold. To see this, we can write the adjusted rule $pd_{\mathrm{adj},i} > c$ in odds form and substitute the adjusted odds,
+where $\alpha$ is the per-test Type I error rate and $1 - \beta$ the power [@Storey2003; @berger2023]. The proposed correction fixes $\pi_0$ at the researcher's prior and, as we now show, implicitly reduces $\alpha$ by tightening the decision threshold. Writing the adjusted rule $pd_{\mathrm{adj},i} > c$ in odds form and substituting the adjusted odds,
 $$
-\frac{pd_{\mathrm{adj},i}}{1 - pd_{\mathrm{adj},i}} = \frac{pd_i}{1 - pd_i} \cdot \frac{1 - \pi_0}{\pi_0}.
+\frac{pd_{\mathrm{adj},i}}{1 - pd_{\mathrm{adj},i}} = \frac{pd_i}{1 - pd_i} \times \frac{1 - \pi_0}{\pi_0},
 $$
-The rule reduces to a condition on the unadjusted odds,
+the rule becomes a condition on the unadjusted odds,
 $$
-\frac{pd_i}{1 - pd_i} > \frac{c}{1 - c} \cdot \frac{\pi_0}{1 - \pi_0},
+\frac{pd_i}{1 - pd_i} > \frac{c}{1 - c} \times \frac{\pi_0}{1 - \pi_0},
 $$
-which, on the probability scale, is a stricter threshold on the raw $pd_i$,
+or, on the probability scale, a stricter threshold on the raw $pd_i$:
 $$
 pd_i > c^*, \qquad c^* = \frac{c\,\pi_0}{(1 - c)(1 - \pi_0) + c\,\pi_0},
 $$
-with $c^* > c$ whenever $\pi_0 > 0.5$. A stricter threshold lowers the per-test probability of rejecting a true null. This rate equals $\alpha^* = 2(1 - c^*)$ when the null distribution of $pd$ is approximately uniform on $[0.5, 1]$ (diffuse within-model prior or large $n$), and is smaller under an informative prior, which shrinks the posterior toward the null. Since $\alpha^* < \alpha$, the adjustment reduces the pFDR, and hence the FDR, relative to the unadjusted rule.^[The adjustment targets the FDR, not the FWER (the probability of at least one false positive). A test produces a false positive only when it is both null and rejected, with probability $\pi_0\,\alpha^*$, so across $m$ independent tests $\mathrm{FWER} = 1 - (1 - \pi_0\,\alpha^*)^{m}$. Controlling it at a target $\alpha$ gives $\alpha^* = \frac{1 - (1 - \alpha)^{1/m}}{\pi_0}$. Because the two-sided rule $pd > c$ has per-test Type I rate $\alpha^* = 2(1 - c)$ (the convention $c = 1 - \alpha/2$ used throughout), inverting this relation turns the family-wise correction into a single cutoff on the raw $pd$, $c_{\mathrm{fwer}} = 1 - \alpha^*/2 = 1 - \tfrac{1 - (1 - \alpha)^{1/m}}{2\,\pi_0}$. This uses the same identity $\alpha^* = 2(1-c)$, so it likewise assumes a diffuse prior or large $n$ and independent tests; an informative prior lowers the per-test rate and makes $c_{\mathrm{fwer}}$ conservative, controlling the FWER at or below the target.] 
+with $c^* > c$ whenever $\pi_0 > 0.5$. Since $c^*$ is increasing in $\pi_0$, the decision threshold is tied directly to the prior probability of the null. The more plausible the null is held to be a priori, the stronger the posterior evidence required to claim a directional effect [@Benjamin2017]. 
+
+When the null distribution of $pd$ is approximately uniform on $[0.5, 1]$ (diffuse within-model prior or large $n$), the per-test probability of error is $\alpha^* = 2(1 - c^*)$; under an informative skeptical prior, which shrinks the posterior toward the null, this rate is even smaller. 
 
 ### Simulation Study
 
-We conducted a fully crossed simulation study, with 10,000 replications per cell, to examine the adjustment under both correctly specified and misspecified priors. We varied the per-test null prior supplied to the procedure, $\pi_0 \in \{0.50, 0.6, \dots, 0.9\}$; the true probability that each hypothesis is null, $\pi_{0\text{true}} \in \{0.5, 0.6, \dots, 1.0\}$; the family size $m \in \{4, 8, 10, 20\}$; and the sample size $n \in \{30, 50, 100\}$. At each replication the number of true null effects ($\theta_i = 0$) was drawn from $\mathrm{Binomial}(m, \pi_{0\text{true}})$ and the remaining effects set to $\theta_i = 0.3$; observations were generated as $y_i \sim \mathcal{N}(\theta_i, 1)$, and the posterior obtained from a conjugate normal--normal model with $y_i \mid \theta \sim \mathcal{N}(\theta, 1)$ and prior $\theta \sim \mathcal{N}(0, 2)$. We declared support for the alternative when $pd > 0.975$ and evaluated the FDR, the FWER, and average power, the proportion of true effects detected [@Benjamini1995; @Grant2025]. The diagonal $\pi_0 = \pi_{0\text{true}}$ corresponds to a correctly specified prior.
+We conducted a fully crossed simulation study, with 10,000 replications per cell, to examine the adjustment under both correctly specified and misspecified priors ($\pi_0$). We varied the per-test null prior supplied to the procedure, $\pi_0 \in \{0.50, 0.6, \dots, 0.9\}$; the true probability that each hypothesis is null, $\pi_{0\text{true}} \in \{0.5, 0.6, \dots, 1.0\}$; the family size $m \in \{4, 8, 10, 20\}$; and the sample size $n \in \{30, 50, 100\}$. At each replication the number of true null effects ($\theta_i = 0$) was drawn from $\mathrm{Binomial}(m, \pi_{0\text{true}})$ and the remaining effects set to $\theta_i = 0.3$; observations were generated as $y_i \sim \mathcal{N}(\theta_i, 1)$, and the posterior obtained from a conjugate normal--normal model with $y_i \mid \theta \sim \mathcal{N}(\theta, 1)$ and prior $\theta \sim \mathcal{N}(0, 2)$. We declared support for the alternative when $pd > 0.975$ and evaluated the FDR, the FWER, and average power, the proportion of true effects detected [@Benjamini1995; @Grant2025]. The diagonal $\pi_0 = \pi_{0\text{true}}$ corresponds to a correctly specified prior.
 
 @fig-ind-fdr-pw shows the FDR resulting from our procedure across the  grid. The column $\pi_0 = 0.5$ is the unadjusted rule: there the prior odds are one, no correction is applied ($pd_{\mathrm{adj}} = pd$), and the FDR inflates with the family size $m$ and the true null proportion $\pi_{0\text{true}}$, reaching $0.64$ when the family is large and most effects are null. Increasing $\pi_0$ brings the FDR under control: it is held low whenever the specified $\pi_0$ is at least the true proportion, and inflates only under substantial underestimation, when a small $\pi_0$ is paired with a large $\pi_{0\text{true}}$ at large $m$. This control trades off power, which decreases as $\pi_0$ increases; because average power does not vary with $m$ (for fixed $\pi_{0\text{true}}$ and $\pi_0$), we display $m = 20$ as a representative condition (@fig-ind-fdr-pw).
 
@@ -608,20 +610,19 @@ df_pi0 |>
 
 ### Comparison with other Bayesian methods
 
-Two further Bayesian methods have been proposed to address multiplicity, differing in the error they aim to control. The first works with directional posterior probabilities: it accepts the $k$ strongest claims whose joint posterior probability is at least $1-\alpha$ [@Gelman2000; @Pruzek2016], thereby bounding the familywise probability of a sign (Type S) error. The second uses simultaneous credible intervals, declaring an effect whenever its $1-\alpha$ simultaneous band excludes the null value [@Schnell2020; @Schnell2016; @Box1992]; this is a two-sided criterion and controls the Type I error instead. Both summaries act on the posterior alone, whereas our method uses both the posterior and the prior odds, with the latter adjusted for the family of hypotheses under test.
+We compare the proposed method with two Bayesian alternatives that differ both in the form of the claim they license and in the error they aim to control. The first, hereafter the *joint directional rule*, orders the directional claims by their posterior probability and accepts the largest set whose joint posterior probability is at least $1-\alpha$ [@Gelman2000; @Pruzek2016]. Its output is a single one-sided statement about signs, that is "all accepted effects lie in their claimed direction", and the quantity it bounds is the familywise probability of a sign (Type S) error. The second, hereafter the *simultaneous-band rule*, computes credible intervals with $1-\alpha$ joint coverage, meaning that with probability $1-\alpha$ every interval contains its parameter, and declares an effect whenever an interval excludes the null value [@Schnell2020; @Schnell2016; @Box1992]. Since an interval that covers a truly null parameter cannot exclude it, the probability of any false declaration is at most $\alpha$. Both procedures act on the posterior alone, whereas the proposed method combines the posterior with the prior odds, adjusted for the family of hypotheses under test.
 
-To benchmark all three approaches, we replicate the simulation described above with $n = 50$ and $\pi_{0\text{true}} = 0.7$ held fixed, and vary the family size $m$; the prior-odds adjustment is evaluated at $\pi_0 = \pi_{0\text{true}}$, representing best-case calibration. All three rules are evaluated at $\alpha = 0.05$: the per-test rule rejects when the adjusted $pd$ exceeds $c = 1 - \alpha/2 = 0.975$, the cumulative joint accepts the strongest claims while their joint probability is at least $1 - \alpha = 0.95$, and the simultaneous bands have $95\%$ joint coverage. @fig-compare displays the resulting FDR, FWER, and power for each rule across values of $m$.
+To benchmark the three procedures, we replicate the simulation described above, holding $n = 50$ and $\pi_{0\text{true}} = 0.7$ fixed while varying the family size $m$. The prior-odds adjustment is evaluated at $\pi_0 = \pi_{0\text{true}}$, its best-case calibration. All procedures use $\alpha = 0.05$: the prior-odds rule claims a directional effect when the adjusted $pd$ exceeds $c = 1 - \alpha/2 = 0.975$, the joint directional rule accepts directional claims as long as their joint posterior probability remains at least $1 - \alpha = 0.95$, and the simultaneous-band rule declares an effect when the $95\%$ joint-coverage band excludes zero. @fig-compare reports the resulting FDR, FWER, and power for each procedure across values of $m$.
 
+In this setting, the simultaneous-band rule is the most stringent: it keeps the FWER, and hence the FDR, below the nominal level at every $m$, since only a proportion $\pi_{0\text{true}} = 0.7$ of the effects are truly null. The joint directional rule is the most liberal, with the FDR reaching $0.22$ and the FWER $0.57$ at the largest family sizes. 
 
-Under this setting, the simultaneous intervals are the strictest, controlling the FWER (and hence the FDR) below the nominal level throughout (as $\pi_{0\text{true}} = 0.7$, and not 1). The cumulative joint statement is the least restrictive, with the FDR reaching $0.22$, and FWER $0.57$. This is expected, because the cumulative joint is a sign-error (Type S) statement, thus it controls the family-wise probability of a wrong direction, which is less restrictive compared to Type I error control.
-
-These choices trade off against power (rightmost panel): the cumulative joint detects the most true effects (around $0.62$), the prior-odds procedure's power is essentially constant in $m$ (around $0.43$), and the strict simultaneous intervals lose power as the family grows (from $0.36$ at $m = 4$ to $0.18$ at $m = 20$). The choice among them is thus a deliberate trade between power and the error one most wants to limit.
+The error criteria trade off directly power (rightmost panel of @fig-compare): the joint directional rule detects the most true effects (around $0.62$), the prior-odds rule maintains nearly constant power across $m$ (around $0.43$), and the simultaneous-band rule loses power as the family grows (from $0.36$ at $m = 4$ to $0.18$ at $m = 20$). Choosing among the procedures is therefore a deliberate trade between power and the error one most wants to limit. 
 
 ```{r}
 #| label: fig-compare
 #| dev: cairo_pdf
 #| fig-cap: >
-#|   False Discovery Rate (FDR), Family-Wise Error Rate (FWER) and average power of three Bayesian rules as a function of the number of tests $m$, all at $\alpha = 0.05$: the prior-odds procedure (adjusted $pd > 0.975$, $\pi_0 = 0.7$), the cumulative joint statement (strongest claims accepted while their joint probability is at least $0.95$), and simultaneous credible intervals ($95\%$ band excluding zero). Sample size $n = 50$; 10,000 replications per cell.
+#|   False Discovery Rate (FDR), Family-Wise Error Rate (FWER) and average power of three Bayesian rules as a function of the number of tests $m$, all at $\alpha = 0.05$: the prior-odds procedure (adjusted $pd > 0.975$, $\pi_0 = 0.7$), joint statements (strongest directional claims accepted while their joint probability is at least $0.95$), and simultaneous credible intervals ($95\%$ band excluding zero). Sample size $n = 50$; 10,000 replications per cell.
 #| fig-width: 16
 #| fig-height: 5.2
 #| echo: false
@@ -637,10 +638,10 @@ dat <- df_compare |>
                       values_to = "rate") |>
   dplyr::mutate(
     Method = dplyr::recode(Method, procedure = "Prior-odds",
-                           joint = "Cumulative joint",
+                           joint = "Joint",
                            simultaneous = "Simultaneous intervals"),
     Method = factor(Method, levels = c("Prior-odds",
-                                       "Cumulative joint", "Simultaneous intervals")),
+                                       "Joint", "Simultaneous intervals")),
     metric = factor(metric, levels = c("FDR", "FWER", "power"),
                     labels = c("FDR", "FWER", "power")))
 
@@ -653,7 +654,7 @@ ggplot(dat, aes(m, rate, colour = Method, shape = Method)) +
   geom_point(size = 4) +
   facet_wrap(~ metric, scales = "free_y") +
   scale_colour_manual(values = c("Prior-odds"  = "#1b9e77",
-                                 "Cumulative joint"        = "#d95f02",
+                                 "Joint"        = "#d95f02",
                                  "Simultaneous intervals"  = "#7570b3")) +
   scale_x_continuous(breaks = c(4, 8, 10, 20))+
   labs(x = "Number of tests (m)", y = NULL, colour = NULL, shape = NULL) +
@@ -664,7 +665,7 @@ ggplot(dat, aes(m, rate, colour = Method, shape = Method)) +
 
 # Application: worked example with the R Package `multibayes`
 
-The procedure is implemented in the `multibayes` R package, which provides functions for computing adjusted $pd$ values from either raw posterior draws or a vector of unadjusted $pd$ values. The core function, `pd.adjust()`, accepts posterior draws directly and computes $pd$ values internally when needed. The prior is supplied in either of two ways: directly as the per-test null prior $\pi_0$, or as the global-null prior $\Pr(H_0)$, from which $\pi_0 = \Pr(H_0)^{1/m}$ is recovered under independence. The output includes the adjusted $pd$ values, the tested null value, the per-test null probability $\pi_0$, and the number of tests $m$. Unadjusted $pd$ values are retained alongside adjusted ones to facilitate direct comparison; when posterior draws are provided as input, the posterior median for each parameter is also returned. `pd.adjust()` returns the per-test correction, and `order = TRUE` sorts the hypotheses by strength of evidence. Family-wise summaries across hypotheses—the cumulative joint statement and simultaneous credible intervals—are provided separately by the companion function `joint()`. The decision threshold may be given either as a $pd$ cutoff $c$ (argument `threshold`, default $0.975$) or, equivalently, as a nominal per-test rate (argument `alpha`, with $c = 1 - \alpha/2$); in either case the function reports the implied adjusted cutoff $c^*$ on the raw $pd$, which summarizes what the chosen $\pi_0$ implies.
+The procedure is implemented in the `multibayes` R package, which provides functions for computing adjusted $pd$ values from either raw posterior draws or a vector of unadjusted $pd$ values. The core function, `pd.adjust()`, accepts posterior draws directly and computes $pd$ values internally when needed. The prior is supplied in either of two ways: directly as the per-test null prior $\pi_0$, or as the global-null prior $\Pr(H_0)$, from which $\pi_0 = \Pr(H_0)^{1/m}$ is recovered under independence. The output includes the adjusted $pd$ values, the tested null value, the per-test null probability $\pi_0$, and the number of tests $m$. Unadjusted $pd$ values are retained alongside adjusted ones to facilitate direct comparison; when posterior draws are provided as input, the posterior median for each parameter is also returned. `pd.adjust()` returns the per-test correction, and `order = TRUE` sorts the hypotheses by strength of evidence. The decision threshold may be given either as a $pd$ cutoff $c$ (argument `threshold`, default $0.975$) or, equivalently, as a nominal per-test rate (argument `alpha`, with $c = 1 - \alpha/2$); in either case the function reports the implied adjusted cutoff $c^*$ on the raw $pd$, which summarizes what the chosen $\pi_0$ implies.
 
 For this example, we use the openly available dataset from @Lin2020, who investigated the effect of ego depletion on conflict resolution across four studies. In their paradigm, an initial high-demand (vs. low-demand) task was followed by a Stroop task. For simplicity, we focus on Study 1, which tested the effects of congruency and ego depletion (within subjects). The dataset is readily accessible via the `afex` package [@Singmann2016] and was chosen for this reason; this example is not intended as a critique of the original work. This dataset includes data from 253 participants; for this example, we randomly selected 80 participants.
 
@@ -740,21 +741,21 @@ The function was called with a per-test null prior of $\pi_0 = 0.7$ (shown in th
 
 The adjustment's effect varies with the strength of the underlying evidence. The predictor `b_congruency1` carries $pd = 1$ and is left untouched ($pd_\text{adj} = 1$). Terms with lower but still substantial evidence are pulled down only mildly: `b_prev_cong1` ($0.980 \to 0.955$), `b_trial` ($0.937 \to 0.864$), `b_congruency1:prev_cong1` ($0.958 \to 0.908$), `b_congruency1:condition1` ($0.929 \to 0.849$), and `b_trial:condition1` ($0.894 \to 0.783$). In contrast, parameters with weak evidence are shrunk substantially toward $0.5$: `b_condition1` ($0.651 \to 0.500$), `b_congruency1:trial` ($0.721 \to 0.525$), and the three-way interaction `b_congruency1:trial:condition1` ($0.596 \to 0.500$).
 
-The family-wise picture is obtained separately with `joint()`, which by default computes the cumulative joint probabilities:
+A companion function, `joint()`, computes by default the joint posterior probability of the $k$ strongest directional claims, for each $k$:
 
 ```{r, echo=TRUE}
 joint(draws_rt, null.value = 0)
 ```
 
-With the rows sorted by decreasing $pd$, the `joint_cum` column reports the cumulative joint posterior probability that the strongest $k$ directional claims hold simultaneously, the posterior probability that every claimed direction is correct at once. A high value therefore licenses accepting that whole set of claims together. Here the two strongest hold jointly with probability $0.98$ and the three strongest with $0.94$, after which the joint confidence lowers as weaker claims are added, indicating how many of the leading effects can be reported as a jointly supported set.
+The rows are sorted by decreasing $pd$, and the `joint_cum` column reports the posterior probability that the top $k$ claims hold simultaneously; a high value supports accepting that set of claims as a whole. Here the two strongest claims hold jointly with probability $0.98$ and the three strongest with $0.94$; the joint probability then declines as weaker claims are added, indicating how many of the leading effects can be reported as a jointly supported set.
 
-Simultaneous equi-tailed credible intervals are obtained with `joint(interval = TRUE)`:
+Setting `interval = TRUE` returns simultaneous equi-tailed credible intervals instead:
 
 ```{r, echo=TRUE}
 joint(draws_rt, interval = TRUE)
 ```
 
-Under this strictest criterion only `b_congruency1` excludes zero (simultaneous band $[-0.19, -0.10]$), consistent with the ordering of the three rules shown in @fig-compare.
+Under this stricter criterion, only `b_congruency1` excludes zero (simultaneous band $[-0.19, -0.10]$).
 
 # Discussion
 
@@ -764,7 +765,7 @@ Related corrections have been implemented for specific testing contexts, such as
 
 We further recommend that researchers justify their choice of $\pi_0$, the prior proportion of effects expected to be null, by drawing on theory, expert elicitation, or domain expertise [@Hagan2019]. More generally, a high prior probability suits exploratory settings with many uncertain hypotheses, while a lower value is warranted in confirmatory settings. For applied reporting, the unadjusted $pd$ should accompany one multiplicity-adjusted measure, with the number of tests and $\pi_0$ clearly stated.
 
-Although our approach derives from the Bayesian FDR literature, it differs from it in a fundamental respect. There, $\pi_0$ itself carries a prior distribution and is typically estimated from the data; here, it is specified by the user. The good frequentist properties of our procedure therefore hold only when the user-specified $\pi_0$ is approximately correct. A researcher may instead deliberately adopt a more skeptical prior, tightening control of Type I error at the cost of higher Type II error; the optimal value depends on the relative costs of the two.
+Although our approach derives from the Bayesian FDR literature [@Stephens2017], it differs from it in a fundamental respect. There, $\pi_0$ itself carries a prior distribution and is typically estimated from the data; here, it is specified by the user. The good frequentist properties of our procedure therefore hold only when the user-specified $\pi_0$ is approximately correct. A researcher may instead deliberately adopt a more skeptical prior, tightening control of Type I error at the cost of higher Type II error; the optimal value depends on the relative costs of the two.
 
 Two limitations of the present framework warrant attention. First, the procedure assumes that all hypotheses are exchangeable. Exchangeability means each hypothesis receives the same prior penalty, even when some effects are regarded as more plausible a priori than others. Because the penalty shrinks weak evidence far more than strong evidence, genuine effects with strong support still survive; the price of a uniform proportion is therefore a modest loss of power on hypotheses one believes more likely to be true, rather than a loss of error control, which is preserved as long as the specified proportion is reasonable. Accommodating differential prior plausibility would require specifying and calibrating a separate $\pi_0$ for each test, with the realized error rate then governed by every individual value rather than by the family average. 
 

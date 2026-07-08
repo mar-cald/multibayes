@@ -105,11 +105,8 @@ Type I rates \code{alpha.nominal} (\eqn{2(1-c)}) and \code{alpha.eff}
 The cutoffs \code{threshold.adj} and \code{threshold.fwer} are exact
 transformations of the decision rule, but the reported per-test \emph{rates}
 (\code{alpha.eff}, and the \code{fwer} calibration) use the identity
-\eqn{\alpha = 2(1 - c)}, which holds \strong{only for a diffuse within-model prior} or
-\strong{large \eqn{n}} (when the null \emph{pd} is approximately uniform on
-\eqn{[0.5, 1]}). Under an informative prior the true per-test rate is
-smaller, so these rates are conservative and \code{threshold.fwer} controls
-the FWER at or below the stated level.
+\eqn{\alpha = 2(1 - c)}, which holds \strong{only when the null \emph{pd} is approximately uniform on
+\eqn{[0.5, 1]}}.
 }
 \description{
 The function accepts either a vector of pre-computed \emph{pd} values or
@@ -152,11 +149,6 @@ Mixed use of directional and direction-agnostic tests within the same call
 is supported: each element of \code{direction} is handled independently,
 and the same prior-odds adjustment is applied uniformly across all
 hypotheses regardless of their directionality.
-
-\code{pd.adjust} returns the per-test correction only (the marginal \code{pd}
-and its adjusted value \code{pd.adj}). Family-wise summaries across hypotheses,
-the cumulative joint statement and simultaneous credible intervals, are
-provided separately by \code{\link{joint}}.
 }
 \examples{
 # From a vector of pd values
