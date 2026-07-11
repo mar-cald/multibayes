@@ -15,14 +15,14 @@ Source:
 
 Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026). A Prior-Odds
 Adjustment for the Probability of Direction in Multiple Testing.
-Preprint. osf.io/preprints/psyarxiv/8zwx2_v1
+Preprint. osf.io/preprints/psyarxiv/8zwx2_v2
 
     @Unpublished{,
       title = {A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing},
       author = {Margherita Calderan and Filippo Gambarota and Livio Finos and Gianmarco Altoè},
       year = {2026},
       note = {Preprint},
-      url = {osf.io/preprints/psyarxiv/8zwx2_v1},
+      url = {osf.io/preprints/psyarxiv/8zwx2_v2},
     }
 
 Calderan, M., & Gambarota, F. (2026). multibayes: Bayesian Multiplicity
