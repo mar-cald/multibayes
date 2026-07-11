@@ -1,8 +1,7 @@
 # A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing
 
-Margherita Calderan, Filippo Gambarota, Livio Finos, & Gianmarco Altoè (2026). **Preprint** — not yet peer-reviewed.
-
-This folder contains the manuscript source and everything needed to reproduce its simulations, figures, and worked example. The accompanying R package **multibayes** lives at the [repository root](../README.md) (docs: <https://mar-cald.github.io/multibayes/>).
+This repository contains the manuscript source and everything needed to reproduce its simulations, figures, and worked example. 
+The accompanying R package **multibayes** lives at the github repo - [multibayes](https://mar-cald.github.io/multibayes/).
 
 ## Contents
 
@@ -10,7 +9,7 @@ This folder contains the manuscript source and everything needed to reproduce it
 |---|---|
 | `manuscript.qmd` | Manuscript source (Quarto, [apaquarto](https://github.com/wjschne/apaquarto) format) |
 | `manuscript.pdf` / `manuscript.html` | Rendered outputs |
-| `bibliography.bib` | References (only entries cited in the manuscript) |
+| `bibliography.bib` | References |
 | `apa.csl` | APA citation style |
 | `_extensions/wjschne/` | apaquarto Quarto extension |
 | `script/simulation.R` | Main simulation study (misspecification grid) → `script/output/sim_pi0.rda` |
@@ -35,9 +34,9 @@ remotes::install_github("mar-cald/multibayes")   # or devtools::install() from t
 
 ```sh
 cd multibayes
-Rscript paper/script/simulation.R           # seed 150595; heavy (10,000 reps × full grid; uses furrr)
+Rscript paper/script/simulation.R           
 Rscript paper/script/results.R              # turns sim_pi0.rda into df_pi0.rda
-Rscript paper/script/compare_proc_joint.R   # seed 2026; ~7 min (4,000 posterior draws × 10,000 reps)
+Rscript paper/script/compare_proc_joint.R   
 ```
 
 Rendering the manuscript does **not** require re-running the simulations.
@@ -47,12 +46,11 @@ Rendering the manuscript does **not** require re-running the simulations.
 **4. Render the manuscript** (requires [Quarto](https://quarto.org) and a LaTeX distribution for the PDF):
 
 ```sh
-quarto render paper/manuscript.qmd
+quarto render paper/manuscript.qmd --to all
 ```
 
-Both `apaquarto-pdf` and `apaquarto-html` formats are produced.
+`apaquarto-pdf`, `apaquarto-html` and `apaquarto-docx` formats are produced.
 
-> **Note.** The manuscript's setup chunk loads the `.rda` files via `~/multibayes/...` paths, i.e. it assumes the repository is cloned at `~/multibayes`. If yours lives elsewhere, adjust the three `load()` calls in the setup chunk.
 
 ### R packages used
 

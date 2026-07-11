@@ -355,11 +355,10 @@ display: none;
 <div id="a-prior-odds-adjustment-for-the-probability-of-direction-in-multiple-testing" class="section level1">
 <h1>A Prior-Odds Adjustment for the Probability of Direction in Multiple
 Testing</h1>
-<p>Margherita Calderan, Filippo Gambarota, Livio Finos, &amp; Gianmarco
-Altoè (2026). <strong>Preprint</strong> — not yet peer-reviewed.</p>
-<p>This folder contains the manuscript source and everything needed to
-reproduce its simulations, figures, and worked example. The accompanying
-R package <strong>multibayes</strong> lives at the <a href="../README.md">repository root</a> (docs: <a href="https://mar-cald.github.io/multibayes/" class="uri">https://mar-cald.github.io/multibayes/</a>).</p>
+<p>This repository contains the manuscript source and everything needed
+to reproduce its simulations, figures, and worked example. The
+accompanying R package <strong>multibayes</strong> lives at the <a href="https://mar-cald.github.io/multibayes/">github repo -
+multibayes</a>.</p>
 <div id="contents" class="section level2">
 <h2>Contents</h2>
 <table>
@@ -446,9 +445,9 @@ remotes::install_github(&quot;mar-cald/multibayes&quot;)   # or devtools::instal
 <p><strong>2. Run the scripts from the repository root</strong> (all
 paths inside them are root-relative):</p>
 <pre class="sh"><code>cd multibayes
-Rscript paper/script/simulation.R           # seed 150595; heavy (10,000 reps × full grid; uses furrr)
+Rscript paper/script/simulation.R           
 Rscript paper/script/results.R              # turns sim_pi0.rda into df_pi0.rda
-Rscript paper/script/compare_proc_joint.R   # seed 2026; ~7 min (4,000 posterior draws × 10,000 reps)</code></pre>
+Rscript paper/script/compare_proc_joint.R   </code></pre>
 <p>Rendering the manuscript does <strong>not</strong> require re-running
 the simulations.</p>
 <p><strong>3. Worked example (optional refit).</strong>
@@ -458,16 +457,9 @@ paper. Re-running <code>example-analysis.r</code> refits it with
 80 participants.</p>
 <p><strong>4. Render the manuscript</strong> (requires <a href="https://quarto.org">Quarto</a> and a LaTeX distribution for the
 PDF):</p>
-<pre class="sh"><code>quarto render paper/manuscript.qmd</code></pre>
+<pre class="sh"><code>quarto render paper/manuscript.qmd --to all</code></pre>
 <p>Both <code>apaquarto-pdf</code> and <code>apaquarto-html</code>
 formats are produced.</p>
-<blockquote>
-<p><strong>Note.</strong> The manuscript’s setup chunk loads the
-<code>.rda</code> files via <code>~/multibayes/...</code> paths, i.e. it
-assumes the repository is cloned at <code>~/multibayes</code>. If yours
-lives elsewhere, adjust the three <code>load()</code> calls in the setup
-chunk.</p>
-</blockquote>
 <div id="r-packages-used" class="section level3">
 <h3>R packages used</h3>
 <ul>

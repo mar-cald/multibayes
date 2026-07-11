@@ -1,11 +1,9 @@
-# Per-test prior-odds procedure vs the cumulative joint statement vs simultaneous
+# Per-test prior-odds procedure vs the joint statement vs simultaneous
 # credible intervals, all computed with the package functions on posterior draws:
 #   * pd.adjust(draws, pi0) -> per-test rule  pd.adj > c  (c = 1 - alpha/2)
 #   * joint(draws)-> cumulative joint, accept top-k with joint_cum > 1 - alpha
 #   * joint(draws, interval = TRUE)-> 95% simultaneous band, declare when it excludes 0
-# alpha = 0.05 throughout. Conjugate normal-normal posterior: theta_j | y ~
-# N(kappa * ybar_j, psd^2), independent across tests, from which S draws are
-# simulated per replication. Output saved to paper/script/output/df_compare.rda.
+# alpha = 0.05 throughout. Output saved to paper/script/output/df_compare.rda.
 
 set.seed(2026)
 
@@ -38,17 +36,17 @@ one_rep <- function(m) {
   colnames(draws) <- paste0("H", seq_len(m))
   names(is_null)  <- colnames(draws)
 
-  # (1) per-test prior-odds procedure (input order preserved)
+  # (1) per-test prior-odds procedure 
   adj <- suppressWarnings(pd.adjust(draws = draws, pi0 = pi0, null.value = 0))
   rej_p <- setNames(adj$pd.adj > c, rownames(adj))
 
-  # (2) cumulative joint statement: top-k rows with joint_cum >= jlev
+  # (2) joint statement: top-k rows with joint_cum >= jlev
   jc <- joint(draws, null.value = 0)
   k <- sum(jc$joint_cum >= jlev)
   rej_j <- setNames(logical(m), colnames(draws))
   if (k > 0) rej_j[rownames(jc)[seq_len(k)]] <- TRUE
 
-  # (3) simultaneous credible intervals: declare when the 95% band excludes 0
+  # (3) simultaneous credible intervals
   bd <- joint(draws, interval = TRUE, prob = jlev)
   rej_s <- setNames(bd$lower > 0 | bd$upper < 0, rownames(bd))
 

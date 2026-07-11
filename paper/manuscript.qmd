@@ -8,7 +8,6 @@ author:
     email: margherita.calderan@unipd.it
     roles:
        - conceptualization
-       - formal analysis
        - methodology
        - software
        - visualization
@@ -23,11 +22,6 @@ author:
         postal-code: 35131
       - name: University of Padova
         department: Department of General Psychology
-        address: Via Venezia 8
-        city: Padova
-        region: 
-        country: Italy
-        postal-code: 35131
   - name: Filippo Gambarota
     corresponding: false
     orcid: 0000-0002-6666-1747
@@ -50,6 +44,7 @@ author:
     email: livio.finos@unipd.it
     roles:
       - supervision
+      - methodology
       - writing – review & editing
     affiliations:
       - name: University of Padova
@@ -79,6 +74,7 @@ author:
         postal-code: 35131
     roles:
       - supervision
+      - conceptualization
       - writing – review & editing
   
 author-note:
@@ -89,7 +85,7 @@ author-note:
     study-registration: 
     data-sharing: "Code is openly available in the *multibayes* repository on GitHub at <https://github.com/mar-cald/multibayes>."
     related-report: ~
-    conflict-of-interest: "The authors declare that they have no competing interests."
+    conflict-of-interest: ~
     financial-support: ~
     gratitude: ~
     authorship-agreements: ~
@@ -99,6 +95,7 @@ abstract: "The probability of direction ($pd$) has seen rapid adoption in psycho
 keywords: [probability of direction, multiple testing, prior-odds, FDR]
 bibliography: "bibliography.bib"
 reference-section-title: References
+suppress-author-note: true
 
 format: # quarto render paper/manuscript.qmd --to all
   apaquarto-html: 
@@ -116,10 +113,21 @@ format: # quarto render paper/manuscript.qmd --to all
     floatsintext: true
     word-count: true
     fig-pos: "H"
+    knitr:
+      opts_chunk:
+        dev: cairo_pdf
     header-includes:
       - \usepackage{float}
       - \raggedbottom
-    
+
+  apaquarto-docx:
+    floatsintext: true
+    word-count: true
+    fig-dpi: 200
+    knitr:
+      opts_chunk:
+        dev: ragg_png
+
 execute:
   eval: true
   warning: false
@@ -129,11 +137,8 @@ execute:
   fig-dpi: 300
 ---
 
-::: callout-warning
-## Preprint
 
-This manuscript is a **preprint** and has not yet been peer-reviewed. As the content is subject to change, we **welcome** and appreciate any **feedback** you can provide!
-:::
+{{< pagebreak >}}
 
 
 ```{r}
@@ -169,10 +174,10 @@ theme_clean <- function(base_size = 20) {
 }
 
 # Load results
-load("~/multibayes/paper/script/output/df_pi0.rda")
-load("~/multibayes/paper/script/output/df_compare.rda")
+load("script/output/df_pi0.rda")
+load("script/output/df_compare.rda")
 # Load model tutorial
-load("~/multibayes/paper/script/example/mod_rt.rda")
+load("script/example/mod_rt.rda")
 ```
 
 # Introduction
@@ -195,7 +200,6 @@ In practice, the $pd$ is often used to summarize both the direction and existenc
 
 ```{r}
 #| label: fig-pd-ci
-#| dev: cairo_pdf
 #| fig-cap: > 
 #|  Posterior distributions illustrating the relationship between
 #|  the probability of direction (pd) and 95% Credible Interval (CI), using c = 0.975 and $\theta_{null} = 0$. 
@@ -310,7 +314,6 @@ Varying the sample size ($n \in \{30, 50, 100\}$) and $\tau$ ($0.2, 0.5, 1, 1.5$
 
 ```{r}
 #| label: fig-uniform-pd
-#| dev: cairo_pdf
 #| fig-cap: >
 #|   Distribution of the probability of direction (pd) stratified by sample size ($n = 30, 50, 100$; rows) and prior standard deviation ($\theta \sim \mathcal{N}(0, \tau)$ with $\tau \in \{0.2, 0.5, 1, 1.5\}$; columns). Bin width = 0.025. 
 #| fig-height:  5.5
@@ -396,7 +399,6 @@ Researchers encode their expectations through $\pi_0$ or, equivalently under ind
 
 ```{r}
 #| label: fig-prior-adj
-#| dev: cairo_pdf
 #| fig-cap: >
 #|   Relationship between the global-null probability, the implied prior probability assigned to individual hypotheses, and the resulting adjustment of the probability of direction (pd). The left panel shows how a specified probability that all tested effects are null, $\Pr(H0)$, translates into the prior probability $\pi_0$ assigned to each individual hypothesis. As the number of tested effects (m) increases, the same global-null assumption implies increasingly skeptical priors for individual tests. The dotted line marks $\pi_0 = 0.5$, below which the prior would favor the alternative hypothesis rather than the null. Because our goal is to introduce a conservative multiplicity adjustment, $\pi_0$ is capped at 0.5 whenever smaller values would arise. The right panel illustrates the practical consequences of this adjustment. For a given $\pi_0$, the adjusted probability of direction ($pd_{adj}$) is always smaller than or equal to the original pd, but the reduction is not uniform. Weak evidence is penalized much more strongly than strong evidence. 
 #| fig-height: 4.5
@@ -499,7 +501,6 @@ We conducted a fully crossed simulation study, with 10,000 replications per cell
 
 ```{r}
 #| label: fig-ind-fdr-pw
-#| dev: cairo_pdf
 #| fig-cap: >
 #|   False Discovery Rate (FDR, Panel A) and average power (Panel B) of the adjusted $pd$ procedure as a function of the specified per-test null prior $\pi_0$ (x-axis) and the true null probability $\pi_{0_{true}}$ (y-axis), by family size m (rows, for Panel A) and sample size n (columns). The column $\pi_0 = 0.5$ is the unadjusted rule, where the prior odds are one and no correction is applied ($pd_{adj} = pd$); the diagonal $\pi_0 = \pi_{0_{true}}$ is a correctly specified prior. Each cell is the empirical FDR/power over 10,000 replications.
 #| fig-width: 21
@@ -575,7 +576,6 @@ p_pw_heat <- df_pi0 |>
 
 ```{r}
 #| label: fig-ind-fwer
-#| dev: cairo_pdf
 #| fig-cap: >
 #|   Family-wise error rate (FWER) of the adjusted $pd$ procedure as a function of the specified per-test null prior $\pi_0$ (x-axis) and the true null probability $\pi_{0_{true}}$ (y-axis), by family size m (columns). The column $\pi_0 = 0.5$ is the unadjusted rule. Each cell is the empirical FWER over 10,000 replications. Because the per-test adjustment targets the FDR, the FWER is reduced by larger $\pi_0$ but still grows with the family size $m$.
 #| fig-width:  22
@@ -619,7 +619,6 @@ The error criteria trade off power (rightmost panel of @fig-compare): the joint 
 
 ```{r}
 #| label: fig-compare
-#| dev: cairo_pdf
 #| fig-cap: >
 #|   False Discovery Rate (FDR), Family-Wise Error Rate (FWER) and average power of three Bayesian rules as a function of the number of tests $m$, all at $\alpha = 0.05$: the prior-odds procedure (adjusted $pd > 0.975$, $\pi_0 = 0.7$), joint statements (strongest directional claims accepted while their joint probability is at least $0.95$), and simultaneous credible intervals ($95\%$ band excluding zero). Sample size $n = 50$; 10,000 replications per cell.
 #| fig-width: 16
@@ -772,8 +771,21 @@ Second, it does not provide evidence for a point null hypothesis. The procedure 
 
 As Bayesian methods become increasingly common in psychological research, often in pragmatic workflows relying on default priors and fixed decision thresholds, the implications of multiplicity should be explicitly recognized. Additionally, although priors may be well-calibrated at the level of individual parameters, they do not by themselves account for multiplicity when many parameters are considered simultaneously. Ignoring this aspect leads fixed $pd$ thresholds to systematically overstate evidence for directional effects, especially as the number of tests grows. The adjustment proposed here addresses this gap by incorporating prior beliefs about the prevalence of null effects directly into $pd$-based decisions. By doing so, it provides a principled and transparent way to account for multiplicity without altering the estimation model, yielding more reliable inferences in multi-parameter settings and reducing the risk that apparent effects reflect chance rather than substantive signals.
 
-### Acknowledgements
-We are grateful to Jelle Goeman, Giovanni Parmigiani and Enrico Toffalini for insightful comments and discussion throughout the development of this work. We also thank Laura Sità and Matteo Manente for helpful feedback on earlier versions of the manuscript.
+### Author Contributions
+Author roles were classified using the Contributor Roles Taxonomy (CRediT; <https://credit.niso.org/>) as follows — Conceptualization: M. Calderan and G. Altoè; Methodology: M. Calderan, F. Gambarota, and L. Finos; Software: M. Calderan and F. Gambarota; Writing - Original Draft: M. Calderan; Writing - Review & Editing: F. Gambarota, L. Finos, and G. Altoè; Visualization: M. Calderan; Supervision: L. Finos and G. Altoè. All authors approved the final version of the manuscript and agree to be accountable for the work.
+
+### Conflicts of Interest
+The authors declare that there were no conflicts of interest with respect to the authorship or the publication of this article.
+
+### Acknowledgments
+We are grateful to Jelle Goeman, Giovanni Parmigiani and Enrico Toffalini for insightful comments and discussion throughout the development of this work. We also thank Laura Sità and Matteo Manente for helpful feedback on earlier versions of the manuscript. The `multibayes` package code was reviewed and debugged with the assistance of AI tools.
+
+### Prior Versions
+A version of this manuscript is posted as a preprint on PsyArXiv at <https://osf.io/preprints/psyarxiv/8zwx2_v2>. The submitted manuscript shares its full content with that preprint.
+
+### Open Materials
+
+Code is openly available in the *multibayes* repository on GitHub at <https://github.com/mar-cald/multibayes>, and in the OSF repository at <https://osf.io/q294m>.
 
 # References {#refs}
 
