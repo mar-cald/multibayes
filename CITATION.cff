@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite the article (preferred-citation below) rather than the software itself."
 type: software
 title: "multibayes: Bayesian Multiplicity Adjustments"
-version: 0.1.0
+version: 0.2.0
 repository-code: "https://github.com/mar-cald/multibayes"
 url: "https://mar-cald.github.io/multibayes/"
 license: GPL-3.0
@@ -18,7 +18,7 @@ preferred-citation:
   title: "A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing"
   year: 2026
   status: preprint
-  url: "osf.io/preprints/psyarxiv/8zwx2_v2"
+  url: "https://osf.io/preprints/psyarxiv/8zwx2_v2"
   authors:
     - family-names: Calderan
       given-names: Margherita

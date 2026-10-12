@@ -17,8 +17,12 @@
 \code{x}, invisibly.
 }
 \description{
-Summarises the constant quantities (\code{pi0}, \code{m}) in a header and
-prints the per-test table. The full set of columns remains available for
-programmatic access via the usual \code{$} and \code{[}.
+Prints a header with the number of tests \eqn{m}, \eqn{\pi_0}, the
+unadjusted threshold \eqn{c} and the adjusted threshold \eqn{c^*} (a
+direction is claimed when \eqn{pd > c^*}), followed by the per-test table
+and a short note on \code{pd.adj}.
+Columns that take the same value in every row (\code{null.value},
+\code{direction}) are reported once in the header. The full set of columns remains available
+for programmatic access via the usual \code{$} and \code{[}.
 }
 \keyword{internal}

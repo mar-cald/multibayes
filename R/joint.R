@@ -21,8 +21,8 @@
 #' simultaneous credible band. Coverage is set by examining how extreme each
 #' draw is across all parameters jointly: for every draw the minimum (nearer)
 #' tail probability across parameters is taken, and the threshold is the
-#' \eqn{(1 - \texttt{prob})}-quantile of these minima. An effect can be declared
-#' when a parameter's band excludes the null value. A closely related
+#' \eqn{(1 - \texttt{prob})}-quantile of these minima. A direction can be claimed
+#' for a parameter when its band excludes the null value. A closely related
 #' implementation is \code{sim.cred.band} in the \pkg{credsubs} package
 #' (Schnell et al., 2020).
 #'
@@ -44,12 +44,15 @@
 #' @param est.FUN Function returning a point estimate from a numeric vector
 #'   (default \code{\link[stats]{median}}). Used only when \code{interval = TRUE}.
 #'
-#' @return A \code{data.frame}. For \code{interval = FALSE}, one row per
+#' @return A \code{data.frame}. For \code{interval = FALSE}, an object of
+#'   class \code{joint_directional} (a \code{data.frame} with a print method),
+#'   with one row per
 #'   parameter ordered by decreasing \emph{pd}, with columns \code{median.est},
 #'   \code{null.value}, \code{pd}, \code{direction}, and \code{joint_cum} (the
 #'   joint posterior probability that the \eqn{k} strongest claims all hold).
-#'   For \code{interval = TRUE}, one row per parameter with columns
-#'   \code{lower}, \code{est}, \code{upper}, and \code{prob}.
+#'   For \code{interval = TRUE}, an object of class \code{joint_interval}
+#'   (a \code{data.frame} with a print method), with one row per parameter and
+#'   columns \code{lower}, \code{est}, \code{upper}, and \code{prob}.
 #'
 #' @references
 #' Box, G. E. P., & Tiao, G. C. (1992). Bayesian inference in statistical
@@ -69,7 +72,7 @@
 #' Schnell, P. et al. (2020). \pkg{credsubs}: Credible Subsets. R package.
 #' \url{https://CRAN.R-project.org/package=credsubs}.
 #'
-#' @seealso \code{\link{pd.adjust}} for the per-test directional adjustment.
+#' @seealso \code{\link{pd.adjust}} for the per-test prior-odds threshold.
 #'
 #' @importFrom stats quantile median setNames
 #' @importFrom matrixStats colRanks rowMins colQuantiles
@@ -108,12 +111,14 @@ joint <- function(draws, interval = FALSE, prob = 0.95,
     tp <- matrixStats::rowMins(pmin(up, 1 - lw))
     cq <- quantile(tp, probs = 1 - prob, type = 1)
     out <- matrixStats::colQuantiles(draws, probs = c(cq, 1 - cq), type = 1)
-    return(data.frame(
+    res <- data.frame(
       lower = setNames(out[, 1], nms),
       est   = setNames(apply(draws, 2, est.FUN), nms),
       upper = setNames(out[, 2], nms),
       prob  = prob
-    ))
+    )
+    class(res) <- c("joint_interval", "data.frame")
+    return(res)
   }
 
   ## ---- joint directional statement ------------------------------------------
@@ -157,5 +162,57 @@ joint <- function(draws, interval = FALSE, prob = 0.95,
   if (!is.null(nms) && length(nms) == nc) rownames(out) <- nms
   out <- out[ord, , drop = FALSE]
   out$joint_cum <- round(joint_cum, 4)  # in ord order, aligned with reordered rows
+  class(out) <- c("joint_directional", "data.frame")
   out
+}
+
+#' Print method for joint directional statements
+#'
+#' Prints the table returned by \code{\link{joint}} with \code{interval = FALSE}.
+#' Columns that take the same value in every row (\code{null.value},
+#' \code{direction}) are reported once in a header. The full set of columns
+#' remains available for programmatic access via the usual \code{$} and
+#' \code{[}.
+#'
+#' @param x A \code{joint_directional} object returned by \code{\link{joint}}.
+#' @param digits Number of digits used when printing. Defaults to 4.
+#' @param ... Further arguments passed to \code{print.data.frame}.
+#'
+#' @return \code{x}, invisibly.
+#'
+#' @keywords internal
+#' @export
+print.joint_directional <- function(x, digits = 4, ...) {
+  df <- as.data.frame(x)
+  cat("Joint directional statement\n")
+  ch <- const_cols(df, c("null.value", "direction"))
+  if (!is.null(ch$text)) cat("  ", ch$text, "\n", sep = "")
+  cat("  joint_cum: Pr(the top k claims all hold | y)\n\n")
+  print(df[, setdiff(names(df), ch$drop), drop = FALSE], digits = digits, ...)
+  invisible(x)
+}
+
+
+#' Print method for simultaneous credible intervals
+#'
+#' Prints the table returned by \code{\link{joint}} with \code{interval = TRUE},
+#' reporting the joint coverage probability once in a header. The full set of
+#' columns remains available for programmatic access via the usual \code{$}
+#' and \code{[}.
+#'
+#' @param x A \code{joint_interval} object returned by \code{\link{joint}}.
+#' @param digits Number of decimal places used when printing. Defaults to 4.
+#' @param ... Further arguments passed to \code{print.data.frame}.
+#'
+#' @return \code{x}, invisibly.
+#'
+#' @keywords internal
+#' @export
+print.joint_interval <- function(x, digits = 4, ...) {
+  df <- as.data.frame(x)
+  cat(sprintf("Simultaneous credible intervals (joint coverage %.4g)\n\n", df$prob[1]))
+  show <- df[, setdiff(names(df), "prob"), drop = FALSE]
+  show[] <- lapply(show, round, digits = digits)
+  print(show, ...)
+  invisible(x)
 }

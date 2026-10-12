@@ -2,7 +2,7 @@
 % Please edit documentation in R/pd.adjust.R
 \name{pd.adjust}
 \alias{pd.adjust}
-\title{Prior-odds adjustment for Probability of Direction \emph{pd}}
+\title{Prior-odds threshold for the Probability of Direction \emph{pd}}
 \usage{
 pd.adjust(
   pd = NULL,
@@ -13,34 +13,43 @@ pd.adjust(
   direction = NULL,
   order = FALSE,
   threshold = 0.975,
-  alpha = NULL,
-  fwer = FALSE
+  alpha = NULL
 )
 }
 \arguments{
-\item{pd}{Numeric vector of \emph{pd} values. For direction-agnostic tests,
-values must be in \eqn{[0.5, 1]}. For directional tests, values are raw
-one-sided probabilities in \eqn{[0, 1]}. Ignored if \code{draws} is
-supplied.}
+\item{pd}{Numeric vector of direction-agnostic \emph{pd} values in
+\eqn{[0.5, 1]}. With \code{pd} input every test is treated as
+direction-agnostic and \code{direction} is ignored; for directional tests,
+supply \code{draws}. Ignored if \code{draws} is supplied.}
 
 \item{draws}{Optional matrix or data frame of posterior draws (columns = parameters).
 If provided, \emph{pd} values are computed automatically from the draws
 according to \code{direction} and \code{null.value}.}
 
-\item{p0}{Numeric scalar in \eqn{(0, 1)}. The prior probability that
-\strong{all} hypotheses are null simultaneously (the global null,
-\eqn{\Pr(H_0)}). Supply \strong{either} \code{pi0} \strong{or} \code{p0},
-not both. When \code{p0} is given, the per-test prior is derived under
-independence as \eqn{\pi_0 = \Pr(H_0)^{1/m}}.}
+\item{p0}{Numeric scalar in \eqn{(0, 1)}. The largest prior probability
+that \strong{no} directional claim in the family is correct
+(\eqn{\Pr(H_0)}). Supply \strong{either} \code{pi0} \strong{or} \code{p0},
+not both. When \code{p0} is given, \eqn{\pi_0} is derived, for parameters
+independent a priori, as \eqn{\pi_0 = \Pr(H_0)^{1/m}}.}
 
-\item{pi0}{Numeric scalar in \eqn{(0, 1)}. The per-test prior probability that
-an individual effect is null, applied to every test. Supply \strong{either} \code{pi0} \strong{or} \code{p0}, not both.}
+\item{pi0}{Numeric scalar in \eqn{(0, 1)}. An upper bound, set by the
+researcher, on the prior probability that a parameter lies on the side of
+\code{null.value} opposite to the claimed one (or equals
+\code{null.value}). Because the same \code{pi0} is applied to every test,
+it is also an upper bound on the expected proportion of parameters in the
+family that are not on the claimed side, null effects included, so a
+judgment about how many null effects the family could contain can guide
+its choice. Values below 0.5 are set
+to 0.5, with a warning, so that no penalty is applied. Supply \strong{either} \code{pi0} \strong{or}
+\code{p0}, not both.}
 
 \item{null.value}{Numeric scalar or vector. The null (reference) value against
 which the posterior is evaluated, specified on the scale of the posterior.
 A single scalar applies the same null to all parameters; a vector of length \code{ncol(draws)}
 assigns a distinct null to each parameter. Ignored when \code{pd} is supplied directly.
-Defaults to \code{0}.}
+Defaults to \code{0}. The class of priors behind the threshold is defined
+for a within-model prior symmetric about the null value (see Details), which
+holds for flat priors and for priors centred on it.}
 
 \item{direction}{Character vector of \code{"greater"}, \code{"less"}, or
 \code{"two.sided"} (or \code{NULL}).
@@ -58,12 +67,10 @@ decreasing \code{pd} (strongest directional evidence first). If \code{FALSE}
 (the default), rows are returned in input order, so the output stays aligned
 with the columns of \code{draws} (or the elements of \code{pd}).}
 
-\item{threshold}{Numeric scalar in \eqn{(0.5, 1)}. The decision cutoff applied
-to \emph{pd} (default \code{0.975}, a two-sided per-test
-\eqn{\alpha = 0.05}). It does \strong{not} change \code{pd.adj}; it is used
-only to report the equivalent \strong{adjusted threshold on the raw}
-\emph{pd}, since rejecting \eqn{pd_{adj} > c} is identical to rejecting raw
-\eqn{pd > c^*} with
+\item{threshold}{Numeric scalar in \eqn{(0.5, 1)}. The threshold \eqn{c}
+on \emph{pd} without penalty (default \code{0.975}, a two-sided per-test
+\eqn{\alpha = 0.05}). The function reports the threshold implied by
+\eqn{c} and \code{pi0},
 \eqn{c^* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)}.}
 
 \item{alpha}{Optional numeric scalar in \eqn{(0, 1)}. A convenience
@@ -71,84 +78,91 @@ parameterization of \code{threshold} on the error scale: when supplied, the
 two-sided cutoff is set to \eqn{c = 1 - \alpha/2} (so \code{alpha = 0.05}
 gives \code{threshold = 0.975}), \strong{overriding} any \code{threshold}
 value.}
-
-\item{fwer}{Logical (default \code{FALSE}). If \code{TRUE}, the output also
-reports a \strong{family-wise} cutoff on the raw \emph{pd} that controls the
-prior-averaged FWER at the nominal level over the \eqn{m} tests, given
-\eqn{\pi_0}. Standard corrections (e.g. Bonferroni) implicitly assume every
-test is null (\eqn{\pi_0 = 1}); here the affordable per-test rate is
-\eqn{[1 - (1 - \alpha)^{1/m}] / \pi_0}, relaxing the standard correction by
-\eqn{1/\pi_0} and reducing to it as \eqn{\pi_0 \to 1}. This is a
-prior-averaged (Bayesian) FWER under the assumed \eqn{\pi_0}, \strong{not}
-strong frequentist control.}
 }
 \value{
 An object of class \code{pd_adjust} (a \code{data.frame} with a
 dedicated \code{\link{print.pd_adjust}} method), with one row per
-hypothesis. Columns: \code{pd} (values used in the adjustment),
-\code{pd.adj} (adjusted values), \code{pi0} (per-test null prior
-\eqn{\pi_0}), and \code{m} (number of tests). When
-\code{order = TRUE} the rows are sorted by decreasing \code{pd}. For
-direction-agnostic tests, both \code{pd} and \code{pd.adj} are bounded in
-\eqn{[0.5, 1]}; for directional tests, both are on \eqn{[0, 1]}, with values
-below \eqn{0.5} indicating that the data (and the adjustment) favoured the
-opposite direction. When \code{draws} are supplied, the output additionally
-includes \code{median.est} (posterior median per parameter), \code{null.value},
-and \code{direction}. The \code{print} method summarises the constant
-quantities (\code{pi0}, \code{m}) in a header and displays the per-test
-table; the columns themselves remain available for programmatic access.
-The object also carries, as attributes, the decision cutoff \code{threshold}
-(\eqn{c}), the equivalent adjusted cutoff on the raw \emph{pd}
-\code{threshold.adj} (\eqn{c^*}), and the corresponding two-sided per-test
-Type I rates \code{alpha.nominal} (\eqn{2(1-c)}) and \code{alpha.eff}
-(\eqn{2(1-c^*)}); retrieve them with, e.g., \code{attr(x, "threshold.adj")}.
-The cutoffs \code{threshold.adj} and \code{threshold.fwer} are exact
-transformations of the decision rule, but the reported per-test \emph{rates}
-(\code{alpha.eff}, and the \code{fwer} calibration) use the identity
+hypothesis. Columns: \code{pd} (the probability of direction, to be
+compared with \code{threshold.adj}), \code{pd.adj} (the posterior
+probability of the claimed direction under the prior in the class most
+skeptical of it, to be compared with \code{threshold}), \code{pi0},
+\code{m}, and \code{direction}. When
+\code{order = TRUE} the rows are sorted by decreasing \code{pd}. When
+\code{draws} are supplied, the output additionally includes
+\code{median.est} (posterior median per parameter) and \code{null.value}.
+The \code{print} method shows \eqn{m}, \eqn{\pi_0}, the thresholds
+\eqn{c} and \eqn{c^*}, and the columns that are constant across rows
+(\code{null.value}, \code{direction}) in a header, followed by the per-test table; all columns remain
+available for programmatic access.
+The object also carries, as attributes, the threshold \code{threshold}
+(\eqn{c}), the adjusted threshold \code{threshold.adj} (\eqn{c^*}), the
+corresponding two-sided per-test Type I error rates \code{alpha.nominal}
+(\eqn{2(1-c)}) and \code{alpha.eff} (\eqn{2(1-c^*)}); retrieve them with, e.g.,
+\code{attr(x, "threshold.adj")}.
+The threshold \code{threshold.adj} is an exact function of \eqn{c} and
+\eqn{\pi_0}, but the reported per-test \emph{rate} \code{alpha.eff} uses the identity
 \eqn{\alpha = 2(1 - c)}, which holds \strong{only when the null \emph{pd} is approximately uniform on
 \eqn{[0.5, 1]}}.
 }
 \description{
-The function accepts either a vector of pre-computed \emph{pd} values or
-a matrix of posterior draws, from which \emph{pd} values are computed
-internally. Both direction-agnostic and directional tests are supported:
-the \code{direction} argument controls which formulation is applied per
-hypothesis. The adjustment is governed by the per-test prior probability
-that an individual effect is null, \eqn{\pi_0} (argument \code{pi0}).
-Equivalently, one may supply the global null \eqn{\Pr(H_0)} (argument
-\code{p0}), the prior that all \eqn{m} hypotheses are null, from which
-\eqn{\pi_0 = \Pr(H_0)^{1/m}} is recovered under independence.
+Converts an upper bound, set by the researcher, on the prior probability
+of the sign opposite to the claimed one into the threshold that \emph{pd}
+must exceed before a direction is claimed. The function
+accepts either a vector of pre-computed \emph{pd} values or a matrix of
+posterior draws, from which \emph{pd} values are computed internally. Both
+direction-agnostic and directional tests are supported: the
+\code{direction} argument controls how \emph{pd} is computed per
+hypothesis. The threshold is governed by \eqn{\pi_0} (argument
+\code{pi0}), the upper bound on the prior probability that a parameter lies
+on the side of \code{null.value} opposite to the claimed one (or equals
+\code{null.value}). Equivalently, one may supply \eqn{\Pr(H_0)} (argument
+\code{p0}), the largest prior probability that no claim in the family is
+correct, from which \eqn{\pi_0 = \Pr(H_0)^{1/m}} is recovered if the
+parameters are independent a priori. For each hypothesis the function also
+reports \code{pd.adj}, the posterior probability of the claimed direction
+(favoured or predicted) under the prior in the class most skeptical of it;
+under the same prior the other side has probability \code{1 - pd.adj}, so
+the two sum to one. A direction is claimed when \code{pd.adj} exceeds
+\eqn{c}, which is the same as \eqn{pd > c^*}.
 }
 \details{
-The adjustment follows from Bayes' theorem. Given a per-hypothesis prior
-\eqn{\pi_0} and its complement \eqn{\pi_1 = 1 - \pi_0},
-the adjusted \emph{pd} is:
-\deqn{
-   pd_{adj} = \frac{pd \pi_1}{pd \pi_1 + (1-pd)\pi_0}
-}
-
-Because the prior is conservative (\eqn{\pi_0 > \pi_1}), the adjustment
-always shrinks \emph{pd} toward its lower bound.
+Following Jeffreys (1938) and Westfall et al. (1997), the prior odds of each
+directional claim in the family are penalized. With \code{pi0} the penalty
+is the same for any number of tests; with \code{p0},
+\eqn{\pi_0 = \Pr(H_0)^{1/m}} and the penalty grows with the number of
+tests. Because the
+direction of a claim is chosen by the data, the penalty is applied over a
+class of priors: the within-model prior is reweighted on the two sides of
+\code{null.value}, so that the prior probability of each direction lies
+between \eqn{1-\pi_0} and \eqn{\pi_0}, and a claim is made only if its
+posterior probability exceeds \eqn{c} under every prior in the class. For
+parameters with independent posteriors, this is equivalent to
+\deqn{pd > c^*, \qquad c^* = \frac{c\,\pi_0}{(1-c)(1-\pi_0) + c\,\pi_0},}
+and the function reports \eqn{c^*} (\code{threshold.adj}). The smallest
+posterior probability is reached under the prior that gives the claimed
+direction probability \eqn{1 - \pi_0}; under that prior the posterior
+probability of the claimed direction is
+\deqn{pd_{adj} = \frac{pd\,(1-\pi_0)}{pd\,(1-\pi_0) + (1-pd)\,\pi_0},}
+reported as \code{pd.adj}, and \eqn{pd_{adj} > c} if and only if
+\eqn{pd > c^*}. With correlated
+posteriors, the bound over the class can be stricter than this rule. The
+posterior used for estimation is not modified. The class is defined for a
+within-model prior that is symmetric about \code{null.value}, as are priors
+centred on it and, as a limit, flat priors.
 
 \strong{Direction-agnostic tests} (\code{"two.sided"}): \emph{pd} is
-defined as \eqn{\max\!\big(\Pr(\hat\theta > \theta_\text{null}),\,
-\Pr(\hat\theta < \theta_\text{null})\big)} and is bounded in
-\eqn{[0.5, 1]} by construction. \eqn{pd_{adj}} is also floored at
-\eqn{0.5}, so the adjustment produces shrinkage toward \eqn{0.5}.
+\eqn{\max\!\big(\Pr(\theta > \theta_\text{null} \mid y),\,
+\Pr(\theta < \theta_\text{null} \mid y)\big)} on \eqn{[0.5, 1]}, and a
+claim is made in the favoured direction when \eqn{pd > c^*}.
 
 \strong{Directional tests} (\code{"greater"} or \code{"less"}): \emph{pd}
-is the raw posterior probability mass on the predicted side,
-\eqn{\Pr(\hat\theta > \theta_\text{null})} or
-\eqn{\Pr(\hat\theta < \theta_\text{null})}, and is defined on \eqn{[0, 1]}.
-Values of \emph{pd} below \eqn{0.5} indicate that the posterior is
-concentrated opposite to the predicted direction; the adjustment will
-further shrink such values toward \eqn{0}, reflecting the combined weight
-of the data and the conservative prior against the hypothesis.
+is the posterior mass on the predicted side, on \eqn{[0, 1]}, and the
+predicted direction is claimed when \eqn{pd > c^*}.
 
 Mixed use of directional and direction-agnostic tests within the same call
 is supported: each element of \code{direction} is handled independently,
-and the same prior-odds adjustment is applied uniformly across all
-hypotheses regardless of their directionality.
+and the same threshold \eqn{c^*} applies to all hypotheses regardless of
+their directionality.
 }
 \examples{
 # From a vector of pd values
@@ -156,7 +170,7 @@ pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763,
 H5 = 0.891, H6 = 0.987)
 pd.adjust(pd = pd_values, p0 = 0.4)
 
-# Equivalent call specifying the per-test prior pi0 directly
+# Equivalent call specifying pi0 directly
 pd.adjust(pd = pd_values, pi0 = 0.4^(1/6))
 
 # Simulate draws
@@ -165,7 +179,7 @@ mu    <- c(1, -0.1, 0.8, 0, 2, 3)
 draws <- MASS::mvrnorm(n = 4000, mu = mu, Sigma = Sigma)
 colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 
-# Per-test correction only (default)
+# From posterior draws
 pd.adjust(draws = draws, pi0 = 0.7, null.value = 0)
 
 # Order the rows by strength of evidence
@@ -178,18 +192,22 @@ pd.adjust(draws = draws, pi0 = 0.6, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
 
 }
 \references{
-Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A bayesian perspective on the bonferroni adjustment.
-\emph{Biometrika}, 84(2), 419–427.
+Berger, J. O. (1994). An overview of robust Bayesian analysis. \emph{Test},
+3(1), 5–124. https://doi.org/10.1007/BF02562676
+
+Westfall, P. H., Johnson, W. O., & Utts, J. M. (1997). A Bayesian perspective on the Bonferroni adjustment.
+\emph{Biometrika}, 84(2), 419–427. https://doi.org/10.1093/biomet/84.2.419
 
 Jeffreys, H. (1938). Significance tests when several degrees of freedom arise simultaneously. \emph{Proceedings
 of the Royal Society of London. Series A. Mathematical and Physical Sciences}, 165(921), 161–198.
 https://doi.org/10.1098/rspa.1938.0052
 
-Storey, J. D. (2003). The positive false discovery rate: A bayesian interpretation and the q-value. \emph{The Annals
+Storey, J. D. (2003). The positive false discovery rate: A Bayesian interpretation and the q-value. \emph{The Annals
 of Statistics}, 31(6), 2013–2035. https://doi.org/10.1214/aos/1074290335
 
-Scott, J. G., & Berger, J. O. (2006). An exploration of aspects of bayesian multiple testing.
+Scott, J. G., & Berger, J. O. (2006). An exploration of aspects of Bayesian multiple testing.
 \emph{Journal of Statistical Planning and Inference}, 136(7), 2144–2162.
+https://doi.org/10.1016/j.jspi.2005.08.031
 
 Scott, J. G., & Berger, J. O. (2010). Bayes and empirical-Bayes multiplicity adjustment in the variable-
 selection problem. \emph{The Annals of Statistics}, 38(5), 2587–2619. https://doi.org/10.1214/10-AOS792

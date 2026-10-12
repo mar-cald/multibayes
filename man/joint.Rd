@@ -38,12 +38,15 @@ for all. Used only when \code{interval = FALSE}.}
 (default \code{\link[stats]{median}}). Used only when \code{interval = TRUE}.}
 }
 \value{
-A \code{data.frame}. For \code{interval = FALSE}, one row per
+A \code{data.frame}. For \code{interval = FALSE}, an object of
+class \code{joint_directional} (a \code{data.frame} with a print method),
+with one row per
 parameter ordered by decreasing \emph{pd}, with columns \code{median.est},
 \code{null.value}, \code{pd}, \code{direction}, and \code{joint_cum} (the
 joint posterior probability that the \eqn{k} strongest claims all hold).
-For \code{interval = TRUE}, one row per parameter with columns
-\code{lower}, \code{est}, \code{upper}, and \code{prob}.
+For \code{interval = TRUE}, an object of class \code{joint_interval}
+(a \code{data.frame} with a print method), with one row per parameter and
+columns \code{lower}, \code{est}, \code{upper}, and \code{prob}.
 }
 \description{
 Computes either the \strong{joint directional statement} (the default): for
@@ -67,8 +70,8 @@ simultaneously with probability \code{prob}, via the quantile-based
 simultaneous credible band. Coverage is set by examining how extreme each
 draw is across all parameters jointly: for every draw the minimum (nearer)
 tail probability across parameters is taken, and the threshold is the
-\eqn{(1 - \texttt{prob})}-quantile of these minima. An effect can be declared
-when a parameter's band excludes the null value. A closely related
+\eqn{(1 - \texttt{prob})}-quantile of these minima. A direction can be claimed
+for a parameter when its band excludes the null value. A closely related
 implementation is \code{sim.cred.band} in the \pkg{credsubs} package
 (Schnell et al., 2020).
 }
@@ -100,5 +103,5 @@ Schnell, P. et al. (2020). \pkg{credsubs}: Credible Subsets. R package.
 \url{https://CRAN.R-project.org/package=credsubs}.
 }
 \seealso{
-\code{\link{pd.adjust}} for the per-test directional adjustment.
+\code{\link{pd.adjust}} for the per-test prior-odds threshold.
 }
