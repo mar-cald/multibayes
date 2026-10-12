@@ -1,8 +1,8 @@
 # multibayes
 
-**multibayes** provides tools for **Bayesian multiplicity adjustments**.
-Direction-agnostic and directional tests are supported, and can be mixed
-freely within a single call.
+**multibayes** provides tools for making directional claims about many
+parameters from posterior draws. Direction-agnostic and directional
+tests are supported, and can be mixed freely within a single call.
 
 ## Installation
 
@@ -14,16 +14,39 @@ remotes::install_github("mar-cald/multibayes")
 
 ## Overview
 
-| Function | Input | Correction type |
+| Function | Input | What it returns |
 |----|----|----|
-| [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md) | Posterior draws or *pd* vector | Prior-odds adjustment for *pd* (per-test) |
-| [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md) | Posterior draws | Joint probability (directional) statements (default) or simultaneous credible intervals (`interval = TRUE`) |
+| [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md) | Posterior draws or *pd* vector | Prior-odds threshold *c\** for the probability of direction (per test) |
+| [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md) | Posterior draws | Joint probability of the strongest directional claims (default) or simultaneous credible intervals (`interval = TRUE`) |
+
+[`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
+asks for a single quantity, `pi0`: an upper bound, set by you, on the
+prior probability of the sign opposite to the claimed one. Because the
+same `pi0` is used for every parameter, it is also an upper bound on the
+expected proportion of parameters in the family that are not on the
+claimed side, null effects included, so a judgment about how many null
+effects the family could contain can guide its choice. Alternatively,
+`p0` is the largest prior probability that no claim in the family is
+correct, with `pi0 = p0^(1/m)` for `m` tests that are independent a
+priori, so that `pi0` grows with the number of tests. A claim is made
+only if it holds under every prior that lowers the prior odds of either
+direction by up to `pi0/(1 - pi0)`, which raises the threshold on *pd*
+from `c` (default 0.975) to `c*`.
+
+``` r
+
+library(multibayes)
+draws <- MASS::mvrnorm(4000, mu = c(1, 0.2, 3), Sigma = diag(3))
+colnames(draws) <- c("b1", "b2", "b3")
+pd.adjust(draws = draws, pi0 = 0.7)   # claim a direction when pd.adj > c (pd > c*)
+joint(draws)                          # joint probability of the top-k claims
+```
 
 ## Citation
 
 > Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (n.d.). A
 > Prior-Odds Adjustment for the Probability of Direction in Multiple
-> Testing. Retrieved from osf.io/preprints/psyarxiv/8zwx2_v2
+> Testing. Retrieved from <https://osf.io/preprints/psyarxiv/8zwx2_v2>
 
 Run `citation("multibayes")` in R for the full reference (article and
 package entries).
@@ -41,7 +64,7 @@ GNU General Public License, Version 3
 - [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
   :
 
-  Prior-odds adjustment for Probability of Direction *pd*
+  Prior-odds threshold for the Probability of Direction *pd*
 
 - [`print(`*`<pd_adjust>`*`)`](https://mar-cald.github.io/multibayes/reference/print.pd_adjust.md)
   :

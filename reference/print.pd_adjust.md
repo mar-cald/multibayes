@@ -1,8 +1,12 @@
 # Print method for `pd_adjust` objects
 
-Summarises the constant quantities (`pi0`, `m`) in a header and prints
-the per-test table. The full set of columns remains available for
-programmatic access via the usual `$` and `[`.
+Prints a header with the number of tests \\m\\, \\\pi_0\\, the
+unadjusted threshold \\c\\ and the adjusted threshold \\c^\*\\ (a
+direction is claimed when \\pd \> c^\*\\), followed by the per-test
+table and a short note on `pd.adj`. Columns that take the same value in
+every row (`null.value`, `direction`) are reported once in the header.
+The full set of columns remains available for programmatic access via
+the usual `$` and `[`.
 
 ## Usage
 

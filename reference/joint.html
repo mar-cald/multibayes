@@ -13,7 +13,7 @@ intervals (interval = TRUE)."><script src="https://cdn.jsdelivr.net/npm/mathjax@
 
     <a class="navbar-brand me-2" href="../index.html">multibayes</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,12 +98,15 @@ for all. Used only when <code>interval = FALSE</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>data.frame</code>. For <code>interval = FALSE</code>, one row per
+    <p>A <code>data.frame</code>. For <code>interval = FALSE</code>, an object of
+class <code>joint_directional</code> (a <code>data.frame</code> with a print method),
+with one row per
 parameter ordered by decreasing <em>pd</em>, with columns <code>median.est</code>,
 <code>null.value</code>, <code>pd</code>, <code>direction</code>, and <code>joint_cum</code> (the
 joint posterior probability that the \(k\) strongest claims all hold).
-For <code>interval = TRUE</code>, one row per parameter with columns
-<code>lower</code>, <code>est</code>, <code>upper</code>, and <code>prob</code>.</p>
+For <code>interval = TRUE</code>, an object of class <code>joint_interval</code>
+(a <code>data.frame</code> with a print method), with one row per parameter and
+columns <code>lower</code>, <code>est</code>, <code>upper</code>, and <code>prob</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -121,8 +124,8 @@ simultaneously with probability <code>prob</code>, via the quantile-based
 simultaneous credible band. Coverage is set by examining how extreme each
 draw is across all parameters jointly: for every draw the minimum (nearer)
 tail probability across parameters is taken, and the threshold is the
-\((1 - \texttt{prob})\)-quantile of these minima. An effect can be declared
-when a parameter's band excludes the null value. A closely related
+\((1 - \texttt{prob})\)-quantile of these minima. A direction can be claimed
+for a parameter when its band excludes the null value. A closely related
 implementation is <code>sim.cred.band</code> in the <span class="pkg">credsubs</span> package
 (Schnell et al., 2020).</p>
     </div>
@@ -143,7 +146,7 @@ and Bayesian single and multiple comparison procedures.
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="pd.adjust.html">pd.adjust</a></code> for the per-test directional adjustment.</p></div>
+    <div class="dont-index"><p><code><a href="pd.adjust.html">pd.adjust</a></code> for the per-test prior-odds threshold.</p></div>
     </div>
 
     <div class="section level2">
@@ -154,15 +157,21 @@ and Bayesian single and multiple comparison procedures.
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"theta1"</span>, <span class="st">"theta2"</span>, <span class="st">"theta3"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">joint</span><span class="op">(</span><span class="va">draws</span><span class="op">)</span>                    <span class="co"># joint directional statement (default)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        median.est null.value     pd direction joint_cum</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta3    -1.9596          0 0.9755 two.sided    0.9755</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta1     1.5206          0 0.9405 two.sided    0.9160</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta2     0.0021          0 0.5005 two.sided    0.4820</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Joint directional statement</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   null value = 0, direction = two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   joint_cum: Pr(the top k claims all hold | y)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        median.est     pd joint_cum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta3    -1.9596 0.9755    0.9755</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta1     1.5206 0.9405    0.9160</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta2     0.0021 0.5005    0.4820</span>
 <span class="r-in"><span><span class="fu">joint</span><span class="op">(</span><span class="va">draws</span>, interval <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>   <span class="co"># simultaneous credible intervals</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             lower          est     upper prob</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta1 -0.7956087  1.520594092 3.7265003 0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta2 -2.4132437  0.002074391 2.2378859 0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> theta3 -4.2133338 -1.959627191 0.3455705 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Simultaneous credible intervals (joint coverage 0.95)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          lower     est  upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta1 -0.7956  1.5206 3.7265</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta2 -2.4132  0.0021 2.2379</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> theta3 -4.2133 -1.9596 0.3456</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

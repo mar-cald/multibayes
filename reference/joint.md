@@ -57,11 +57,14 @@ joint(
 
 ## Value
 
-A `data.frame`. For `interval = FALSE`, one row per parameter ordered by
-decreasing *pd*, with columns `median.est`, `null.value`, `pd`,
-`direction`, and `joint_cum` (the joint posterior probability that the
-\\k\\ strongest claims all hold). For `interval = TRUE`, one row per
-parameter with columns `lower`, `est`, `upper`, and `prob`.
+A `data.frame`. For `interval = FALSE`, an object of class
+`joint_directional` (a `data.frame` with a print method), with one row
+per parameter ordered by decreasing *pd*, with columns `median.est`,
+`null.value`, `pd`, `direction`, and `joint_cum` (the joint posterior
+probability that the \\k\\ strongest claims all hold). For
+`interval = TRUE`, an object of class `joint_interval` (a `data.frame`
+with a print method), with one row per parameter and columns `lower`,
+`est`, `upper`, and `prob`.
 
 ## Details
 
@@ -80,10 +83,10 @@ simultaneously with probability `prob`, via the quantile-based
 simultaneous credible band. Coverage is set by examining how extreme
 each draw is across all parameters jointly: for every draw the minimum
 (nearer) tail probability across parameters is taken, and the threshold
-is the \\(1 - \texttt{prob})\\-quantile of these minima. An effect can
-be declared when a parameter's band excludes the null value. A closely
-related implementation is `sim.cred.band` in the credsubs package
-(Schnell et al., 2020).
+is the \\(1 - \texttt{prob})\\-quantile of these minima. A direction can
+be claimed for a parameter when its band excludes the null value. A
+closely related implementation is `sim.cred.band` in the credsubs
+package (Schnell et al., 2020).
 
 ## References
 
@@ -107,7 +110,7 @@ Schnell, P. et al. (2020). credsubs: Credible Subsets. R package.
 ## See also
 
 [`pd.adjust`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
-for the per-test directional adjustment.
+for the per-test prior-odds threshold.
 
 ## Examples
 
@@ -118,13 +121,19 @@ draws <- MASS::mvrnorm(2000, mu, Sigma)
 colnames(draws) <- c("theta1", "theta2", "theta3")
 
 joint(draws)                    # joint directional statement (default)
-#>        median.est null.value     pd direction joint_cum
-#> theta3    -1.9596          0 0.9755 two.sided    0.9755
-#> theta1     1.5206          0 0.9405 two.sided    0.9160
-#> theta2     0.0021          0 0.5005 two.sided    0.4820
+#> Joint directional statement
+#>   null value = 0, direction = two.sided
+#>   joint_cum: Pr(the top k claims all hold | y)
+#> 
+#>        median.est     pd joint_cum
+#> theta3    -1.9596 0.9755    0.9755
+#> theta1     1.5206 0.9405    0.9160
+#> theta2     0.0021 0.5005    0.4820
 joint(draws, interval = TRUE)   # simultaneous credible intervals
-#>             lower          est     upper prob
-#> theta1 -0.7956087  1.520594092 3.7265003 0.95
-#> theta2 -2.4132437  0.002074391 2.2378859 0.95
-#> theta3 -4.2133338 -1.959627191 0.3455705 0.95
+#> Simultaneous credible intervals (joint coverage 0.95)
+#> 
+#>          lower     est  upper
+#> theta1 -0.7956  1.5206 3.7265
+#> theta2 -2.4132  0.0021 2.2379
+#> theta3 -4.2133 -1.9596 0.3456
 ```

@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Bayesian Multiplicity Adjustments">
-<meta name="description" content="multibayes provides tools for Bayesian inference and decision-making across multiple parameters.">
-<meta property="og:description" content="multibayes provides tools for Bayesian inference and decision-making across multiple parameters.">
+<meta name="description" content="Tools for making directional claims about many parameters from posterior draws. A prior-odds threshold for the probability of direction accounts for multiplicity: a claim is made only if it holds under every prior in a class that lowers the prior odds of either direction, which raises the threshold that the probability of direction must exceed. Joint posterior probabilities of sets of directional claims and simultaneous credible intervals are also provided.">
+<meta property="og:description" content="Tools for making directional claims about many parameters from posterior draws. A prior-odds threshold for the probability of direction accounts for multiplicity: a claim is made only if it holds under every prior in a class that lowers the prior odds of either direction, which raises the threshold that the probability of direction must exceed. Joint posterior probabilities of sets of directional claims and simultaneous credible intervals are also provided.">
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script>
 </head>
 <body>
@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">multibayes</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="multibayes">multibayes<a class="anchor" aria-label="anchor" href="#multibayes"></a>
 </h1></div>
-<p><strong>multibayes</strong> provides tools for <strong>Bayesian multiplicity adjustments</strong>. Direction-agnostic and directional tests are supported, and can be mixed freely within a single call.</p>
+<p><strong>multibayes</strong> provides tools for making directional claims about many parameters from posterior draws. Direction-agnostic and directional tests are supported, and can be mixed freely within a single call.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -69,27 +69,34 @@
 <thead><tr>
 <th>Function</th>
 <th>Input</th>
-<th>Correction type</th>
+<th>What it returns</th>
 </tr></thead>
 <tbody>
 <tr>
 <td><code><a href="reference/pd.adjust.html">pd.adjust()</a></code></td>
 <td>Posterior draws or <em>pd</em> vector</td>
-<td>Prior-odds adjustment for <em>pd</em> (per-test)</td>
+<td>Prior-odds threshold <em>c*</em> for the probability of direction (per test)</td>
 </tr>
 <tr>
 <td><code><a href="reference/joint.html">joint()</a></code></td>
 <td>Posterior draws</td>
-<td>Joint probability (directional) statements (default) or simultaneous credible intervals (<code>interval = TRUE</code>)</td>
+<td>Joint probability of the strongest directional claims (default) or simultaneous credible intervals (<code>interval = TRUE</code>)</td>
 </tr>
 </tbody>
 </table>
+<p><code><a href="reference/pd.adjust.html">pd.adjust()</a></code> asks for a single quantity, <code>pi0</code>: an upper bound, set by you, on the prior probability of the sign opposite to the claimed one. Because the same <code>pi0</code> is used for every parameter, it is also an upper bound on the expected proportion of parameters in the family that are not on the claimed side, null effects included, so a judgment about how many null effects the family could contain can guide its choice. Alternatively, <code>p0</code> is the largest prior probability that no claim in the family is correct, with <code>pi0 = p0^(1/m)</code> for <code>m</code> tests that are independent a priori, so that <code>pi0</code> grows with the number of tests. A claim is made only if it holds under every prior that lowers the prior odds of either direction by up to <code>pi0/(1 - pi0)</code>, which raises the threshold on <em>pd</em> from <code>c</code> (default 0.975) to <code>c*</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mar-cald/multibayes" class="external-link">multibayes</a></span><span class="op">)</span></span>
+<span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MASS/man/mvrnorm.html" class="external-link">mvrnorm</a></span><span class="op">(</span><span class="fl">4000</span>, mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.2</span>, <span class="fl">3</span><span class="op">)</span>, Sigma <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b1"</span>, <span class="st">"b2"</span>, <span class="st">"b3"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, pi0 <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span>   <span class="co"># claim a direction when pd.adj &gt; c (pd &gt; c*)</span></span>
+<span><span class="fu"><a href="reference/joint.html">joint</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span>                          <span class="co"># joint probability of the top-k claims</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <blockquote>
-<p>Calderan, M., Gambarota, F., Finos, L., &amp; Altoè, G. (n.d.). A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing. Retrieved from osf.io/preprints/psyarxiv/8zwx2_v2</p>
+<p>Calderan, M., Gambarota, F., Finos, L., &amp; Altoè, G. (n.d.). A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing. Retrieved from <a href="https://osf.io/preprints/psyarxiv/8zwx2_v2" class="external-link uri">https://osf.io/preprints/psyarxiv/8zwx2_v2</a></p>
 </blockquote>
 <p>Run <code>citation("multibayes")</code> in R for the full reference (article and package entries).</p>
 <hr>
