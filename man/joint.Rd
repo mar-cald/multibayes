@@ -21,8 +21,8 @@ joint(
 joint directional statement; if \code{TRUE}, return simultaneous credible
 intervals.}
 
-\item{prob}{Numeric scalar in \eqn{(0, 1)}. Joint coverage probability for the
-simultaneous intervals (default \code{0.95}). Used only when
+\item{prob}{Numeric scalar in \eqn{(0, 1)}. Joint posterior probability that
+all parameters lie within their intervals (default \code{0.95}). Used only when
 \code{interval = TRUE}.}
 
 \item{null.value}{Numeric scalar or vector giving the null reference value(s)
@@ -67,7 +67,7 @@ dependence among parameters.
 \strong{Simultaneous credible intervals} (\code{interval = TRUE}). Equi-tailed
 intervals calibrated so that \strong{all} parameters lie within their bounds
 simultaneously with probability \code{prob}, via the quantile-based
-simultaneous credible band. Coverage is set by examining how extreme each
+simultaneous credible band. The intervals are set by examining how extreme each
 draw is across all parameters jointly: for every draw the minimum (nearer)
 tail probability across parameters is taken, and the threshold is the
 \eqn{(1 - \texttt{prob})}-quantile of these minima. A direction can be claimed

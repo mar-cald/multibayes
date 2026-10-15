@@ -18,7 +18,7 @@
 #' \strong{Simultaneous credible intervals} (\code{interval = TRUE}). Equi-tailed
 #' intervals calibrated so that \strong{all} parameters lie within their bounds
 #' simultaneously with probability \code{prob}, via the quantile-based
-#' simultaneous credible band. Coverage is set by examining how extreme each
+#' simultaneous credible band. The intervals are set by examining how extreme each
 #' draw is across all parameters jointly: for every draw the minimum (nearer)
 #' tail probability across parameters is taken, and the threshold is the
 #' \eqn{(1 - \texttt{prob})}-quantile of these minima. A direction can be claimed
@@ -31,8 +31,8 @@
 #' @param interval Logical (default \code{FALSE}). If \code{FALSE}, return the
 #'   joint directional statement; if \code{TRUE}, return simultaneous credible
 #'   intervals.
-#' @param prob Numeric scalar in \eqn{(0, 1)}. Joint coverage probability for the
-#'   simultaneous intervals (default \code{0.95}). Used only when
+#' @param prob Numeric scalar in \eqn{(0, 1)}. Joint posterior probability that
+#'   all parameters lie within their intervals (default \code{0.95}). Used only when
 #'   \code{interval = TRUE}.
 #' @param null.value Numeric scalar or vector giving the null reference value(s)
 #'   used to define the claimed direction (a scalar is recycled). Used only when
@@ -196,7 +196,7 @@ print.joint_directional <- function(x, digits = 4, ...) {
 #' Print method for simultaneous credible intervals
 #'
 #' Prints the table returned by \code{\link{joint}} with \code{interval = TRUE},
-#' reporting the joint coverage probability once in a header. The full set of
+#' reporting the joint probability once in a header. The full set of
 #' columns remains available for programmatic access via the usual \code{$}
 #' and \code{[}.
 #'
@@ -210,7 +210,7 @@ print.joint_directional <- function(x, digits = 4, ...) {
 #' @export
 print.joint_interval <- function(x, digits = 4, ...) {
   df <- as.data.frame(x)
-  cat(sprintf("Simultaneous credible intervals (joint coverage %.4g)\n\n", df$prob[1]))
+  cat(sprintf("Simultaneous credible intervals (joint probability %.4g)\n\n", df$prob[1]))
   show <- df[, setdiff(names(df), "prob"), drop = FALSE]
   show[] <- lapply(show, round, digits = digits)
   print(show, ...)

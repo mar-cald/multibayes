@@ -9,11 +9,11 @@ bibentry(
     person("Livio", "Finos"),
     person("Gianmarco", "Altoè")
   ),
-  year = "2026",
+  year = "n.d.",
   note = "Preprint",
   url  = "https://osf.io/preprints/psyarxiv/8zwx2_v2",
   textVersion = paste(
-    "Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (2026).",
+    "Calderan, M., Gambarota, F., Finos, L., & Altoè, G. (n.d.).",
     "A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing.",
     "Preprint. https://osf.io/preprints/psyarxiv/8zwx2_v2"
   )

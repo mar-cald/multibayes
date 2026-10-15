@@ -18,7 +18,7 @@
 }
 \description{
 Prints the table returned by \code{\link{joint}} with \code{interval = TRUE},
-reporting the joint coverage probability once in a header. The full set of
+reporting the joint probability once in a header. The full set of
 columns remains available for programmatic access via the usual \code{$}
 and \code{[}.
 }

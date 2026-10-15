@@ -33,9 +33,9 @@ not both. When \code{p0} is given, \eqn{\pi_0} is derived, for parameters
 independent a priori, as \eqn{\pi_0 = \Pr(H_0)^{1/m}}.}
 
 \item{pi0}{Numeric scalar in \eqn{(0, 1)}. An upper bound, set by the
-researcher, on the prior probability that a parameter lies on the side of
-\code{null.value} opposite to the claimed one (or equals
-\code{null.value}). Because the same \code{pi0} is applied to every test,
+researcher, on the prior probability that a parameter lies on either side
+of \code{null.value}, and hence on the side opposite to whichever one is
+claimed. Because the same \code{pi0} is applied to every test,
 it is also an upper bound on the expected proportion of parameters in the
 family that are not on the claimed side, null effects included, so a
 judgment about how many null effects the family could contain can guide
@@ -48,7 +48,7 @@ which the posterior is evaluated, specified on the scale of the posterior.
 A single scalar applies the same null to all parameters; a vector of length \code{ncol(draws)}
 assigns a distinct null to each parameter. Ignored when \code{pd} is supplied directly.
 Defaults to \code{0}. The class of priors behind the threshold is defined
-for a within-model prior symmetric about the null value (see Details), which
+for an estimation prior symmetric about the null value (see Details), which
 holds for flat priors and for priors centred on it.}
 
 \item{direction}{Character vector of \code{"greater"}, \code{"less"}, or
@@ -106,24 +106,24 @@ The threshold \code{threshold.adj} is an exact function of \eqn{c} and
 }
 \description{
 Converts an upper bound, set by the researcher, on the prior probability
-of the sign opposite to the claimed one into the threshold that \emph{pd}
-must exceed before a direction is claimed. The function
+of either sign of a parameter into the threshold that \emph{pd}
+must reach before a direction is claimed. The function
 accepts either a vector of pre-computed \emph{pd} values or a matrix of
 posterior draws, from which \emph{pd} values are computed internally. Both
 direction-agnostic and directional tests are supported: the
 \code{direction} argument controls how \emph{pd} is computed per
 hypothesis. The threshold is governed by \eqn{\pi_0} (argument
 \code{pi0}), the upper bound on the prior probability that a parameter lies
-on the side of \code{null.value} opposite to the claimed one (or equals
-\code{null.value}). Equivalently, one may supply \eqn{\Pr(H_0)} (argument
+on either side of \code{null.value}, and hence on the side opposite to
+whichever one is claimed. Equivalently, one may supply \eqn{\Pr(H_0)} (argument
 \code{p0}), the largest prior probability that no claim in the family is
 correct, from which \eqn{\pi_0 = \Pr(H_0)^{1/m}} is recovered if the
 parameters are independent a priori. For each hypothesis the function also
 reports \code{pd.adj}, the posterior probability of the claimed direction
 (favoured or predicted) under the prior in the class most skeptical of it;
 under the same prior the other side has probability \code{1 - pd.adj}, so
-the two sum to one. A direction is claimed when \code{pd.adj} exceeds
-\eqn{c}, which is the same as \eqn{pd > c^*}.
+the two sum to one. A direction is claimed when \code{pd.adj} is at least
+\eqn{c}, which is the same as \eqn{pd \ge c^*}.
 }
 \details{
 Following Jeffreys (1938) and Westfall et al. (1997), the prior odds of each
@@ -132,32 +132,31 @@ is the same for any number of tests; with \code{p0},
 \eqn{\pi_0 = \Pr(H_0)^{1/m}} and the penalty grows with the number of
 tests. Because the
 direction of a claim is chosen by the data, the penalty is applied over a
-class of priors: the within-model prior is reweighted on the two sides of
+class of priors: the estimation prior (the prior of the fitted model) is
+reweighted on the two sides of
 \code{null.value}, so that the prior probability of each direction lies
 between \eqn{1-\pi_0} and \eqn{\pi_0}, and a claim is made only if its
-posterior probability exceeds \eqn{c} under every prior in the class. For
-parameters with independent posteriors, this is equivalent to
-\deqn{pd > c^*, \qquad c^* = \frac{c\,\pi_0}{(1-c)(1-\pi_0) + c\,\pi_0},}
+posterior probability is at least \eqn{c} under every prior in the class that
+reweights the prior of that parameter. This is equivalent to
+\deqn{pd \ge c^*, \qquad c^* = \frac{c\,\pi_0}{(1-c)(1-\pi_0) + c\,\pi_0},}
 and the function reports \eqn{c^*} (\code{threshold.adj}). The smallest
 posterior probability is reached under the prior that gives the claimed
 direction probability \eqn{1 - \pi_0}; under that prior the posterior
 probability of the claimed direction is
 \deqn{pd_{adj} = \frac{pd\,(1-\pi_0)}{pd\,(1-\pi_0) + (1-pd)\,\pi_0},}
-reported as \code{pd.adj}, and \eqn{pd_{adj} > c} if and only if
-\eqn{pd > c^*}. With correlated
-posteriors, the bound over the class can be stricter than this rule. The
-posterior used for estimation is not modified. The class is defined for a
-within-model prior that is symmetric about \code{null.value}, as are priors
+reported as \code{pd.adj}, and \eqn{pd_{adj} \ge c} if and only if
+\eqn{pd \ge c^*}. The posterior used for estimation is not modified. The
+class is defined for an estimation prior that is symmetric about \code{null.value}, as are priors
 centred on it and, as a limit, flat priors.
 
 \strong{Direction-agnostic tests} (\code{"two.sided"}): \emph{pd} is
 \eqn{\max\!\big(\Pr(\theta > \theta_\text{null} \mid y),\,
 \Pr(\theta < \theta_\text{null} \mid y)\big)} on \eqn{[0.5, 1]}, and a
-claim is made in the favoured direction when \eqn{pd > c^*}.
+claim is made in the favoured direction when \eqn{pd \ge c^*}.
 
 \strong{Directional tests} (\code{"greater"} or \code{"less"}): \emph{pd}
 is the posterior mass on the predicted side, on \eqn{[0, 1]}, and the
-predicted direction is claimed when \eqn{pd > c^*}.
+predicted direction is claimed when \eqn{pd \ge c^*}.
 
 Mixed use of directional and direction-agnostic tests within the same call
 is supported: each element of \code{direction} is handled independently,

@@ -19,7 +19,8 @@ remotes::install_github("mar-cald/multibayes")
 | `joint()` | Posterior draws | Joint probability of the strongest directional claims (default) or simultaneous credible intervals (`interval = TRUE`) |
 
 `pd.adjust()` asks for a single quantity, `pi0`: an upper bound, set by you,
-on the prior probability of the sign opposite to the claimed one. Because the
+on the prior probability of either sign of a parameter, and hence of the sign
+opposite to whichever one is claimed. Because the
 same `pi0` is used for every parameter, it is also an upper bound on the
 expected proportion of parameters in the family that are not on the claimed
 side, null effects included, so a judgment about how many null effects the
@@ -27,15 +28,15 @@ family could contain can guide its choice.
 Alternatively, `p0` is the largest prior probability that no claim in the
 family is correct, with `pi0 = p0^(1/m)` for `m` tests that are independent a priori, so that `pi0` grows with
 the number of tests. A claim is made only if
-it holds under every prior that lowers the prior odds of either direction by up
-to `pi0/(1 - pi0)`, which raises the threshold on *pd* from `c` (default
-0.975) to `c*`.
+it holds under every prior that lowers the prior odds of either direction by a
+factor of up to `pi0/(1 - pi0)`, which raises the threshold on *pd* from `c`
+(default 0.975) to `c*`.
 
 ```r
 library(multibayes)
 draws <- MASS::mvrnorm(4000, mu = c(1, 0.2, 3), Sigma = diag(3))
 colnames(draws) <- c("b1", "b2", "b3")
-pd.adjust(draws = draws, pi0 = 0.7)   # claim a direction when pd.adj > c (pd > c*)
+pd.adjust(draws = draws, pi0 = 0.7)   # claim a direction when pd.adj >= c (pd >= c*)
 joint(draws)                          # joint probability of the top-k claims
 ```
 

@@ -100,7 +100,7 @@ test_that("joint() outputs are classed data frames with print methods", {
   expect_s3_class(ji, "data.frame")
   expect_output(print(js), "Joint directional statement")
   expect_output(print(js), "null value = 0, direction = two.sided", fixed = TRUE)
-  expect_output(print(ji), "Simultaneous credible intervals (joint coverage 0.95)", fixed = TRUE)
+  expect_output(print(ji), "Simultaneous credible intervals (joint probability 0.95)", fixed = TRUE)
   capture.output(res_js <- print(js), res_ji <- print(ji))
   expect_identical(res_js, js)
   expect_identical(res_ji, ji)

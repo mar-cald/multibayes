@@ -58,15 +58,15 @@ test_that("pd.adj is the posterior under the most skeptical prior and matches c*
   expect_equal(out$pd.adj, round(expected, 4))
   # posterior odds under the skeptical prior = Bayes factor x prior odds
   expect_equal(expected / (1 - expected), pd / (1 - pd) * (1 - pi0) / pi0)
-  # pd.adj > c if and only if pd > c*
-  expect_identical(expected > c0, pd > attr(out, "threshold.adj"))
+  # pd.adj >= c if and only if pd >= c*
+  expect_identical(expected >= c0, pd >= attr(out, "threshold.adj"))
   # no floor: values below .5 are kept
   expect_lt(out$pd.adj[1], 0.5)
   # pi0 = .5 leaves pd unchanged
   expect_equal(pd.adjust(pd = pd, pi0 = 0.5)$pd.adj, round(pd, 4))
   txt <- capture.output(print(out))
   expect_true(any(grepl("pd.adj: Pr(claimed direction | y)", txt, fixed = TRUE)))
-  expect_true(any(grepl("Claim a direction when pd.adj > 0.975", txt, fixed = TRUE)))
+  expect_true(any(grepl("Claim a direction when pd.adj >= 0.975", txt, fixed = TRUE)))
 })
 
 test_that("the threshold reproduces the decision under the most skeptical prior of the class", {
@@ -207,9 +207,9 @@ test_that("pd.adjust() reports the adjusted threshold and effective alpha", {
   expect_equal(attr(out, "alpha.nominal"), 2 * (1 - cc))
   expect_equal(attr(out, "alpha.eff"),     2 * (1 - cst))
 
-  # equivalence: penalized odds > c/(1 - c)  <=>  pd > c*
+  # equivalence: penalized odds >= c/(1 - c)  <=>  pd >= c*
   shifted <- out$pd * (1 - pi0) / (out$pd * (1 - pi0) + (1 - out$pd) * pi0)
-  expect_equal(shifted > 0.975, out$pd > cst)
+  expect_equal(shifted >= 0.975, out$pd >= cst)
 })
 
 test_that("pd.adjust() honours a custom threshold and validates it", {
@@ -218,7 +218,7 @@ test_that("pd.adjust() honours a custom threshold and validates it", {
   cst <- (0.95 * 0.7) / ((1 - 0.7) * (1 - 0.95) + 0.95 * 0.7)
   expect_equal(attr(out, "threshold.adj"), cst)
   shifted <- out$pd * (1 - 0.7) / (out$pd * (1 - 0.7) + (1 - out$pd) * 0.7)
-  expect_equal(shifted > 0.95, out$pd > cst)
+  expect_equal(shifted >= 0.95, out$pd >= cst)
 
   expect_error(pd.adjust(pd = pd, pi0 = 0.7, threshold = 0.4),
                "`threshold`: must be a single number")

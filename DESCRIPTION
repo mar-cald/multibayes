@@ -15,7 +15,7 @@ Description: Tools for making directional claims about many parameters from
     posterior draws. A prior-odds threshold for the probability of direction
     accounts for multiplicity: a claim is made only if it holds under
     every prior in a class that lowers the prior odds of either direction,
-    which raises the threshold that the probability of direction must exceed.
+    which raises the threshold that the probability of direction must reach.
     Joint posterior probabilities of sets of directional claims and
     simultaneous credible intervals are also provided.
 License: GPL-3
