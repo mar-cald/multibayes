@@ -68,7 +68,7 @@ sim_ind <- function(n, m, r, s, eff, nsim, pi0_true, compare = FALSE) {
 
 ## threshold c* of the prior-odds rule for a specified pi0, from
 ## multibayes::pd.adjust() (c = .975; pi0 = .5 gives the unadjusted rule)
-cstar <- function(pi0) attr(multibayes::pd.adjust(pd = 0.5, pi0 = pi0), "threshold.adj")
+cstar <- function(pi0) attr(multibayes::pd.adjust(pd = 0.5, pi.max = pi0), "threshold.adj")
 
 ## FWER, average power and FDR of one procedure in one cell: the prior-odds
 ## rule (pd >= c*) for a given pi0, or the stored claims of the joint statement

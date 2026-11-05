@@ -7,38 +7,38 @@
 #' posterior draws, from which \emph{pd} values are computed internally. Both
 #' direction-agnostic and directional tests are supported: the
 #' \code{direction} argument controls how \emph{pd} is computed per
-#' hypothesis. The threshold is governed by \eqn{\pi_0} (argument
-#' \code{pi0}), the upper bound on the prior probability that a parameter lies
-#' on either side of \code{null.value}, and hence on the side opposite to
-#' whichever one is claimed. Equivalently, one may supply \eqn{\Pr(H_0)} (argument
+#' hypothesis. The threshold is governed by \eqn{\bar{\pi}} (argument
+#' \code{pi.max}), an upper bound, set by the researcher before the data, on
+#' the prior probability of each direction of a parameter (either side of
+#' \code{null.value}). Equivalently, one may supply \eqn{\Pr(H_0)} (argument
 #' \code{p0}), the largest prior probability that no claim in the family is
-#' correct, from which \eqn{\pi_0 = \Pr(H_0)^{1/m}} is recovered if the
+#' correct, from which \eqn{\bar{\pi} = \Pr(H_0)^{1/m}} is recovered if the
 #' parameters are independent a priori. For each hypothesis the function also
-#' reports \code{pd.adj}, the posterior probability of the claimed direction
-#' (favoured or predicted) under the prior in the class most skeptical of it;
+#' reports \code{pd.adj}, the posterior probability of the favored (or
+#' predicted) direction under the prior in the class most skeptical of it;
 #' under the same prior the other side has probability \code{1 - pd.adj}, so
 #' the two sum to one. A direction is claimed when \code{pd.adj} is at least
 #' \eqn{c}, which is the same as \eqn{pd \ge c^*}.
 #'
 #' @details
 #' Following Jeffreys (1938) and Westfall et al. (1997), the prior odds of each
-#' directional claim in the family are penalized. With \code{pi0} the penalty
+#' directional claim in the family are penalized. With \code{pi.max} the penalty
 #' is the same for any number of tests; with \code{p0},
-#' \eqn{\pi_0 = \Pr(H_0)^{1/m}} and the penalty grows with the number of
+#' \eqn{\bar{\pi} = \Pr(H_0)^{1/m}} and the penalty grows with the number of
 #' tests. Because the
 #' direction of a claim is chosen by the data, the penalty is applied over a
 #' class of priors: the estimation prior (the prior of the fitted model) is
 #' reweighted on the two sides of
 #' \code{null.value}, so that the prior probability of each direction lies
-#' between \eqn{1-\pi_0} and \eqn{\pi_0}, and a claim is made only if its
+#' between \eqn{1-\bar{\pi}} and \eqn{\bar{\pi}}, and a claim is made only if its
 #' posterior probability is at least \eqn{c} under every prior in the class that
 #' reweights the prior of that parameter. This is equivalent to
-#' \deqn{pd \ge c^*, \qquad c^* = \frac{c\,\pi_0}{(1-c)(1-\pi_0) + c\,\pi_0},}
+#' \deqn{pd \ge c^*, \qquad c^* = \frac{c\,\bar{\pi}}{(1-c)(1-\bar{\pi}) + c\,\bar{\pi}},}
 #' and the function reports \eqn{c^*} (\code{threshold.adj}). The smallest
-#' posterior probability is reached under the prior that gives the claimed
-#' direction probability \eqn{1 - \pi_0}; under that prior the posterior
-#' probability of the claimed direction is
-#' \deqn{pd_{adj} = \frac{pd\,(1-\pi_0)}{pd\,(1-\pi_0) + (1-pd)\,\pi_0},}
+#' posterior probability is reached under the prior that gives the favored
+#' direction probability \eqn{1 - \bar{\pi}}; under that prior the posterior
+#' probability of the favored direction is
+#' \deqn{pd_{adj} = \frac{pd\,(1-\bar{\pi})}{pd\,(1-\bar{\pi}) + (1-pd)\,\bar{\pi}},}
 #' reported as \code{pd.adj}, and \eqn{pd_{adj} \ge c} if and only if
 #' \eqn{pd \ge c^*}. The posterior used for estimation is not modified. The
 #' class is defined for an estimation prior that is symmetric about \code{null.value}, as are priors
@@ -67,18 +67,19 @@
 #'   according to \code{direction} and \code{null.value}.
 #' @param p0 Numeric scalar in \eqn{(0, 1)}. The largest prior probability
 #'   that \strong{no} directional claim in the family is correct
-#'   (\eqn{\Pr(H_0)}). Supply \strong{either} \code{pi0} \strong{or} \code{p0},
-#'   not both. When \code{p0} is given, \eqn{\pi_0} is derived, for parameters
-#'   independent a priori, as \eqn{\pi_0 = \Pr(H_0)^{1/m}}.
-#' @param pi0 Numeric scalar in \eqn{(0, 1)}. An upper bound, set by the
-#'   researcher, on the prior probability that a parameter lies on either side
-#'   of \code{null.value}, and hence on the side opposite to whichever one is
-#'   claimed. Because the same \code{pi0} is applied to every test,
-#'   it is also an upper bound on the expected proportion of parameters in the
-#'   family that are not on the claimed side, null effects included, so a
-#'   judgment about how many null effects the family could contain can guide
-#'   its choice. Values below 0.5 are set
-#'   to 0.5, with a warning, so that no penalty is applied. Supply \strong{either} \code{pi0} \strong{or}
+#'   (\eqn{\Pr(H_0)}). Supply \strong{either} \code{pi.max} \strong{or} \code{p0},
+#'   not both. When \code{p0} is given, \eqn{\bar{\pi}} is derived, for parameters
+#'   independent a priori, as \eqn{\bar{\pi} = \Pr(H_0)^{1/m}}.
+#' @param pi.max Numeric scalar in \eqn{(0, 1)}. An upper bound, set by the
+#'   researcher before the data, on the prior probability of each direction of
+#'   a parameter (either side of \code{null.value}); a claim is made only if it
+#'   holds under the prior most skeptical of it. When the same \code{pi.max} is
+#'   applied to exchangeable parameters, it is also an upper bound on the
+#'   expected proportion of parameters in the family that are not on a given
+#'   side of \code{null.value}. Since null effects are among them, a judgment
+#'   about how many null effects the family could contain can guide its
+#'   choice. Values below 0.5 are set to 0.5, with a warning, so that no
+#'   penalty is applied. Supply \strong{either} \code{pi.max} \strong{or}
 #'   \code{p0}, not both.
 #' @param null.value Numeric scalar or vector. The null (reference) value against
 #'  which the posterior is evaluated, specified on the scale of the posterior.
@@ -104,8 +105,8 @@
 #' @param threshold Numeric scalar in \eqn{(0.5, 1)}. The threshold \eqn{c}
 #'   on \emph{pd} without penalty (default \code{0.975}, a two-sided per-test
 #'   \eqn{\alpha = 0.05}). The function reports the threshold implied by
-#'   \eqn{c} and \code{pi0},
-#'   \eqn{c^* = c\,\pi_0 / ((1-\pi_0)(1-c) + c\,\pi_0)}.
+#'   \eqn{c} and \code{pi.max},
+#'   \eqn{c^* = c\,\bar{\pi} / ((1-\bar{\pi})(1-c) + c\,\bar{\pi})}.
 #' @param alpha Optional numeric scalar in \eqn{(0, 1)}. A convenience
 #'   parameterization of \code{threshold} on the error scale: when supplied, the
 #'   two-sided cutoff is set to \eqn{c = 1 - \alpha/2} (so \code{alpha = 0.05}
@@ -116,13 +117,13 @@
 #'   dedicated \code{\link{print.pd_adjust}} method), with one row per
 #'   hypothesis. Columns: \code{pd} (the probability of direction, to be
 #'   compared with \code{threshold.adj}), \code{pd.adj} (the posterior
-#'   probability of the claimed direction under the prior in the class most
-#'   skeptical of it, to be compared with \code{threshold}), \code{pi0},
+#'   probability of the favored direction under the prior in the class most
+#'   skeptical of it, to be compared with \code{threshold}), \code{pi.max},
 #'   \code{m}, and \code{direction}. When
 #'   \code{order = TRUE} the rows are sorted by decreasing \code{pd}. When
 #'   \code{draws} are supplied, the output additionally includes
 #'   \code{median.est} (posterior median per parameter) and \code{null.value}.
-#'   The \code{print} method shows \eqn{m}, \eqn{\pi_0}, the thresholds
+#'   The \code{print} method shows \eqn{m}, \eqn{\bar{\pi}}, the thresholds
 #'   \eqn{c} and \eqn{c^*}, and the columns that are constant across rows
 #'   (\code{null.value}, \code{direction}) in a header, followed by the per-test table; all columns remain
 #'   available for programmatic access.
@@ -132,7 +133,7 @@
 #'   (\eqn{2(1-c)}) and \code{alpha.eff} (\eqn{2(1-c^*)}); retrieve them with, e.g.,
 #'   \code{attr(x, "threshold.adj")}.
 #'   The threshold \code{threshold.adj} is an exact function of \eqn{c} and
-#'   \eqn{\pi_0}, but the reported per-test \emph{rate} \code{alpha.eff} uses the identity
+#'   \eqn{\bar{\pi}}, but the reported per-test \emph{rate} \code{alpha.eff} uses the identity
 #'   \eqn{\alpha = 2(1 - c)}, which holds **only when the null \emph{pd} is approximately uniform on
 #'   \eqn{[0.5, 1]}**.
 #'
@@ -163,8 +164,8 @@
 #' H5 = 0.891, H6 = 0.987)
 #' pd.adjust(pd = pd_values, p0 = 0.4)
 #'
-#' # Equivalent call specifying pi0 directly
-#' pd.adjust(pd = pd_values, pi0 = 0.4^(1/6))
+#' # Equivalent call specifying pi.max directly
+#' pd.adjust(pd = pd_values, pi.max = 0.4^(1/6))
 #'
 #' # Simulate draws
 #' Sigma <- matrix(0, nrow = 6, ncol = 6); diag(Sigma) <- 1
@@ -173,31 +174,31 @@
 #' colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 #'
 #' # From posterior draws
-#' pd.adjust(draws = draws, pi0 = 0.7, null.value = 0)
+#' pd.adjust(draws = draws, pi.max = 0.7, null.value = 0)
 #'
 #' # Order the rows by strength of evidence
-#' pd.adjust(draws = draws, pi0 = 0.7, null.value = 0, order = TRUE)
+#' pd.adjust(draws = draws, pi.max = 0.7, null.value = 0, order = TRUE)
 #'
 #' # Mix of directional and agnostic tests with parameter-specific nulls
-#' pd.adjust(draws = draws, pi0 = 0.6, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
+#' pd.adjust(draws = draws, pi.max = 0.6, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
 #'           direction = c("greater", "two.sided", "greater",
 #'           "two.sided", "greater", "greater"))
 #'
 #' @importFrom stats median
 #' @export
-pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
+pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi.max = NULL,
                       null.value = 0, direction = NULL,
                       order = FALSE, threshold = 0.975,
                       alpha = NULL) {
 
-  if (is.null(p0) == is.null(pi0)) {
-    stop("Specify exactly one of `p0` (largest prior probability that no claim is correct) or `pi0` (upper bound on the prior probability of either sign of a parameter).")
+  if (is.null(p0) == is.null(pi.max)) {
+    stop("Specify exactly one of `p0` (largest prior probability that no claim is correct) or `pi.max` (upper bound on the prior probability of either sign of a parameter).")
   }
   if (!is.null(p0)) {
     stopifnot("`p0`: must be a single number in (0, 1)" = length(p0) == 1L && p0 > 0 && p0 < 1)
   }
-  if (!is.null(pi0)) {
-    stopifnot("`pi0`: must be a single number in (0, 1)" = length(pi0) == 1L && pi0 > 0 && pi0 < 1)
+  if (!is.null(pi.max)) {
+    stopifnot("`pi.max`: must be a single number in (0, 1)" = length(pi.max) == 1L && pi.max > 0 && pi.max < 1)
   }
   if (!is.null(alpha)) {
     stopifnot("`alpha`: must be a single number in (0, 1)" =
@@ -253,25 +254,25 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
 
   # Upper bound on the prior probability of the sign opposite to the claim. If `p0` (the
   # largest prior probability that no claim in the family is correct) is
-  # supplied, pi0 = p0^(1/m) for parameters independent a priori. Below 0.5 the class of priors
-  # is empty, so pi0 is set to 0.5 and no penalty is applied.
-  if (is.null(pi0)) pi0 <- p0^(1 / m)
-  if (pi0 < 0.5) {
-    warning(sprintf("pi0 = %.3g is below 0.5 and was set to 0.5: no penalty is applied and the threshold is left unchanged.", pi0))
-    pi0 <- 0.5
+  # supplied, pi.max = p0^(1/m) for parameters independent a priori. Below 0.5 the class of priors
+  # is empty, so pi.max is set to 0.5 and no penalty is applied.
+  if (is.null(pi.max)) pi.max <- p0^(1 / m)
+  if (pi.max < 0.5) {
+    warning(sprintf("pi.max = %.3g is below 0.5 and was set to 0.5: no penalty is applied and the threshold is left unchanged.", pi.max))
+    pi.max <- 0.5
   }
 
   # A claim is made when its posterior probability is at least `threshold` under
   # every prior in the class; the smallest posterior odds are
-  # pd/(1 - pd) * (1 - pi0)/pi0, so the rule is pd >= threshold.adj.
+  # pd/(1 - pd) * (1 - pi.max)/pi.max, so the rule is pd >= threshold.adj.
   alpha.nominal <- 2 * (1 - threshold)
-  threshold.adj <- (threshold * pi0) / ((1 - pi0) * (1 - threshold) + threshold * pi0)
+  threshold.adj <- (threshold * pi.max) / ((1 - pi.max) * (1 - threshold) + threshold * pi.max)
   alpha.eff <- 2 * (1 - threshold.adj)
 
-  # Posterior probability of the claimed direction under the prior in the class
-  # most skeptical of it (prior probability 1 - pi0 for that direction); the
+  # Posterior probability of the favored direction under the prior in the class
+  # most skeptical of it (prior probability 1 - pi.max for that direction); the
   # other side has probability 1 - pd.adj under the same prior.
-  pd.adj <- pd * (1 - pi0) / (pd * (1 - pi0) + (1 - pd) * pi0)
+  pd.adj <- pd * (1 - pi.max) / (pd * (1 - pi.max) + (1 - pd) * pi.max)
 
   # Row order: by decreasing evidence when `order = TRUE`; otherwise input order.
   ord <- if (isTRUE(order)) order(pd, decreasing = TRUE) else seq_len(m)
@@ -282,7 +283,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
       null.value = null.value,
       pd         = round(pd, 4),
       pd.adj     = round(pd.adj, 4),
-      pi0        = round(rep(pi0, m), 4),
+      pi.max     = round(rep(pi.max, m), 4),
       m          = rep(m, m),
       direction  = direction
     )
@@ -292,7 +293,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
       null.value = NA,
       pd         = round(pd, 4),
       pd.adj     = round(pd.adj, 4),
-      pi0        = round(rep(pi0, m), 4),
+      pi.max     = round(rep(pi.max, m), 4),
       m          = rep(m, m),
       direction  = direction
     )
@@ -314,7 +315,7 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
 
 #' Print method for \code{pd_adjust} objects
 #'
-#' Prints a header with the number of tests \eqn{m}, \eqn{\pi_0}, the
+#' Prints a header with the number of tests \eqn{m}, \eqn{\bar{\pi}}, the
 #' unadjusted threshold \eqn{c} and the adjusted threshold \eqn{c^*} (a
 #' direction is claimed when \eqn{pd \ge c^*}), followed by the per-test table
 #' and a short note on \code{pd.adj}.
@@ -333,16 +334,16 @@ pd.adjust <- function(pd = NULL, draws = NULL, p0 = NULL, pi0 = NULL,
 print.pd_adjust <- function(x, digits = 4, ...) {
   df  <- as.data.frame(x)
   m   <- as.integer(df$m[1])
-  pi0 <- df$pi0[1]
+  pi.max <- df$pi.max[1]
   cat("Prior-odds threshold for directional claims\n")
-  cat(sprintf("  m = %d, pi0 = %.4g\n", m, pi0))
+  cat(sprintf("  m = %d, pi.max = %.4g\n", m, pi.max))
 
   cadj <- attr(x, "threshold.adj")
   if (!is.null(cadj)) {
     cat(sprintf("  c = %.4g, c* = %.4g\n", attr(x, "threshold"), cadj))
   }
 
-  show <- df[, setdiff(names(df), c("pi0", "m")), drop = FALSE]
+  show <- df[, setdiff(names(df), c("pi.max", "m")), drop = FALSE]
   # drop columns that are entirely NA (e.g. median.est / null.value for pd input)
   keep <- !vapply(show, function(col) all(is.na(col)), logical(1))
   show <- show[, keep, drop = FALSE]
@@ -351,8 +352,9 @@ print.pd_adjust <- function(x, digits = 4, ...) {
   cat("\n")
   print(show[, setdiff(names(show), ch$drop), drop = FALSE], digits = digits, ...)
   if ("pd.adj" %in% names(show)) {
-    cat("\npd.adj: Pr(claimed direction | y) under the prior in the class most skeptical\n")
+    cat("\npd.adj: Pr(favored direction | y) under the prior in the class most skeptical\n")
     cat("        of it; 1 - pd.adj is the probability of the other side under that prior.\n")
+    cat("        Below 0.5, the priors in the class disagree on the more probable direction.\n")
     if (!is.null(cadj))
       cat(sprintf("Claim a direction when pd.adj >= %.4g, or equivalently pd >= %.4g.\n",
                   attr(x, "threshold"), cadj))

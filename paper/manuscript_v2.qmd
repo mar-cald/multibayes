@@ -89,9 +89,9 @@ author-note:
     gratitude: ~
     authorship-agreements: ~
 
-abstract: "The probability of direction ($pd$) is increasingly used in psychological research to summarize how strongly the posterior favors one direction of a parameter relative to a null value. Researchers often claim a direction when $pd$ exceeds a fixed threshold, such as .975, and when this rule is applied across many parameters, the probability of at least one wrong directional claim grows with the number of tests. We address this multiplicity with the classical Bayesian response, a penalty on the prior odds of each claim. Because the claimed direction is known only after the data are seen, the researcher sets an upper bound on the prior probability of each side of the null value. A claim is made only if its posterior probability still reaches the threshold when the opposite side receives the bound as its prior probability. If the same bound is used for every parameter, it also caps the expected proportion of parameters in the family that are not on the claimed side. Since null effects are among them, a judgment about how many null effects the family could contain can guide its choice. We evaluate the error rates and power of the rule in simulations varying the sample size, the number of tests, and the bound, set below, at, or above the actual proportion of null effects. We also compare the rule with two other Bayesian multiple-comparison procedures, joint directional statements and simultaneous credible intervals. All three are implemented in an accompanying R package."
+abstract: "Psychologists increasingly report the probability of direction ($pd$), the posterior probability that a parameter lies on the side of the null value favored by the posterior, and claim a direction when $pd$ reaches a fixed threshold such as .975. Applied to many parameters, this rule produces more wrong claims as tests accumulate. We present an adjustment based on the classical Bayesian response to multiplicity, a penalty on the prior odds of each claim. Because the claimed direction is known only after the data, the researcher sets in advance $\\bar{\\pi}$, an upper bound on the prior probability of each direction of a parameter. A claim is made only if its posterior probability still reaches the threshold under the prior most skeptical of it, which is equivalent to a higher threshold for $pd$. The adjustment uses only the $pd$ values and holds whenever the estimation prior, the prior used to fit the model, is continuous and symmetric about the null value. For exchangeable parameters, $\\bar{\\pi}$ also bounds the expected proportion of parameters not on a given side of the null value. Since null effects are among them, a judgment about how many null effects the family could contain can guide its choice. Simulations show how false discovery and family-wise error rates and power depend on $\\bar{\\pi}$, set below, at, or above the actual proportion of null effects, and compare the rule with joint directional statements and simultaneous credible intervals. All three procedures are implemented in the accompanying R package multibayes."
 
-keywords: [probability of direction, multiple testing, prior odds, robust Bayesian analysis, FDR]
+keywords: [probability of direction, multiple testing, prior odds, FDR]
 bibliography: "bibliography.bib"
 reference-section-title: References
 suppress-author-note: false
@@ -142,10 +142,12 @@ execute:
   fig-dpi: 300
 ---
 
+::: {.content-visible when-format="html"}
 ::: callout-warning
 ## Preprint
 
 This manuscript is a **preprint** and has not yet been peer-reviewed. As the content is subject to change, we **welcome** and appreciate any **feedback** you can provide!
+:::
 :::
 
 ```{r}
@@ -200,21 +202,58 @@ load("script/output/df_h0.rda")
 load("script/example/mod_rt.rda")
 ```
 
-Over the past two decades, the use of Bayesian methods in psychological research has grown considerably [@Van2017; @Jevremov2024; @Pfadt2025]. This expansion has, however, been accompanied by practices reminiscent of the "null ritual" in frequentist statistics, where widespread adoption gave way to automatic application rather than principled reasoning [@Gigerenzer2004; @Cohen1994]. Researchers sometimes treat Bayes factor thresholds (e.g., BF > 3) as dichotomous decision rules, or claim that an effect "exists" because the posterior probability of a directional effect exceeds a conventional benchmark such as .975 [@Heck2023; @Kelter2023; @Tendeiro2024; @Hoijtink2016; @Tendeiro2019; @Kruschke2018]. Such cutoffs are convenient, but they encourage all-or-none interpretations, and when these binary judgments are applied repeatedly across many parameters they generate a multiplicity problem no different in kind from the one long recognized in frequentist statistics. 
+Over the past two decades, the use of Bayesian methods in psychological research has grown considerably [@Van2017; @Jevremov2024; @Pfadt2025]. This expansion has, however, been accompanied by practices reminiscent of the "null ritual" in frequentist statistics, where widespread adoption gave way to automatic application rather than principled reasoning [@Gigerenzer2004; @Cohen1994]. Researchers sometimes treat Bayes factor thresholds (e.g., BF > 3) as dichotomous decision rules, or claim that an effect "exists" because the posterior probability of a directional effect exceeds a conventional benchmark such as .975 [@Heck2023; @Kelter2023; @Tendeiro2024; @Hoijtink2016; @Tendeiro2019; @Kruschke2018]. Such cutoffs are convenient, but they encourage all-or-none interpretations. Moreover, when the same cutoff is applied to parameter after parameter, the resulting decisions face the multiplicity problem long recognized in frequentist statistics.
 
 Frequentists developed methods to address this problem, controlling either the Family-Wise Error Rate (FWER; the probability of at least one false positive) or the False Discovery Rate (FDR; the expected proportion of false positives among rejected hypotheses) [@Benjamini1995; @Westfall1993]. These procedures address whether a spurious result enters the literature, but leave unresolved a subtler consequence of the same selection process. When researchers examine many parameters but highlight only the most extreme estimates, selection systematically inflates reported magnitudes [@Gelman2014; @Zwet2021; @Altoe2020]. Bayesian methods can mitigate this overestimation, pulling extreme estimates toward more plausible values through informative priors [@Zwet2022; @Dawid1994] and hierarchical modeling [@Gelman2012; @GelmanBook; @Kruschke2011; @Berry1999]. Magnitude bias and false-positive accumulation are, however, distinct problems. Shrinkage offers no guarantee about the error properties of a decision rule applied across many parameters: if the same cutoff is used repeatedly (e.g., claiming an effect whenever a posterior probability exceeds .975), the probability of spurious findings can remain substantial. Bayesian responses to this issue do exist, such as joint probability statements [@Gelman2000; @Pruzek2016; @Schnell2020; @Box1992] or priors over the hypothesis space that scale with the number of tests [@Scott2006; @Scott2010; @Jeffreys1938; @Westfall1997].
 
 Here we focus on a decision rule based on the probability of direction ($pd$), which is increasingly used in psychological research [@Stone2024; @Brissenden2023; @Hochman2025; @Makowski2020; @Brissenden2024; @Ciranka2026; @Schurr2024; @Ben2022; @Bramley2022]. The $pd$ is the posterior probability that a parameter lies in its dominant direction [@Makowski2019; @Shi2021], and a direction is claimed when $pd$ exceeds a fixed threshold (e.g., $.95$ or $.975$). We examine the frequentist operating characteristics^[Although frequentist and Bayesian frameworks rest on different foundations, examining the frequentist operating characteristics of a Bayesian procedure (how it behaves over repeated use) is a well-established practice [@Zhang2019; @Ventz2015; @Müller2004].] of this rule and address the resulting multiplicity problem with the second strategy noted above, a penalty on the prior odds of each claim. This penalty is the classical Bayesian response to multiplicity, introduced by @Jeffreys1938 and developed by @Westfall1997, and it underlies more recent Bayesian approaches to FDR control [@Scott2006; @Scott2010; @Guo2010; @Abraham2022; @Efron2001; @Storey2003; @Storey2002] as well as the post hoc correction implemented in JASP [@Bergh2020; @deJong2019].
 
-To our knowledge, the penalty has not been applied to $pd$. Because the direction of a claim based on $pd$ is chosen by the data, the penalty cannot be attached to a direction fixed in advance; following the approach of robust Bayesian analysis [@Berger1994], we therefore require each claim to hold under every prior in a class that lowers the prior odds of either direction. A claim is thus made when its posterior probability under the prior in the class most skeptical of it reaches the usual threshold, which is equivalent to raising the threshold that $pd$ must reach. The rule depends on an upper bound $\pi_0$, set by the researcher, on the prior probability of either sign of a parameter, and hence of the sign opposite to whichever one is claimed. When the same bound is used for every parameter in a family, it is also an upper bound on the expected proportion of parameters in the family that are not on the claimed side. Null effects are among them, so a judgment about how many null effects the family could contain can inform its choice.
+To our knowledge, the penalty has not been applied to $pd$. The obstacle is that the direction of a claim based on $pd$ is chosen by the data, so the penalty cannot be attached to a direction fixed in advance. Following robust Bayesian analysis [@Berger1994], we therefore consider a set of priors that lower the prior odds of either direction, and accept a claim only if it holds under all of them, that is, if its posterior probability under the prior most skeptical of it reaches the usual threshold. This is equivalent to raising the threshold that $pd$ must reach. The size of the penalty is set by a single number, $\bar{\pi}$, chosen by the researcher before the data. It is an upper bound on the prior probability of each direction of a parameter. When the parameters in a family are exchangeable, that is, when no parameter is judged more likely than another to lie on a given side of the null value, $\bar{\pi}$ also bounds the expected proportion of parameters in the family that are not on a given side of the null value. Null effects are among them, so a judgment about how many null effects the family could contain can guide the choice of $\bar{\pi}$.
 
-The paper proceeds as follows. We begin by introducing $pd$ and the decision rule based on it, and show that the probability of at least one wrong directional claim grows with the number of tests. We then define the class of priors and derive the posterior probability of a claim under the prior most skeptical of it, together with the equivalent threshold for $pd$. We evaluate the rule through simulation, with values of $\pi_0$ below, equal to, and above the actual proportion of null effects, and compare it with two other Bayesian multiple-comparison procedures. A worked example using the accompanying R package follows, after which we conclude with a general discussion.
+The paper proceeds as follows. We first introduce $pd$ and the rule based on it, and show why the rule produces more false directional claims as the number of tests grows. We then derive the adjustment, which needs only the $pd$ values and amounts to a higher threshold for $pd$, and discuss how to choose $\bar{\pi}$. A simulation study then shows how the FDR, the FWER, and power depend on $\bar{\pi}$, including values below and above the actual proportion of null effects, and compares the rule with joint directional statements and simultaneous credible intervals, which serve different aims. Finally, we illustrate with a worked example the R package `multibayes`, which implements all three procedures, and conclude with a general discussion.
 
 # Probability of Direction
 
 The probability of direction ($pd$) is a posterior summary that quantifies how strongly the posterior distribution favors one direction of a parameter $\theta$ relative to a reference value $\theta_{\text{null}}$ [@Makowski2019]. For a continuous posterior, it can be defined as the larger of the two one-sided posterior probabilities, $pd = \max(\Pr(\theta < \theta_{\text{null}} \mid y),\ \Pr(\theta > \theta_{\text{null}} \mid y))$, and it ranges from .5 (no directional preference) to 1 (all on one side). The $pd$ equals exactly the complement of the one-sided $p$-value when computed on the posterior of a location parameter in exponential-family models estimated under a uniform prior; under a broader class of priors, this correspondence holds approximately [@Marsman2017; @Casella1987; @Shi2021]. For ease of exposition, we set $\theta_{\text{null}} = 0$ throughout; it can take any other value, which is particularly relevant when hypotheses involve a minimum effect of practical interest.
 
-In practice, $pd$ is often used to summarize both the direction and the existence of an effect. This use is clearest when phrased as a decision rule, $pd \geq c$, which requires the posterior to assign at least $c$ probability mass to the side of $0$ it favors. Setting $c = 1 - \alpha/2$ is convenient because it bounds the posterior mass on the other side of $0$ by $\alpha/2$. For concreteness, suppose the posterior favors positive values, so that $pd = \Pr(\theta > 0 \mid y)$. With $\alpha = .05$, $c = .975$, and the rule requires $\Pr(\theta \le 0 \mid y) \leq .025$. The rule $pd \geq .975$ is therefore the same as the common practice of claiming a direction when the central 95% equal-tailed credible interval does not extend past $0$, which is often read as showing that $0$ is relatively implausible. Like the reference value of $0$, the threshold $c = .975$ is chosen only for ease of exposition, and any other posterior probability cutoff can be used.
+In practice, $pd$ is often used to summarize both the direction and the existence of an effect. This use is clearest when phrased as a decision rule, $pd \geq c$, which requires the posterior to assign at least $c$ probability mass to the side of $0$ it favors. Setting $c = 1 - \alpha/2$ is convenient because it bounds the posterior mass on the other side of $0$ by $\alpha/2$. For concreteness, suppose the posterior favors positive values, so that $pd = \Pr(\theta > 0 \mid y)$. With $\alpha = .05$, $c = .975$, and the rule requires $\Pr(\theta \le 0 \mid y) \leq .025$. The rule $pd \geq .975$ is therefore the same as the common practice of claiming an effect when the central 95% equal-tailed credible interval does not extend past $0$ (@fig-pd-ci), which is often read as showing that $0$ is relatively implausible [@Box1992]. Like the reference value of $0$, the threshold $c = .975$ is chosen only for ease of exposition, and any other posterior probability cutoff can be used.
+
+```{r}
+#| label: fig-pd-ci
+#| fig-cap: "The Probability of Direction and the 95% Credible Interval"
+#| apa-note: >
+#|   Two normal posteriors for a parameter $\theta$, with the posterior mass below $0$ in orange and above $0$ in blue; the black bar is the central 95% equal-tailed credible interval. Panel A: $pd \geq .975$, and the interval does not extend past $0$. Panel B: $pd < .975$, and the interval includes $0$.
+#| fig-width: 10.2
+#| fig-height: 3.5
+#| echo: false
+#| message: false
+#| warning: false
+
+# one panel: normal posterior with mean mu and sd s, shaded by side of 0
+pd_ci_plot <- function(mu, s, tag) {
+  x  <- seq(-1, 1, length.out = 2001)
+  d  <- data.frame(x = x, y = dnorm(x, mu, s), side = ifelse(x > 0, "pos", "neg"))
+  ci <- qnorm(c(0.025, 0.975), mu, s)
+  p_pos <- 1 - pnorm(0, mu, s)
+  # plotmath labels, one per line, so theta is drawn as a symbol
+  lab <- c(sprintf('Pr(theta > 0 ~ "|" ~ italic(y)) == "%s"', nz(p_pos, 3)),
+           sprintf('Pr(theta < 0 ~ "|" ~ italic(y)) == "%s"', nz(1 - p_pos, 3)),
+           sprintf('italic(pd) == "%s"', nz(max(p_pos, 1 - p_pos), 3)),
+           sprintf('"95%% CI = [%.2f, %.2f]"', ci[1], ci[2]))
+  ggplot(d, aes(x, y)) +
+    geom_area(aes(fill = side), show.legend = FALSE) +
+    geom_line(linewidth = 0.7) +
+    geom_vline(xintercept = 0, linetype = "dotted", colour = "grey40") +
+    annotate("segment", x = ci[1], xend = ci[2], y = 0, yend = 0, linewidth = 2.5, lineend = "round") +
+    annotate("rect", xmin = -1, xmax = -0.1, ymin = 1.2, ymax = 2.45, fill = "white", colour = "grey30") +
+    annotate("text", x = -0.96, y = c(2.25, 1.95, 1.65, 1.35), label = lab, parse = TRUE, hjust = 0, size = 4.2) +
+    scale_fill_manual(values = c(neg = "#F8A31B", pos = "deepskyblue3")) +
+    scale_x_continuous(breaks = c(-0.5, 0, 0.5, 1)) +
+    labs(x = expression(theta), y = "Posterior density", title = tag) +
+    theme_clean(14) + theme(plot.title = element_text(face = "bold"))
+}
+pd_ci_plot(0.35, 0.16, "A") | pd_ci_plot(0.30, 0.16, "B")
+```
 
 How often the rule $pd \geq c$ claims a direction when $\theta = 0$ depends on how $pd$ varies across repeated samples, and hence on the model and the prior. All illustrations and simulations use the normal model, as a representative case of parameters whose posterior is approximately normal. For a parameter $\theta$, $n$ independent observations are drawn from $\mathcal{N}(\theta, 1)$, and $\theta$ has the prior $\mathcal{N}(0, \tau)$, where $\tau$ is the prior standard deviation, so that the posterior of $\theta$ is also normal. Small values of $\tau$ give a narrow prior, concentrated near $0$, and large values a diffuse one. 
 
@@ -223,7 +262,7 @@ In this model, for a null effect ($\theta = 0$) under a diffuse prior, $pd$ is a
 
 ```{r}
 #| label: fig-uniform-pd
-#| fig-cap: "Distribution of the Probability of Direction When the Parameter Equals 0"
+#| fig-cap: "Distribution of the Probability of Direction Under the Null"
 #| apa-note: >
 #|   Density of $pd$ across repeated samples when $\theta = 0$, for observations $y_i \sim \mathcal{N}(\theta, 1)$ and a normal prior $\theta \sim \mathcal{N}(0, \tau)$, by sample size $n$ (rows) and prior standard deviation $\tau$ (columns). With a diffuse prior ($\tau = 2$), $pd$ is approximately uniform on $[.5, 1]$; a narrow prior ($\tau = 0.2$) shrinks it toward $.5$, especially in small samples. Bin width = 0.025.
 #| fig-height: 4.5
@@ -259,22 +298,55 @@ ggplot(grid_pd, aes(x = mid, y = density)) +
 
 # Penalizing the Prior Odds of a Directional Claim
 
-To limit the false claims that accumulate across tests, we penalize the prior odds of each directional claim, following @Jeffreys1938 and @Westfall1997. Because the penalty acts on the prior odds of the two directions of a parameter, we first write the rule $pd \geq c$ in terms of odds. As in the previous section, suppose that the posterior favors positive values. The claim is then that $\theta > 0$, which we denote $H_{+}$, and the opposite direction, $\theta < 0$, which we denote $H_{-}$. We also assume that the prior specified in the fitted model, which we call the estimation prior because the parameters are estimated under it, is continuous and symmetric about $0$, as are normal priors centered on $0$ and, as a limit, flat priors. The two hypotheses are then equally probable a priori, $\Pr(H_{+}) = \Pr(H_{-}) = .5$, and the prior odds are one. With prior odds of one, the posterior odds equal the Bayes factor, so that $pd/(1 - pd)$ is the Bayes factor for $H_{+}$ against $H_{-}$ [@Marsman2017]. Because $pd \geq c$ is the same as $pd/(1 - pd) \geq c/(1 - c)$, the rule $pd \geq c$ accepts a directional claim whenever this Bayes factor is at least $c/(1 - c)$, with prior odds fixed at one. 
+To limit the false claims that accumulate across tests, we penalize the prior odds of each directional claim, following @Jeffreys1938 and @Westfall1997.
 
-Consider now a family of $m$ tests, indexed by $i = 1, \dots, m$, each concerning a parameter $\theta_i$ with probability of direction $pd_i$. Prior odds of one mean that each sign of each parameter has prior probability $.5$. If the parameters are independent a priori, the prior probability that every parameter lies on the side of $0$ opposite to the one claimed, so that every claim in the family is false, whichever claims are made, an event we denote $H_0$, is therefore $.5^m$, which tends to zero as $m$ grows (for $m = 10$, $.5^{10} \approx .001$). Before any data are observed, the rule thus treats it as nearly certain that at least one claim in a large family is correct. 
+## From the Probability of Direction to the Bayes Factor
 
-With $pd$, the direction of each claim is chosen by the posterior, so the hypotheses to be penalized cannot be stated before the data. We therefore consider priors that change how much probability the estimation prior gives to each side of $0$, while keeping its shape on each side, and require a claim to hold under all of them.
+As in the previous section, suppose that the posterior favors positive values. The claim is then that $\theta > 0$, which we denote $H_{+}$, and the opposite direction, $\theta < 0$, we denote $H_{-}$. We call the prior on $\theta$ specified in the fitted model the *estimation prior*, because the parameters are estimated under it. We assume that it is continuous and symmetric about $0$, as are normal or Student-$t$ priors centered on $0$ and, as a limit, flat priors. Symmetry makes $H_{+}$ and  $H_{-}$ equally probable a priori, $\Pr(H_{+}) = \Pr(H_{-}) = .5$, and after the data $pd = \Pr(H_{+} \mid y)$ and $1 - pd = \Pr(H_{-} \mid y)$.
 
-For example, take the prior $\mathcal{N}(0, \tau)$ of the normal model described above, and let $\mathcal{N}_{-}(0, \tau)$ and $\mathcal{N}_{+}(0, \tau)$ denote this normal truncated to negative and to positive values. The estimation prior is then the equal mixture $.5\,\mathcal{N}_{-} + .5\,\mathcal{N}_{+}$, and for a value $\pi_0$ between $.5$ and $1$ the reweighted prior is $$\pi_0\,\mathcal{N}_{-}(0, \tau) + (1 - \pi_0)\,\mathcal{N}_{+}(0, \tau).$$
-The prior odds of $H_{+}$ are then $(1 - \pi_0)/\pi_0$ instead of one; with $\pi_0 = .7$, for example, $.3/.7 \approx 0.43$. 
+The ratio $pd/(1 - pd)$ is therefore the posterior odds of $H_{+}$ against $H_{-}$, that is, how many times more probable $H_{+}$ is than $H_{-}$ after the data. By Bayes' rule, the posterior odds are the product of two terms,
+$$
+\frac{\Pr(H_{+} \mid y)}{\Pr(H_{-} \mid y)} = \text{BF}_{+-} \times \frac{\Pr(H_{+})}{\Pr(H_{-})}.
+$$
+The second term, the prior odds, says how many times more probable $H_{+}$ is than $H_{-}$ before the data. The first, the Bayes factor $\text{BF}_{+-}$, says by how much the data change these odds. Under the symmetric estimation prior, the prior odds are $.5/.5 = 1$, so the posterior odds equal the Bayes factor [@Marsman2017],
+$$
+\frac{pd}{1 - pd} = \text{BF}_{+-}.
+$$
+For a parameter with $pd = .988$, for example, $\text{BF}_{+-} = .988/.012 \approx 82$, so the data are about 82 times more probable under $H_{+}$ than under $H_{-}$.
 
-The researcher specifies $\pi_0$ before the data, and we consider the class $\Gamma$ of all priors obtained by reweighting the estimation prior in this way, with the probability of each sign of every $\theta_i$ between $1 - \pi_0$ and $\pi_0$. Because the bounds are the same for both signs, $\pi_0$ is an upper bound on the prior probability of either sign of a parameter, and in particular of the sign opposite to the one claimed, whichever sign that is. The estimation prior belongs to $\Gamma$, and with $\pi_0 = .5$ it is the only prior in $\Gamma$, so that no penalty is applied. @fig-class shows the class for $\pi_0 = .7$ and $\pi_0 = .9$.
+The rule $pd \geq c$ can thus be written as a rule on the Bayes factor. Because the odds $pd/(1 - pd)$ increase with $pd$,
+$$
+pd \geq c \quad \Longleftrightarrow \quad \frac{pd}{1 - pd} \geq \frac{c}{1 - c} \quad \Longleftrightarrow \quad \text{BF}_{+-} \geq \frac{c}{1 - c}.
+$$
+With $c = .975$, a direction is claimed whenever the Bayes factor is at least $.975/.025 = 39$. Because the prior odds are fixed at one, the Bayes factor alone decides every claim.
+
+## Prior Odds With Many Tests
+
+Consider now a family of $m$ tests, indexed by $i = 1, \dots, m$, each concerning a parameter $\theta_i$ with probability of direction $pd_i$. Under the symmetric estimation prior, each parameter is equally likely to be positive or negative before the data. Whichever direction is later claimed for a parameter, the claim is therefore false with prior probability $.5$. If the parameters are independent a priori, the prior probability that all $m$ claims are false, an event we denote $H_0$, is the product of these probabilities, $.5^m$. With $m = 5$, $\Pr(H_0) = .5^{5} \approx .03$, so before any data the estimation prior gives probability $1 - .03 = .97$ to at least one claim in the family being correct. This probability approaches one as more parameters are tested, yet the rule $pd \geq c$ requires the same Bayes factor of 39 for every claim.
+
+The classical response to this problem [@Jeffreys1938; @Westfall1997] is to lower the prior odds of each claim, so that a larger Bayes factor is needed before the claim is made. Suppose first that the direction of a parameter is predicted before the data, say $\theta > 0$. The researcher then gives the opposite direction, $H_{-}$, a prior probability $\pi$ larger than $.5$, and $H_{+}$ the probability $1 - \pi$, so the prior odds of $H_{+}$ become $(1 - \pi)/\pi$, below one.
+
+The prior odds can be lowered without changing the shape of the estimation prior on either side of $0$. For the prior $\mathcal{N}(0, \tau)$ of the normal model, let $\mathcal{N}_{-}(0, \tau)$ and $\mathcal{N}_{+}(0, \tau)$ denote this normal truncated to negative and to positive values, so that the estimation prior is $.5\,\mathcal{N}_{-} + .5\,\mathcal{N}_{+}$. The reweighted prior
+$$
+\pi\,\mathcal{N}_{-}(0, \tau) + (1 - \pi)\,\mathcal{N}_{+}(0, \tau)
+$$
+moves probability from the positive to the negative side and keeps the shape within each side. The likelihood averaged over each side, and hence the Bayes factor $pd/(1 - pd)$, is the same as under the estimation prior. Only the prior odds change, and the posterior odds of $H_{+}$ become 
+$$\text{BF}_{+-} \times \frac{1 - \pi}{\pi}.$$
+
+The remaining question is how large $\pi$ should be. @Jeffreys1938 and @Westfall1997 fixed the prior probability of $H_0$ in advance, at the same value whatever the size of the family. With the penalty, $\Pr(H_0) = \pi^m$ for independent parameters, so keeping $\Pr(H_0)$ fixed requires $\pi$ to grow with $m$. Fixing $\Pr(H_0) = .5$, for example, makes the event that all claims are false and the event that at least one claim is correct equally probable before the data, and gives $\pi = .5^{1/m}$, which is $`r nz(.5^(1/2), 2)`$ for $m = 2$, $`r nz(.5^(1/5), 2)`$ for $m = 5$, and $`r nz(.5^(1/20), 2)`$ for $m = 20$. A larger $\pi$ gives smaller prior odds, so the Bayes factor needed for a claim grows with $m$, much as the per-test threshold does in the frequentist Bonferroni correction [@Westfall1997]. In the procedure developed below, the same role is played by $\bar{\pi}$, which is not the prior probability of a direction fixed in advance but an upper bound on the prior probability of either direction.
+
+
+## A Set of Priors for Directions Chosen by the Data
+
+With $pd$, however, the direction of a claim is usually not predicted. It is whichever side the posterior favors, and it is known only after the data. A penalty attached to a direction fixed in advance would then fail. If the researcher lowered the prior odds of $\theta > 0$ but the data favored $\theta < 0$, the claim $\theta < 0$ would receive prior odds above one, a bonus instead of a penalty. Because the penalty must apply to whichever direction the data select, we consider the penalty on each direction at once and require a claim to hold under all of them. 
+
+The researcher fixes the upper bound $\bar{\pi}$, between $.5$ and $1$, before the data. The class $\Gamma$, the set of priors considered, contains every prior obtained by reweighting the two halves of the estimation prior, as above, so that the prior probability of each side of $0$ lies between $1 - \bar{\pi}$ and $\bar{\pi}$. With $\bar{\pi} = .8$, for example, $\Gamma$ contains the prior that gives $\theta < 0$ probability $.8$, the one most skeptical of $\theta > 0$, the prior that gives $\theta > 0$ probability $.8$, the one most skeptical of $\theta < 0$, and every prior in between, including the estimation prior with $.5$ on each side (@fig-class shows the class for $\bar{\pi} = .7$ and $\bar{\pi} = .9$.). 
 
 ```{r}
 #| label: fig-class
-#| fig-cap: "The Class of Priors for Two Values of $\\pi_0$"
+#| fig-cap: "The Class of Priors for Two Values of $\\bar{\\pi}$"
 #| apa-note: >
-#|   The priors in $\Gamma$ reweight the two halves of the estimation prior, here $\mathcal{N}(0, 1)$ (black), keeping the shape of each half; every prior in $\Gamma$, including the estimation prior, lies within the grey band. Panel A: for $\pi_0 = .7$, the prior probability of $\theta > 0$ lies between $.3$ and $.7$; the colored lines are the two extreme priors of the class, the one most skeptical of $\theta > 0$ (solid) and the one most skeptical of $\theta < 0$ (dashed). Panel B: the same for $\pi_0 = .9$, for which the prior probability of $\theta > 0$ lies between $.1$ and $.9$. A larger $\pi_0$ gives a wider class.
+#|   The priors in $\Gamma$ reweight the two halves of the estimation prior, here $\mathcal{N}(0, 1)$ (black), keeping the shape of each half; every prior in $\Gamma$, including the estimation prior, lies within the grey band. Panel A: for $\bar{\pi} = .7$, the prior probability of $\theta > 0$ lies between $.3$ and $.7$; the colored lines are the two extreme priors of the class, the one most skeptical of $\theta > 0$ (solid) and the one most skeptical of $\theta < 0$ (dashed). Panel B: the same for $\bar{\pi} = .9$, for which the prior probability of $\theta > 0$ lies between $.1$ and $.9$. A larger $\bar{\pi}$ gives a wider class.
 #| fig-width: 10
 #| fig-height: 4.6
 #| fig-pos: htbp
@@ -288,7 +360,7 @@ ttl <- theme(legend.position = "top", plot.title = element_text(face = "bold"))
 
 # the estimation prior and the two extreme priors of the class, for a given pi0
 lab3  <- c("mid", "low", "high")
-labx  <- c("Within-model prior",
+labx  <- c("Estimation prior",
            expression("Most skeptical of " * theta > 0),
            expression("Most skeptical of " * theta < 0))
 cols3 <- c(mid = "black", low = "#F8A31B", high = "deepskyblue3")
@@ -307,35 +379,43 @@ class_plot <- function(p0, tag) {
     scale_linetype_manual(values = ltys3, labels = labx) +
     coord_cartesian(ylim = c(0, 2 * 0.9 * dnorm(0))) +
     labs(x = expression(theta), y = "Prior density", colour = NULL, linetype = NULL,
-         title = bquote(bold(.(tag))*"   "*pi[0] == .(sub("^0", "", format(p0))))) +
+         title = bquote(bold(.(tag))*"   "*bar(pi) == .(sub("^0", "", format(p0))))) +
     theme_clean(15) + ttl
 }
 (class_plot(0.7, "A") | class_plot(0.9, "B")) +
   plot_layout(guides = "collect") & theme(legend.position = "top")
 ```
 
-If the parameters are exchangeable, the same $\pi_0$ can be applied to every parameter in the family, and the prior probability that a parameter lies on a given side of $0$ equals the expected proportion of parameters in the family that lie on that side. The bound $\pi_0$ is therefore also an upper bound on the expected proportion of parameters that are not on the claimed side. Priors in $\Gamma$ give no probability to null effects, but a null effect, like a parameter of the opposite sign, does not lie on the claimed side, so a judgment about how many null effects the family could contain can guide the choice of $\pi_0$. Alternatively, $\pi_0$ can be set for the family through the prior probability of $H_0$. If the parameters are independent a priori, the largest value of $\Pr(H_0)$ over $\Gamma$ is $\pi_0^m$, so that $\pi_0 = \Pr(H_0)^{1/m}$. For a fixed $\Pr(H_0)$, $\pi_0$ increases with $m$, so that the class widens as the family grows. With $\Pr(H_0) = .5$, for example, $\pi_0$ is $`r nz(.5^(1/2), 2)`$ for $m = 2$, $`r nz(.5^(1/9), 2)`$ for $m = 9$, and $`r nz(.5^(1/20), 2)`$ for $m = 20$. 
+Because the two bounds are the same for both sides, $\bar{\pi}$ is an upper bound on the prior probability of either sign of a parameter. Whichever sign the data later favor, the opposite sign has therefore received a prior probability of at most $\bar{\pi}$ under every prior in $\Gamma$. With $\bar{\pi} = .5$, the estimation prior is the only prior in $\Gamma$, and no penalty is applied. 
 
-We accept a claim about $\theta_i$ only if its posterior probability is at least $c$ under every prior in $\Gamma$ that reweights the prior of $\theta_i$. These priors share the Bayes factor for $H_{+}$ against $H_{-}$, $pd_i/(1 - pd_i)$, so the model does not need to be refitted. Since the posterior odds are the Bayes factor multiplied by the prior odds, they are smallest under the prior that gives $H_{+}$ the lowest prior probability, $1 - \pi_0$, which we call the most skeptical prior. Under this prior, the posterior probability of $H_{+}$ is
-$$
-pd_{\text{adj},i} = \frac{pd_i\,(1 - \pi_0)}{pd_i\,(1 - \pi_0) + (1 - pd_i)\,\pi_0},
-$$
-and that of $H_{-}$ is $1 - pd_{\text{adj},i}$.
+## The Adjusted Probability of Direction and Its Threshold
 
-A claim is accepted when $pd_{\text{adj},i} \geq c$, which is equivalent to
-$$
-pd_i \geq c^*, \qquad c^* = \frac{c\,\pi_0}{(1 - c)(1 - \pi_0) + c\,\pi_0}.
-$$
-The rule can thus be applied either to $pd_{\text{adj},i}$, with the usual threshold $c$, or to $pd_i$, with the threshold $c^*$, which exceeds $c$ whenever $\pi_0 > .5$. Since $\Gamma$ and $c^*$ are fixed before the data, the data decide only which direction is claimed, and hence which prior in $\Gamma$ is the most skeptical.
+In a family of $m$ parameters, the class $\Gamma$ reweights the prior of each $\theta_i$ in the same way. We accept a claim about $\theta_i$ only if its posterior probability is at least $c$ under every prior in $\Gamma$.
 
-@fig-rule, Panel A, illustrates the rule for $\pi_0 = .7$, for which $c^* = .989$. Each bar spans the posterior probability of $\theta > 0$ across $\Gamma$, and its left end is $pd_{\text{adj}}$. A parameter with $pd = .980$ exceeds $c = .975$ under the estimation prior but not under every prior in $\Gamma$ ($pd_{\text{adj}} = `r nz(.98 * .3 / (.98 * .3 + .02 * .7), 3)`$), so no claim is made, whereas parameters with $pd = .990$ and $pd = .999$ are claimed. With $\pi_0 = .9$ (Panel B), the class is wider (@fig-class, Panel B), and $c^* = `r nz(.975 * .9 / (.025 * .1 + .975 * .9), 3)`$, so only the parameter with $pd = .999$ is claimed.
+All priors in $\Gamma$ keep the shape of each half of the estimation prior, so they all share the Bayes factor $pd_i/(1 - pd_i)$, and the model does not need to be refitted. They differ only in the prior odds of the claimed direction, $H_{+}$ in our example, which range from $(1 - \bar{\pi})/\bar{\pi}$ to $\bar{\pi}/(1 - \bar{\pi})$. Since the posterior odds are the Bayes factor multiplied by the prior odds, they are smallest under the prior that gives $H_{+}$ the lowest prior probability, $1 - \bar{\pi}$, which we call the prior most skeptical of the claim. If the claim holds under this prior, it holds under every prior in $\Gamma$. Under the most skeptical prior, the posterior odds of $H_{+}$ are
+$$
+\frac{pd_i}{1 - pd_i} \times \frac{1 - \bar{\pi}}{\bar{\pi}},
+$$
+and converting these odds into a probability, gives the posterior probability of $H_{+}$,
+$$
+pd_{\text{adj},i} = \frac{pd_i\,(1 - \bar{\pi})}{pd_i\,(1 - \bar{\pi}) + (1 - pd_i)\,\bar{\pi}}.
+$$
+Under the same prior, the posterior probability of $H_{-}$ is $1 - pd_{\text{adj},i}$, so the two sum to one. For the parameter with $pd = .988$ and $\bar{\pi} = .8$, $pd_{\text{adj}} \approx .954$. The value of $pd_{\text{adj}}$ can fall below $.5$ when the evidence is weak. With $\bar{\pi} = .8$, the most skeptical prior gives the direction favored by the posterior prior odds of $.25$, so its posterior odds stay below one whenever the Bayes factor is below $4$, that is, whenever $pd < .8$. A parameter with $pd = .7$, for example, has $pd_{\text{adj}} = (.7 \times .2)/(.7 \times .2 + .3 \times .8) \approx .37$. Under the prior in $\Gamma$ most favorable to this direction, its posterior probability is instead $(.7 \times .8)/(.7 \times .8 + .3 \times .2) \approx .90$, so across $\Gamma$ it ranges from $.37$ to $.90$. Some priors in $\Gamma$ make this direction the more probable one, and others make the opposite direction more probable. A value of $pd_{\text{adj}}$ below $.5$ therefore does not indicate evidence for the opposite direction. It means that, with the skepticism allowed by $\bar{\pi}$, the data do not establish even which direction is more probable.
+
+A claim is accepted when $pd_{\text{adj},i} \geq c$. Since $pd_{\text{adj},i}$ increases with $pd_i$, this is equivalent to $pd_i$ reaching the value at which $pd_{\text{adj},i} = c$, which is
+$$
+c^* = \frac{c\,\bar{\pi}}{(1 - c)(1 - \bar{\pi}) + c\,\bar{\pi}}.
+$$
+In terms of the Bayes factor, the unadjusted rule requires at least $c/(1 - c)$, and the adjusted rule requires this value multiplied by $\bar{\pi}/(1 - \bar{\pi})$. With $c = .975$ and $\bar{\pi} = .8$, the required Bayes factor rises from 39 to $39 \times 4 = 156$, and $c^* = `r nz(.975 * .8 / (.025 * .2 + .975 * .8), 4)`$. The rule can thus be applied either to $pd_{\text{adj},i}$, with the usual threshold $c$, or to $pd_i$, with the threshold $c^*$, which exceeds $c$ whenever $\bar{\pi} > .5$. Since $\Gamma$ and $c^*$ are fixed before the data, the data decide only which direction is claimed, and hence which prior in $\Gamma$ is the most skeptical.
+
+@fig-rule, Panel A, illustrates the rule for $\bar{\pi} = .7$, for which $c^* = .989$. Each bar spans the posterior probability of $\theta > 0$ across $\Gamma$, and its left end is $pd_{\text{adj}}$. A parameter with $pd = .980$ exceeds $c = .975$ under the estimation prior but not under every prior in $\Gamma$ ($pd_{\text{adj}} = `r nz(.98 * .3 / (.98 * .3 + .02 * .7), 3)`$), so no claim is made, whereas parameters with $pd = .990$ and $pd = .999$ are claimed. With $\bar{\pi} = .9$ (Panel B), the class is wider (@fig-class, Panel B), and $c^* = `r nz(.975 * .9 / (.025 * .1 + .975 * .9), 3)`$, so only the parameter with $pd = .999$ is claimed.
 
 ```{r}
 #| label: fig-rule
 #| dependson: fig-class
-#| fig-cap: "The Resulting Rule for Two Values of $\\pi_0$"
+#| fig-cap: "The Resulting Rule for Two Values of $\\bar{\\pi}$"
 #| apa-note: >
-#|   For four parameters, the range of the posterior probability of $\theta > 0$ across $\Gamma$ (bars), whose left end is $pd_{\text{adj}}$, and its value under the estimation prior, $pd$ (circles). A claim is made only when the whole bar lies at or above $c = .975$ (dashed line), that is, when $pd_{\text{adj}} \geq c$, which is equivalent to $pd \geq c^*$. Panel A: for $\pi_0 = .7$, $c^* = .989$. Panel B: for $\pi_0 = .9$, $c^* = .997$. A larger $\pi_0$ gives a wider class and longer bars, so fewer parameters are claimed; note the different scales of the x-axes.
+#|   For four parameters, the range of the posterior probability of $\theta > 0$ across $\Gamma$ (bars), whose left end is $pd_{\text{adj}}$, and its value under the estimation prior, $pd$ (circles). A claim is made only when the whole bar lies at or above $c = .975$ (dashed line), that is, when $pd_{\text{adj}} \geq c$, which is equivalent to $pd \geq c^*$. Panel A: for $\bar{\pi} = .7$, $c^* = .989$. Panel B: for $\bar{\pi} = .9$, $c^* = .997$. A larger $\bar{\pi}$ gives a wider class and longer bars, so fewer parameters are claimed; note the different scales of the x-axes.
 #| fig-width: 10
 #| fig-height: 4.6
 #| echo: false
@@ -358,28 +438,36 @@ rule_plot <- function(p0, tag, xmin, xby) {
     scale_x_continuous(limits = c(xmin, 1), breaks = seq(1, xmin, -xby)) +
     labs(x = expression(Pr(theta > 0 ~ "|" ~ italic(y)) ~ "across the class"),
          y = expression(italic(pd)),
-         title = bquote(bold(.(tag))*"   "*pi[0] == .(sub("^0", "", format(p0))))) +
+         title = bquote(bold(.(tag))*"   "*bar(pi) == .(sub("^0", "", format(p0))))) +
     theme_clean(15) + ttl + theme(axis.text.y = element_text(angle = 0, hjust = 1))
 }
 (rule_plot(0.7, "A", 0.925, 0.01) | rule_plot(0.9, "B", 0.75, 0.05)) +
   plot_layout(guides = "collect") & theme(legend.position = "top")
 ```
 
+## What $\bar{\pi}$ Means and How to Choose It
+
+The value of $\bar{\pi}$ can be read in two ways, one about each parameter and one about the family. For each parameter, $\bar{\pi}$ is the largest prior probability the researcher is willing to give, before the data, to either direction. This reading holds for any family and is the one on which the derivation above rests.
+
+For the family, suppose the parameters are exchangeable, that is, no parameter is judged more likely than another to lie on a given side of $0$, so the same $\bar{\pi}$ is applied to all of them. For exchangeable parameters, the prior probability that a parameter lies on a given side of $0$ equals the expected proportion of parameters in the family that lie on that side. The bound $\bar{\pi}$ is therefore also an upper bound on the expected proportion of parameters that are not on a given side of $0$, whether that side is positive or negative. The priors in $\Gamma$ give null effects no probability, but in the family a null effect lies on neither side, so it counts among the parameters not on a given side. A judgment about how many null effects the family could contain can therefore guide the choice of $\bar{\pi}$, as a lower limit. If up to 70% of the effects in a family could be null, $\bar{\pi}$ should be at least $.7$, and larger if the direction of the non-null effects is also uncertain.
+
+Alternatively, $\bar{\pi}$ can be set, as in @Jeffreys1938 and @Westfall1997, through a fixed prior probability of $H_0$, the event that every claim in the family is false. If the parameters are independent a priori, the largest value of $\Pr(H_0)$ over $\Gamma$ is $\bar{\pi}^m$, so that $\bar{\pi} = \Pr(H_0)^{1/m}$ and the class widens as the family grows. The first route, through the proportion of null effects, keeps $\bar{\pi}$ the same whatever the size of the family, and suits the aim of keeping the proportion of false claims low. The second raises $\bar{\pi}$ with $m$, and suits the aim of avoiding any false claim.
+
 # Simulation Study
 
-We conducted a fully crossed simulation study, with 10,000 replications per cell, varying four factors. The specified $\pi_0$ took the values $.5, .6, \dots, .9$; the proportion of null effects in the data-generating process, $\pi_0^{\text{true}}$, took the values $.5, .6, \dots, 1$; the family size $m$ was 4, 8, 10, or 20; and the sample size $n$ was 30, 50, or 100. 
+We conducted a fully crossed simulation study, with 10,000 replications per cell, varying four factors. The bound $\bar{\pi}$ set by the researcher took the values $.5, .6, \dots, .9$; the proportion of null effects in the data-generating process, $\pi_0$, took the values $.5, .6, \dots, 1$; the family size $m$ was 4, 8, 10, or 20; and the sample size $n$ was 30, 50, or 100. 
 
-At each replication the number of null effects ($\theta_i = 0$) was drawn from $\mathrm{Binomial}(m, \pi_0^{\text{true}})$ and the remaining parameters were set to $\theta_i = 0.3$. The data-generating process thus places probability $\pi_0^{\text{true}}$ exactly at $0$ and $1 - \pi_0^{\text{true}}$ at $0.3$, whereas the priors in $\Gamma$ are continuous. The simulation therefore shows whether a $\pi_0$ set from the proportion of null effects gives decisions with good frequentist properties, even though the priors used to make them do not represent null effects. Data and posteriors followed the normal model described in the section on $pd$, with $n$ observations per parameter and a diffuse prior ($\tau = 2$).
+At each replication the number of null effects ($\theta_i = 0$) was drawn from $\mathrm{Binomial}(m, \pi_0)$ and the remaining parameters were set to $\theta_i = 0.3$. The data-generating process thus places probability $\pi_0$ exactly at $0$ and $1 - \pi_0$ at $0.3$, whereas the priors in $\Gamma$ are continuous. The simulation therefore shows whether a $\bar{\pi}$ set from the proportion of null effects gives decisions with good frequentist properties, even though the priors used to make them do not represent null effects. These properties are not implied by the class of priors, so they can only be checked in this way, and they hold for the conditions simulated, not as a guarantee. Data and posteriors followed the normal model described in the section on $pd$, with $n$ observations per parameter and a diffuse prior ($\tau = 2$).
 
-A directional claim was made when $pd \geq c^*$, with $c = .975$. For each family, let $R$ be the number of claims and $V$ the number of false claims. A claim about a null effect was false whichever direction it stated, whereas a claim about an effect of 0.3 was false only if it stated that $\theta_i < 0$, which requires a sample mean far below 0 and has probability at most $.00015$ in these conditions. We evaluated the FDR, $\mathbb{E}[V/\max(R, 1)]$ [@Benjamini1995; @Benjamini2005], the FWER, $\Pr(V > 0)$, and average power, the proportion of non-null effects claimed in the correct direction. The specified $\pi_0$ plays the role of the researcher's judgment about how many null effects the family could contain, whereas $\pi_0^{\text{true}}$ is the proportion that the data-generating process actually produces on average. We refer to $\pi_0 = \pi_0^{\text{true}}$ as a matched value, which corresponds to a correct judgment, to $\pi_0 < \pi_0^{\text{true}}$ as an underestimate, and to $\pi_0 > \pi_0^{\text{true}}$ as a conservative value.
+A directional claim was made when $pd \geq c^*$, with $c = .975$. For each family, let $R$ be the number of claims and $V$ the number of false claims. A claim about a null effect was false whichever direction it stated, whereas a claim about an effect of 0.3 was false only if it stated that $\theta_i < 0$, which requires a sample mean far below 0 and has probability at most $.00015$ in these conditions. We evaluated the FDR, $\mathbb{E}[V/\max(R, 1)]$ [@Benjamini1995; @Benjamini2005], the FWER, $\Pr(V > 0)$, and average power, the proportion of non-null effects claimed in the correct direction. The bound $\bar{\pi}$ plays the role of the researcher's judgment about how many null effects the family could contain, whereas $\pi_0$ is the proportion that the data-generating process actually produces on average. Since non-null effects were always positive and almost never claimed with the wrong sign, $\pi_0$ is here also, in practice, the proportion of parameters not on the positive side. We refer to $\bar{\pi} = \pi_0$, a bound equal to the actual proportion of null effects, as a matched value, which corresponds to a correct judgment, to $\bar{\pi} < \pi_0$ as an underestimate, and to $\bar{\pi} > \pi_0$ as a conservative value.
 
-@fig-ind-fdr-pw, Panel A, shows the FDR of the rule across the grid. In the row $\pi_0 = .5$, the unadjusted rule, the FDR inflates with the family size $m$ and with $\pi_0^{\text{true}}$, reaching $`r nz(max(df_pi0$FDR[df_pi0$pi0 == 0.5]), 2)`$ when the family is large and most effects are null. Increasing $\pi_0$ lowers the FDR. It stays low for matched and conservative values of $\pi_0$, and rises only under substantial underestimation, when a small $\pi_0$ is paired with a large $\pi_0^{\text{true}}$ at large $m$. Lowering the FDR in this way costs power, which decreases as $\pi_0$ increases (@fig-ind-fdr-pw, Panel B). Average power depends only on $\pi_0$ and $n$, not on $m$ or $\pi_0^{\text{true}}$, because the threshold $c^*$ is the same for every $m$ and each non-null effect is claimed according to its own $pd$, so Panel B shows $m = 20$ only.
+@fig-ind-fdr-pw, Panel A, shows the FDR of the rule across the grid. In the row $\bar{\pi} = .5$, the unadjusted rule, the FDR inflates with the family size $m$ and with $\pi_0$, reaching $`r nz(max(df_pi0$FDR[df_pi0$pi0 == 0.5]), 2)`$ when the family is large and most effects are null. Increasing $\bar{\pi}$ lowers the FDR. It stays low for matched and conservative values of $\bar{\pi}$, and rises only under substantial underestimation, when a small $\bar{\pi}$ is paired with a large $\pi_0$ at large $m$. Lowering the FDR in this way costs power, which decreases as $\bar{\pi}$ increases (@fig-ind-fdr-pw, Panel B). Average power depends only on $\bar{\pi}$ and $n$, not on $m$ or $\pi_0$, because the threshold $c^*$ is the same for every $m$ and each non-null effect is claimed according to its own $pd$, so Panel B shows $m = 20$ only.
 
 ```{r}
 #| label: fig-ind-fdr-pw
 #| fig-cap: "False Discovery Rate and Power of the Prior-Odds Rule"
 #| apa-note: >
-#|   False Discovery Rate (FDR, Panel A) and average power (Panel B) as a function of the true proportion of null effects, $\pi_0^{\text{true}}$ (x-axis), and the specified $\pi_0$ (y-axis), by family size $m$ (rows, Panel A) and sample size $n$ (columns). The row $\pi_0 = .5$ is the unadjusted rule, where the prior odds are one and $c^* = c$; outlined cells mark matched values, $\pi_0 = \pi_0^{\text{true}}$. Each cell is the empirical FDR or power over 10,000 replications.
+#|   False Discovery Rate (FDR, Panel A) and average power (Panel B) as a function of the true proportion of null effects, $\pi_0$ (x-axis), and the bound $\bar{\pi}$ set by the researcher (y-axis), by family size $m$ (rows, Panel A) and sample size $n$ (columns). The row $\bar{\pi} = .5$ is the unadjusted rule, where the prior odds are one and $c^* = c$; outlined cells mark matched values, $\bar{\pi} = \pi_0$. Each cell is the empirical FDR or power over 10,000 replications.
 #| fig-width: 21
 #| fig-height: 24
 #| echo: false
@@ -405,7 +493,7 @@ fdr_heat <- ggplot(d_fdr, aes(x = factor(pi0_true), y = factor(pi0), fill = FDR)
     labels  = scales::label_number(accuracy = 0.01), name = "FDR",
     guide   = guide_colorbar(barheight = unit(8, "cm"), barwidth = unit(1, "cm"),
                              title.position = "top", title.hjust = 0.5)) +
-  labs(x = expression(italic(pi)[0]^"true"), y = expression(italic(pi)[0])) +
+  labs(x = expression(italic(pi)[0]), y = expression(bar(italic(pi)))) +
   theme_clean(28) +
   theme(legend.position = "right", strip.text = element_text(face = "bold"),
         axis.text.y = element_text(angle = 0, hjust = 1))
@@ -434,8 +522,8 @@ p_pw_heat <- df_pi0 |>
     na.value = "grey90"
   ) +
     labs(
-  x = expression(italic(pi)[0]^"true"),
-  y = expression(italic(pi)[0]),
+  x = expression(italic(pi)[0]),
+  y = expression(bar(italic(pi))),
   fill = "power"
 )+theme_clean(28)+
     theme(legend.position = "right",
@@ -447,13 +535,13 @@ p_pw_heat <- df_pi0 |>
   plot_annotation(tag_levels = c('A', '1'))
 ```
 
-@fig-ind-fwer shows the FWER of the same rule (for $n = 50$, as a representative case). For a fixed $\pi_0$ the FWER grows with the family size $m$, reaching $`r nz(max(df_pi0$FWER[df_pi0$n == 50 & df_pi0$pi0 == 0.5]), 2)`$ for the unadjusted rule with a large family of mostly null effects. Increasing $\pi_0$ lowers it substantially. At $\pi_0 = .9$ it stays at or below about $`r nz(max(df_pi0$FWER[df_pi0$n == 50 & df_pi0$pi0 == 0.9]), 2)`$. Setting $\pi_0$ through a fixed $\Pr(H_0)$ instead, which raises $\pi_0$ with $m$, offsets this growth. For example, with a specified $\Pr(H_0) = .5$ (top row of @fig-ind-fwer), the FWER stays at or below $`r nz(max(df_h0$FWER[df_h0$n == 50]), 2)`$ for every family size. 
+@fig-ind-fwer shows the FWER of the same rule (for $n = 50$, as a representative case). For a fixed $\bar{\pi}$ the FWER grows with the family size $m$, reaching $`r nz(max(df_pi0$FWER[df_pi0$n == 50 & df_pi0$pi0 == 0.5]), 2)`$ for the unadjusted rule with a large family of mostly null effects. Increasing $\bar{\pi}$ lowers it substantially. At $\bar{\pi} = .9$ it stays at or below about $`r nz(max(df_pi0$FWER[df_pi0$n == 50 & df_pi0$pi0 == 0.9]), 2)`$. Setting $\bar{\pi}$ through a fixed $\Pr(H_0)$ instead, which raises $\bar{\pi}$ with $m$, offsets this growth. For example, with a specified $\Pr(H_0) = .5$ (top row of @fig-ind-fwer), the FWER stays at or below $`r nz(max(df_h0$FWER[df_h0$n == 50]), 2)`$ for every family size. 
 
 ```{r}
 #| label: fig-ind-fwer
 #| fig-cap: "Family-Wise Error Rate of the Prior-Odds Rule"
 #| apa-note: >
-#|   Family-wise error rate (FWER) as a function of the true proportion of null effects, $\pi_0^{\text{true}}$ (x-axis), and the specified $\pi_0$ (y-axis), by family size $m$ (panels), with $n = 50$. The row $\pi_0 = .5$ is the unadjusted rule; outlined cells mark matched values, $\pi_0 = \pi_0^{\text{true}}$. Each cell is the empirical FWER over 10,000 replications. With a fixed $\pi_0$, the per-test threshold does not change with $m$, so the FWER is reduced by larger $\pi_0$ but still grows with the family size $m$. The top row of each panel sets $\pi_0$ through a specified $\Pr(H_0) = .5$, a choice of the researcher like the other values of $\pi_0$, so that $\pi_0 = .5^{1/m}$.
+#|   Family-wise error rate (FWER) as a function of the true proportion of null effects, $\pi_0$ (x-axis), and the bound $\bar{\pi}$ set by the researcher (y-axis), by family size $m$ (panels), with $n = 50$. The row $\bar{\pi} = .5$ is the unadjusted rule; outlined cells mark matched values, $\bar{\pi} = \pi_0$. Each cell is the empirical FWER over 10,000 replications. With a fixed $\bar{\pi}$, the per-test threshold does not change with $m$, so the FWER is reduced by larger $\bar{\pi}$ but still grows with the family size $m$. The top row of each panel sets $\bar{\pi}$ through a specified $\Pr(H_0) = .5$, a choice of the researcher like the other values of $\bar{\pi}$, so that $\bar{\pi} = .5^{1/m}$.
 #| fig-width:  16
 #| fig-height: 12
 #| out-width: 72%
@@ -485,7 +573,7 @@ dplyr::bind_rows(
     labels  = scales::label_number(accuracy = 0.01), name = "FWER",
     guide   = guide_colorbar(barheight = unit(8, "cm"), barwidth = unit(1, "cm"),
                              title.position = "top", title.hjust = 0.5)) +
-  labs(x = expression(italic(pi)[0]^"true"), y = expression(italic(pi)[0])) +
+  labs(x = expression(italic(pi)[0]), y = expression(bar(italic(pi)))) +
   theme_clean(28) +
   theme(legend.position = "right", strip.text = element_text(face = "bold"),
         axis.text.y = element_text(angle = 0, hjust = 1))
@@ -523,21 +611,21 @@ FWER90 <- function(d) nz(max(d$FWER[d$n == 50 & abs(d$pi0_true - 0.9) < 1e-9]), 
 
 We compare the prior-odds rule with two Bayesian alternatives. The first, hereafter the *joint directional rule*, orders the directional claims by their posterior probability and accepts the largest set whose joint posterior probability is at least $c$ [@Gelman2000; @Pruzek2016]. The second, hereafter the *simultaneous-band rule*, computes credible intervals such that the joint posterior probability that every interval contains its parameter equals a set value, and claims a direction for a parameter whenever its interval excludes 0 [@Schnell2020; @Schnell2016; @Box1992].
 
-The two procedures were applied to the same replications as the prior-odds rule, and we report the results for $n = 50$, as a representative case. The thresholds were set so that, for a single parameter, each procedure claims a direction when $pd \geq .975$. The joint directional rule requires a joint posterior probability of at least $c = .975$, the simultaneous band has a joint posterior probability of $.95$, and the prior-odds rule claims a direction when $pd_{\text{adj}} \geq c$. @fig-compare shows their FDR, FWER, and power, together with those of the prior-odds rule with a matched $\pi_0$ ($\pi_0 = \pi_0^{\text{true}}$).
+The two procedures were applied to the same replications as the prior-odds rule, and we report the results for $n = 50$, as a representative case. The thresholds were set so that, for a single parameter, each procedure claims a direction when $pd \geq .975$. The joint directional rule requires a joint posterior probability of at least $c = .975$, the simultaneous band has a joint posterior probability of $.95$, and the prior-odds rule claims a direction when $pd_{\text{adj}} \geq c$. @fig-compare shows their FDR, FWER, and power, together with those of the prior-odds rule with a matched $\bar{\pi}$ ($\bar{\pi} = \pi_0$).
 
 In this simulation setting, the simultaneous-band rule keeps the FWER at or below $.05$, up to simulation error, in all conditions (between $`r nz(BAND_FWER[1], 2)`$ and $`r nz(BAND_FWER[2], 2)`$), and therefore also the FDR. Its FWER increases with the proportion of null effects but hardly changes with $m$. Its power, however, decreases with family size.
 
-The error rates of the joint directional rule, in contrast, increase with the proportion of null effects, and its FWER also with the family size. At $m = 20$, its FDR rises from $`r G(0.7,"joint","FDR",20,0.5)`$ at $\pi_0^{\text{true}} = .5$ to $`r G(0.7,"joint","FDR",20,0.9)`$ at $\pi_0^{\text{true}} = .9$ and $`r G(0.7,"joint","FDR",20,1)`$ when all effects are null. Its first claim requires the same $pd \geq .975$ as the unadjusted rule (i.e., $\pi_0 = .5$), and each further claim must keep the joint probability at or above $.975$, so it makes a subset of the unadjusted rule's claims and never more false claims. When some effects are non-null, its FWER is lower than that of the unadjusted rule, and for $m > 4$ so is its FDR. When all effects are null, the two rules have equal error rates.
+The error rates of the joint directional rule, in contrast, increase with the proportion of null effects, and its FWER also with the family size. At $m = 20$, its FDR rises from $`r G(0.7,"joint","FDR",20,0.5)`$ at $\pi_0 = .5$ to $`r G(0.7,"joint","FDR",20,0.9)`$ at $\pi_0 = .9$ and $`r G(0.7,"joint","FDR",20,1)`$ when all effects are null. Its first claim requires the same $pd \geq .975$ as the unadjusted rule (i.e., $\bar{\pi} = .5$), and each further claim must keep the joint probability at or above $.975$, so it makes a subset of the unadjusted rule's claims and never more false claims. When some effects are non-null, its FWER is lower than that of the unadjusted rule, and for $m > 4$ so is its FDR. When all effects are null, the two rules have equal error rates.
 
-With a matched $\pi_0$, the prior-odds rule keeps its FDR low in all conditions, and its FWER decreases as $\pi_0^{\text{true}}$ increases, because a matched $\pi_0$ increases with it. When most effects are null, its error rates are therefore far below those of the joint directional rule and approach those of the simultaneous band. At $\pi_0^{\text{true}} = .9$, for example, its FWER is at most $`r FWER90(matched)`$, against up to $`r FWER90(cmp("joint"))`$ for the joint directional rule. Lower error rates come with lower power. The joint directional rule loses little power relative to the unadjusted rule, at most $`r JLOSS(4)`$ at $m = 4$ and $`r JLOSS(20)`$ at $m = 20$. The simultaneous band loses much more, and at $m = 20$ it has less power than the prior-odds rule with any $\pi_0$. Unlike that of the other two procedures, the power of the prior-odds rule does not depend on $m$.
+With a matched $\bar{\pi}$, the FDR of the prior-odds rule stays between $`r nz(min(matched$FDR[matched$n == 50]), 2)`$ and $`r nz(max(matched$FDR[matched$n == 50]), 2)`$, with the largest values at $m = 20$. It is therefore much lower than that of the unadjusted rule, but not always at or below $.05$, because the rule is not built to guarantee a nominal FDR. Its FWER decreases as $\pi_0$ increases, because a matched $\bar{\pi}$ increases with it. When most effects are null, its error rates are therefore far below those of the joint directional rule and approach those of the simultaneous band. At $\pi_0 = .9$, for example, its FWER is at most $`r FWER90(matched)`$, against up to $`r FWER90(cmp("joint"))`$ for the joint directional rule. Lower error rates come with lower power. The joint directional rule loses little power relative to the unadjusted rule, at most $`r JLOSS(4)`$ at $m = 4$ and $`r JLOSS(20)`$ at $m = 20$. The simultaneous band loses much more, and at $m = 20$ it has less power than the prior-odds rule with any $\bar{\pi}$. Unlike that of the other two procedures, the power of the prior-odds rule does not depend on $m$.
 
-Which procedure to use thus depends on whether any false claim must be avoided (FWER) or only a small proportion of false claims is acceptable (FDR). The prior-odds rule is the only one of the three that requires an explicit specification of $\pi_0$, and it is designed for the second aim. When any false claim must be avoided, the simultaneous band controlled the FWER directly in these simulations; the prior-odds rule can do so as well, with $\pi_0$ set through a fixed $\Pr(H_0)$, but this is not its main purpose. The joint directional rule is better suited to settings in which the fitted prior describes the effects in the family, or in which a theory predicts the directions of a fixed set of parameters and the whole predicted directional pattern is evaluated as a single claim (i.e., not as a selected subset).
+Which procedure to use thus depends on whether any false claim must be avoided (FWER) or only a small proportion of false claims is acceptable (FDR). The prior-odds rule is the only one of the three that requires an explicit specification of $\bar{\pi}$, and it is designed for the second aim. When any false claim must be avoided, the simultaneous band controlled the FWER directly in these simulations; the prior-odds rule can do so as well, with $\bar{\pi}$ set through a fixed $\Pr(H_0)$, but this is not its main purpose. The joint directional rule is better suited to settings in which the estimation prior describes the effects in the family, or in which a theory predicts the directions of a fixed set of parameters and the whole predicted directional pattern is evaluated as a single claim (i.e., not as a selected subset).
 
 ```{r}
 #| label: fig-compare
 #| fig-cap: "False Discovery Rate, Family-Wise Error Rate, and Power of the Three Procedures"
 #| apa-note: >
-#|   False Discovery Rate (FDR, top row), Family-Wise Error Rate (FWER, middle row), and average power (bottom row) as a function of the true proportion of null effects, $\pi_0^{\text{true}}$ (x-axis), by family size $m$ (columns), with $n = 50$. Blue squares show the prior-odds rule with a matched $\pi_0$, $\pi_0 = \pi_0^{\text{true}}$, which stops at $\pi_0^{\text{true}} = .9$ because with $\pi_0 = 1$ no claim would ever be made, orange circles the joint directional rule (joint posterior probability of at least $.975$), and grey triangles the simultaneous-band rule (simultaneous credible intervals with joint posterior probability $.95$). The dotted line marks $.05$. Each point is the empirical rate over 10,000 replications.
+#|   False Discovery Rate (FDR, top row), Family-Wise Error Rate (FWER, middle row), and average power (bottom row) as a function of the true proportion of null effects, $\pi_0$ (x-axis), by family size $m$ (columns), with $n = 50$. Blue squares show the prior-odds rule with a matched $\bar{\pi}$, $\bar{\pi} = \pi_0$, which stops at $\pi_0 = .9$ because with $\bar{\pi} = 1$ no claim would ever be made, orange circles the joint directional rule (joint posterior probability of at least $.975$), and grey triangles the simultaneous-band rule (simultaneous credible intervals with joint posterior probability $.95$). The dotted line marks $.05$. Each point is the empirical rate over 10,000 replications.
 #| fig-width: 21
 #| fig-height: 18
 #| echo: false
@@ -557,7 +645,7 @@ d_cmp <- df_compare |>
   dplyr::filter(!is.na(rate))   # power is undefined when every effect is null
 # reference line at .05 for the two error rates
 ref05 <- data.frame(metric = factor(c("FDR", "FWER"), levels = levels(d_cmp$metric)), y = 0.05)
-lab_proc <- c(expression("Prior-odds, matched "*italic(pi)[0]), "Joint directional", "Simultaneous band")
+lab_proc <- c(expression("Prior-odds, "*bar(italic(pi)) == italic(pi)[0]), "Joint directional", "Simultaneous band")
 
 ggplot(d_cmp, aes(x = pi0_true, y = rate, colour = method, shape = method)) +
   geom_hline(data = ref05, aes(yintercept = y), colour = "grey50", linetype = "dotted", linewidth = 1) +
@@ -567,7 +655,7 @@ ggplot(d_cmp, aes(x = pi0_true, y = rate, colour = method, shape = method)) +
   scale_colour_manual(values = c("#1F4E9C", "#F8A31B", "grey35"), labels = lab_proc, name = NULL) +
   scale_shape_manual(values = c(15, 16, 17), labels = lab_proc, name = NULL) +
   scale_x_continuous(breaks = seq(0.5, 1, 0.1), labels = c(".5", ".6", ".7", ".8", ".9", "1")) +
-  labs(x = expression(italic(pi)[0]^"true"), y = NULL) +
+  labs(x = expression(italic(pi)[0]), y = NULL) +
   theme_clean(28) +
   theme(strip.placement = "outside", strip.text = element_text(face = "bold"),
         legend.position = "bottom", legend.key.width = unit(2.5, "cm"),
@@ -576,23 +664,21 @@ ggplot(d_cmp, aes(x = pi0_true, y = rate, colour = method, shape = method)) +
 
 # Application: Worked Example With the R Package `multibayes`
 
-The procedures are implemented in the `multibayes` R package. The function `pd.adjust()` accepts either a matrix of posterior draws, from which $pd$ values are computed internally, or a vector of pre-computed $pd$ values. The penalty is specified either directly as $\pi_0$ (argument `pi0`) or as $\Pr(H_0)$ (argument `p0`), from which $\pi_0 = \Pr(H_0)^{1/m}$. The decision threshold can be given as a $pd$ cutoff $c$ (argument `threshold`, default $.975$).
+The procedures are implemented in the `multibayes` R package. The function `pd.adjust()` accepts either a matrix of posterior draws, from which $pd$ values are computed internally, or a vector of pre-computed $pd$ values. The penalty is specified either directly as $\bar{\pi}$ (argument `pi.max`) or as $\Pr(H_0)$ (argument `p0`), from which $\bar{\pi} = \Pr(H_0)^{1/m}$. The decision threshold can be given as a $pd$ cutoff $c$ (argument `threshold`, default $.975$).
 
-For this example, we use the openly available dataset from @Lin2020, who investigated the effect of ego depletion on conflict resolution across four studies. In their paradigm, an initial high-demand (vs. low-demand) task was followed by a Stroop task. For simplicity, we focus on Study 1, which tested the effects of congruency and ego depletion (within subjects). The dataset is readily accessible via the `afex` package [@Singmann2016] and was chosen for this reason; this example is not intended as a critique of the original work. Study 1 includes data from 253 participants; for this example, we randomly selected 80 of them.
+For this example, we use the openly available dataset from @Lin2020, who investigated the effect of ego depletion on conflict resolution across four studies. In their paradigm, an initial high-demand (vs. low-demand) task was followed by a Stroop task. For simplicity, we focus on Study 1, which tested the effects of congruency and ego depletion (within subjects). The dataset is readily accessible via the `afex` package [@Singmann2016] and was chosen for this reason; this example is not intended as a critique of the original work. Study 1 includes data from 253 participants, each completing 180 Stroop trials after each of the two tasks, and we use all of them.
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 # install.packages("remotes")
 remotes::install_github("mar-cald/multibayes")
 library(multibayes); library(brms); library(dplyr)
 
-set.seed(1)
 stroop1 <- subset(afex::stroop, subset = study == 1)
-# select 80 ids 
-data_stroop <- subset(stroop1, subset = pno %in% sample(unique(pno), size = 80)) |>
+data_stroop <- stroop1 |>
   # remove useless levels id
   dplyr::mutate(id = droplevels(pno)) |>
   # select relevant variables
-  dplyr::select(id, condition, congruency, acc, rt) |>
+  dplyr::select(id, condition, congruency, trialnum, acc, rt) |>
   group_by(id, condition) |>
   mutate(prev_cong = lag(congruency)) |> # previous cong
   ungroup() |>
@@ -601,17 +687,18 @@ data_stroop <- subset(stroop1, subset = pno %in% sample(unique(pno), size = 80))
 
 Given the repeated-measures structure of the data and the large number of trials per participant, we fit a multilevel generalized linear model using `brms` [@Paul2017] on reaction time (RT) data. A lognormal model was specified with the default flat priors. We used them because they are the most common choice in applied work and the one in which the penalty matters most, not as a recommendation.
 
-The model includes the effects of congruency (congruent vs. incongruent), previous congruency (congruent vs. incongruent), and condition (depletion vs. control). The sequential congruency effect was modeled as the interaction between congruency and previous congruency, and a possible effect of depletion on the congruency effect as the congruency $\times$ condition interaction. Following the common practice of reporting a $pd$ for every coefficient, we test the direction of each of the five fixed effects (@tbl-hypotheses). We treat the five tests as one family because they come from the same model, are reported together, and any of them could be singled out as a finding of the study, the pick-the-winner situation. This family serves the aim of describing which effects the experiment provides evidence for; a study that tests only the effects of ego depletion would define a smaller family (e.g., the two effects involving condition).
+The model includes the effects of congruency (congruent vs. incongruent), previous congruency (congruent vs. incongruent), condition (depletion vs. control), and trial (position within the 180 trials of a condition, standardized). The sequential congruency effect was modeled as the interaction between congruency and previous congruency. A possible effect of depletion was modeled through condition and its interactions with congruency and trial, so that depletion could change response times overall, change the congruency effect, or change how either evolves over the trials.
 
-Although some hypotheses are directional (e.g., incongruent trials are expected to slow responses), we compute $pd$ as $\max\!\big(\Pr(\theta > 0 \mid y),\, \Pr(\theta < 0 \mid y)\big)$ for all hypotheses. When the direction of each parameter is specified in advance, the argument `direction` (`"greater"` or `"less"`, for each hypothesis) computes $pd$ as the posterior probability of the predicted direction, with the same threshold. The rule then corresponds to a single prior for each parameter, the member of $\Gamma$ most skeptical of the predicted direction, and $pd_{\text{adj}}$ is the posterior probability under that prior.
+The question of the study is whether ego depletion affects performance, so the family consists of the four effects involving condition (@tbl-hypotheses). The remaining effects, such as the congruency effect, are estimated but enter no claim, so they are not part of the family. Before the data we had no reason to judge any of the four more likely than another to be positive or negative, so we treat them as exchangeable and apply the same $\bar{\pi}$ to all of them. A family that also included the congruency effect, which is expected to be large and positive, would not be exchangeable.
+
+Although a direction could be predicted for some of these effects (e.g., that depletion enlarges the congruency effect), we compute $pd$ as $\max\!\big(\Pr(\theta > 0 \mid y),\, \Pr(\theta < 0 \mid y)\big)$ for all hypotheses. When the direction of each parameter is specified in advance, the argument `direction` (`"greater"` or `"less"`, for each hypothesis) computes $pd$ as the posterior probability of the predicted direction, with the same threshold. The rule then corresponds to a single prior for each parameter, the member of $\Gamma$ most skeptical of the predicted direction, and $pd_{\text{adj}}$ is the posterior probability under that prior.
 
 | **Hypothesis** | **$\theta_\text{null}$** |
 |----|:--:|
-| $H_1$: congruency effect | 0 |
-| $H_2$: previous congruency effect | 0 |
-| $H_3$: condition effect | 0 |
-| $H_4$: congruency $\times$ previous congruency interaction | 0 |
-| $H_5$: congruency $\times$ condition interaction | 0 |
+| $H_1$: condition effect | 0 |
+| $H_2$: congruency $\times$ condition interaction | 0 |
+| $H_3$: condition $\times$ trial interaction | 0 |
+| $H_4$: congruency $\times$ condition $\times$ trial interaction | 0 |
 
 : Tested Hypotheses for Reaction Times {#tbl-hypotheses}
 
@@ -628,38 +715,44 @@ data_rt <- data_stroop |>
 contrasts(data_rt$congruency) <- contr.sum(2)/2
 contrasts(data_rt$prev_cong) <- contr.sum(2)/2
 contrasts(data_rt$condition) <- contr.sum(2)/2
+# trial standardized (z-score)
+data_rt$trial <- as.numeric(scale(data_rt$trialnum))
 
 mod_rt <- brm(
   formula = rt ~ 1 + congruency * prev_cong +
-    congruency * condition +
-    (1 + prev_cong + congruency + congruency * condition || id),
+    congruency * condition * trial +
+    (1 + prev_cong + congruency * condition + trial * condition || id),
   family = lognormal(), data = data_rt,
   cores = 3, chains = 3, iter = 8000, seed = 1)
 ```
 
-Since `pd.adjust()` computes $pd$ values automatically from a matrix of posterior draws, we extracted the relevant draws from the model and set $\pi_0 = .8$. Under the estimation prior, each sign of a parameter has prior probability $.5$; with $\pi_0 = .8$, we allow it to be as high as $.8$. This reflects skepticism about every effect in the family except the main effect of congruency, and corresponds to judging that up to four of the five effects could be null.
+Since `pd.adjust()` computes $pd$ values automatically from a matrix of posterior draws, we extracted the draws of the four effects in the family and set $\bar{\pi} = .8$. Under the estimation prior, each sign of a parameter has prior probability $.5$; with $\bar{\pi} = .8$, we allow either direction of each parameter to have prior probability as high as $.8$, so a claim requires a Bayes factor four times larger than under the unadjusted rule. Because the four effects are exchangeable, this corresponds to judging that up to 80% of them, on average, could fail to lie on a given side of 0, because they are null or lie on the other side. This reflects skepticism about whether the depletion manipulation affects Stroop performance at all.
 
 ```{r, echo=TRUE}
 draws_rt <- as.data.frame(mod_rt)
-par_names <- colnames(draws_rt)[2:6]
+# the family: the four effects involving condition
+par_names <- grep("^b_.*condition", colnames(draws_rt), value = TRUE)
 draws_rt  <- draws_rt[, par_names]
-pd.adjust(draws = draws_rt, pi0 = 0.8, null.value = 0)
+pd.adjust(draws = draws_rt, pi.max = 0.8, null.value = 0)
 ```
 
 ```{r}
 #| label: ex-counts
 #| echo: false
 ex   <- suppressWarnings(pd.adjust(draws = draws_rt, 
-                                   pi0 = 0.8, null.value = 0))
+                                   pi.max = 0.8, null.value = 0))
 EXc  <- attr(ex, "threshold"); EXcs <- attr(ex, "threshold.adj")
 EXpd <- setNames(ex$pd, rownames(ex))
 EXadj <- setNames(ex$pd.adj, rownames(ex))
 EXn0 <- sum(EXpd >= EXc); EXn1 <- sum(EXpd >= EXcs)
 num_word <- function(k) c("no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")[k + 1]
-EXlost <- names(EXpd)[EXpd >= EXc & EXpd < EXcs]
-# largest pi0 at which a claim with this pd is still made (c* = pd)
-pimax <- function(p) p * (1 - EXc) / (p * (1 - EXc) + EXc * (1 - p))
-EXclaimed <- c("b_congruency1", "b_congruency1:condition1")
+INT <- "b_congruency1:condition1"
+# congruency effect (incongruent minus congruent, log RT) after each task;
+# sum contrasts: congruent = +.5, control = +.5
+fe <- brms::fixef(mod_rt)[, "Estimate"]
+EXint_ctrl <- -(fe[["congruency1"]] + 0.5 * fe[["congruency1:condition1"]])
+EXint_depl <- -(fe[["congruency1"]] - 0.5 * fe[["congruency1:condition1"]])
+EXbelow <- names(EXadj)[EXadj < 0.5]
 # joint directional statement and simultaneous band
 EXj <- joint(draws_rt, null.value = 0)
 EXb <- joint(draws_rt, interval = TRUE)
@@ -667,23 +760,22 @@ EXk <- sum(EXj$joint_cum >= 0.975)
 band <- function(p, d) sprintf("[%.*f, %.*f]", d, EXb[p, "lower"], d, EXb[p, "upper"])
 EXband <- rownames(EXb)[EXb$lower > 0 | EXb$upper < 0]
 # the text below describes this pattern
-stopifnot(EXn0 == 3, EXn1 == 2, identical(EXlost, "b_prev_cong1"),
-          setequal(names(EXpd)[EXpd >= EXcs], EXclaimed),
-          names(sort(EXpd, decreasing = TRUE))[4] == "b_condition1", EXk == 3,
-          identical(EXband, "b_congruency1"), EXb["b_congruency1:condition1", "upper"] > 0)
+stopifnot(EXn0 == 1, EXn1 == 1, EXpd[[INT]] >= EXcs, EXk == 1,
+          identical(EXband, INT), fe[["congruency1:condition1"]] < 0,
+          setequal(EXbelow, c("b_condition1:trial", "b_congruency1:condition1:trial")))
 ```
 
-The printed header reports $m$, $\pi_0$, and the resulting thresholds: with the default $c = `r nz(EXc, 3)`$, a directional claim requires $pd_{\text{adj}} \geq `r nz(EXc, 3)`$ or, equivalently, $pd \geq c^* = `r nz(EXcs, 3)`$. Each row gives the posterior median, $pd$, and $pd_{\text{adj}}$ (`pd.adj`) of a parameter, and a short note below the table explains $pd_{\text{adj}}$.
+The printed header reports $m$, $\bar{\pi}$, and the resulting thresholds: with the default $c = `r nz(EXc, 3)`$, a directional claim requires $pd_{\text{adj}} \geq `r nz(EXc, 3)`$ or, equivalently, $pd \geq c^* = `r nz(EXcs, 4)`$. Each row gives the posterior median, $pd$, and $pd_{\text{adj}}$ (`pd.adj`) of a parameter, and a short note below the table explains $pd_{\text{adj}}$.
 
-In this family, `r num_word(EXn0)` effects have $pd \geq c$. They are the congruency effect (`b_congruency1`, $pd = `r nz(EXpd[["b_congruency1"]], 3)`$), the congruency $\times$ condition interaction (`b_congruency1:condition1`, $pd = `r nz(EXpd[["b_congruency1:condition1"]], 3)`$, $pd_{\text{adj}} = `r nz(EXadj[["b_congruency1:condition1"]], 3)`$), and the previous-congruency effect (`b_prev_cong1`, $pd = `r nz(EXpd[["b_prev_cong1"]], 3)`$, $pd_{\text{adj}} = `r nz(EXadj[["b_prev_cong1"]], 3)`$). The first two also have $pd_{\text{adj}} \geq c$, that is, $pd \geq c^*$, whereas the previous-congruency effect does not, so with $\pi_0 = .8$ the adjustment withholds one of the three claims that the unadjusted rule makes. The claim about the previous-congruency effect would be made only with a $\pi_0$ of at most $`r nz(pimax(EXpd[["b_prev_cong1"]]), 2)`$.
+Only the congruency $\times$ condition interaction (`b_congruency1:condition1`) has $pd \geq c$, with $pd = `r nz(EXpd[[INT]], 4)`$, and it also has $pd_{\text{adj}} = `r nz(EXadj[[INT]], 3)`$, at or above $c$. The claim therefore holds under every prior in $\Gamma$. On the log scale, the congruency effect, the difference between incongruent and congruent trials, was `r nz(EXint_ctrl, 3)` after the low-demand task and `r nz(EXint_depl, 3)` after the high-demand task, so the claim is that the congruency effect is smaller after the high-demand task. None of the other three effects reaches $c$, with or without the adjustment. For two of them, the condition $\times$ trial interaction ($pd = `r nz(EXpd[["b_condition1:trial"]], 3)`$, $pd_{\text{adj}} = `r nz(EXadj[["b_condition1:trial"]], 3)`$) and the three-way interaction ($pd = `r nz(EXpd[["b_congruency1:condition1:trial"]], 3)`$, $pd_{\text{adj}} = `r nz(EXadj[["b_congruency1:condition1:trial"]], 3)`$), $pd_{\text{adj}}$ is below $.5$, so the priors in $\Gamma$ disagree on which direction is more probable, and the data do not establish even a leaning in either direction.
 
-A companion function, `joint()`, computes by default the joint posterior probability of the $k$ strongest directional claims, for each $k$:
+A companion function, `joint()`, implements the joint directional rule and the simultaneous-band rule compared in the simulation study. By default, it computes the joint posterior probability of the $k$ strongest directional claims, for each $k$:
 
 ```{r, echo=TRUE}
 joint(draws_rt, null.value = 0)
 ```
 
-The rows are sorted by decreasing $pd$, and `joint_cum` gives this probability for the first $k$ rows. Here it is $`r nz(EXj$joint_cum[3], 2)`$ for the three strongest claims and $`r nz(EXj$joint_cum[4], 2)`$ for the four strongest, so the joint directional rule at $.975$ accepts the same three claims as the unadjusted rule.
+The rows are sorted by decreasing $pd$, and `joint_cum` gives this probability for the first $k$ rows. Here it is $`r nz(EXj$joint_cum[1], 4)`$ for the strongest claim alone and $`r nz(EXj$joint_cum[2], 2)`$ for the two strongest, so the joint directional rule at $.975$ accepts only the claim about the congruency $\times$ condition interaction.
 
 Setting `interval = TRUE` returns simultaneous equal-tailed credible intervals instead:
 
@@ -691,35 +783,67 @@ Setting `interval = TRUE` returns simultaneous equal-tailed credible intervals i
 joint(draws_rt, interval = TRUE)
 ```
 
-Only the band of the congruency effect ($`r band("b_congruency1", 2)`$) excludes 0. The bands of the congruency $\times$ condition interaction ($`r band("b_congruency1:condition1", 4)`$), whose upper bound lies just above 0, and of the previous-congruency effect ($`r band("b_prev_cong1", 4)`$) include it, so the simultaneous-band rule makes a single claim.
+Only the band of the congruency $\times$ condition interaction ($`r band(INT, 4)`$) excludes 0, so the simultaneous-band rule makes the same single claim. In this family, the three procedures agree.
 
 # Discussion
 
-The probability of direction ($pd$) is the posterior mass on the data-favored side of a reference point null value, equivalently, the larger of the two one-sided posterior probabilities. It is common practice to claim a direction whenever $pd$ exceeds a fixed threshold $c$, typically $.975$. Under an estimation prior symmetric about the null value, the direction selected after inspecting the data has the same prior probability as the opposite one, so each such data-selected hypothesis is evaluated at prior odds of one, and the rule $pd \geq c$ leaves these odds unchanged. When many parameters, independent a priori, are tested, these prior odds make it almost certain, before the data, that at least one favored direction is genuine. Building on @Jeffreys1938 [see also @Westfall1997] and on Bayesian approaches to FDR control [@Scott2006; @Scott2010; @Guo2010; @Abraham2022; @Efron2001; @Storey2003; @Storey2002; @Stephens2017], the procedure presented here requires each claim to hold even when its prior odds are lowered, by an amount the researcher sets through a single quantity, $\pi_0$, an upper bound on the prior probability of either sign of a parameter. A claim is then made when $pd_{\text{adj}}$, its posterior probability under the prior most skeptical of it, reaches the usual threshold $c$, or, equivalently, when $pd$ reaches the higher threshold $c^*$.
+The probability of direction ($pd$) is the posterior mass on the data-favored side of a reference point null value, equivalently, the larger of the two one-sided posterior probabilities. It is common practice to claim a direction whenever $pd$ exceeds a fixed threshold $c$, typically $.975$. Under an estimation prior symmetric about the null value, the direction selected after inspecting the data has the same prior probability as the opposite one, so each such data-selected hypothesis is evaluated at prior odds of one, and the rule $pd \geq c$ leaves these odds unchanged. When many parameters, independent a priori, are tested, these prior odds make it almost certain, before the data, that at least one favored direction is genuine. Building on @Jeffreys1938 [see also @Westfall1997] and on Bayesian approaches to FDR control [@Scott2006; @Scott2010; @Guo2010; @Abraham2022; @Efron2001; @Storey2003; @Storey2002; @Stephens2017], the procedure presented here requires each claim to hold even when its prior odds are lowered, by an amount the researcher sets through a single quantity, $\bar{\pi}$, an upper bound on the prior probability of each direction of a parameter. A claim is then made when $pd_{\text{adj}}$, its posterior probability under the prior most skeptical of it, reaches the usual threshold $c$, or, equivalently, when $pd$ reaches the higher threshold $c^*$.
 
-If the direction of a test is not specified in advance, the direction to penalize is known only after the data, so the rule considers a penalty on either direction and requires the claim to hold even when its own direction is penalized. If it is specified in advance, the rule reduces to a single prior for that parameter, the one that gives the predicted direction prior probability $1 - \pi_0$. Whether or not the direction is specified in advance, the priors under which claims are evaluated are continuous and give point null effects no probability. Because the procedure evaluates only directional claims, not making a claim reflects the absence of a directional discovery, not evidence that the effect is null. Evaluating whether an effect is null requires other methods, such as those based on the two-group, or spike-and-slab, prior, which places probability exactly at the null value [@Scott2006; @Scott2010; @Stephens2017]. In Bayesian approaches to FDR control based on this prior, the proportion of null effects can be learned from the data [@Scott2010; @Stephens2017], but this requires large families [@Storey2002; @Efron2001], larger than those typical of psychological studies. 
+If the direction of a test is specified in advance, the rule reduces to a single prior for that parameter, the one that gives the predicted direction prior probability $1 - \bar{\pi}$. Whether or not the direction is specified in advance, the priors under which claims are evaluated are continuous and give point null effects no probability. Because the procedure evaluates only directional claims, not making a claim reflects the absence of a directional discovery, not evidence that the effect is null. Evaluating whether an effect is null requires other methods, such as those based on the two-group, or spike-and-slab, prior, which places probability exactly at the null value [@Scott2006; @Scott2010; @Stephens2017]. In Bayesian approaches to FDR control based on this prior, the proportion of null effects can be learned from the data [@Scott2010; @Stephens2017], but this requires large families [@Storey2002; @Efron2001], larger than those typical of psychological studies. 
 
-The proposed adjustment keeps the researcher's continuous prior and accounts for null effects only in the decision. A null effect makes every directional claim about it false, as a parameter of the opposite sign does. When the parameters in the family are exchangeable, $\pi_0$ therefore also bounds the expected proportion of parameters that are not on the claimed side, null effects included, so it can be specified from a judgment about how many null effects the family could contain instead of being learned from the data. In the simulations, the FDR increased gradually when $\pi_0$ was below the proportion of null effects and decreased, at the cost of power, when it was above it. A researcher may also choose a larger $\pi_0$ deliberately, accepting this loss of power in exchange for fewer false claims.
+The proposed adjustment keeps the researcher's continuous prior and accounts for null effects only in the decision. When the parameters in the family are exchangeable, $\bar{\pi}$ also bounds the expected proportion of parameters that are not on a given side of $0$, null effects included, so it can be specified from a judgment about how many null effects the family could contain instead of being learned from the data. Because null effects and effects of the opposite sign both count, the expected proportion of null effects is a lower limit for $\bar{\pi}$, not its value. In the simulations, the FDR increased gradually when $\bar{\pi}$ was below the proportion of null effects and decreased, at the cost of power, when it was above it. A researcher may also deliberately choose a $\bar{\pi}$ larger than the expected proportion of null effects, accepting this loss of power in exchange for fewer false claims.
 
 The implementation applies directly to posterior draws or any posterior-derived $pd$, including cases where $pd$ values arise from multiple separate analyses within the same manuscript [@Ciranka2026; @Philippe2021]. This raises the question of how to define the hypothesis family to which the correction applies [@Shaffer1995; @Hochberg1987]. Although no universal consensus exists regarding what constitutes a family, we favor the criteria proposed by @Westfall2011, where a family is a set of questions that *"form a natural and coherent unit, \[are\] considered simultaneously in the decision-making process, and/or present a set over which one plays pick-the-winner"*. Regardless of the chosen definition, authors should clearly specify their chosen family and explain how it serves the study's substantive goals.
 
-We further recommend that researchers justify their choice of $\pi_0$ by drawing on theory, expert elicitation, or domain expertise [@Hagan2019], and report this justification. Making this choice explicit serves two purposes. For researchers who use diffuse estimation priors, it provides a principled way to encode skepticism at the family level without placing informative priors on individual parameters. For researchers who judge prior odds of one appropriate and decline the adjustment, makes that commitment transparent. If the aim is instead to avoid any wrong claim in the family, a procedure designed for the FWER, such as the simultaneous credible band, is the more direct choice. For applied reporting, we recommend stating $\pi_0$, $m$, and $c^*$, together with the $pd$ and $pd_{\text{adj}}$ of every parameter in the family, so that readers can apply the threshold implied by a different value of $\pi_0$.
+We further recommend that researchers justify their choice of $\bar{\pi}$ by drawing on theory, expert elicitation, or domain expertise [@Hagan2019], and report this justification. Making this choice explicit serves two purposes. For researchers who use diffuse estimation priors, it provides a principled way to encode skepticism at the family level without placing informative priors on individual parameters. For researchers who judge prior odds of one appropriate and decline the adjustment, it makes that commitment transparent.
 
-A limitation is that applying the same $\pi_0$ to every parameters assumes that they are exchangeable. In many models this is not the case; for example, a known main effect and an interaction term that motivated the study typically differ in prior plausibility. A common $\pi_0$ set at the average proportion of null effects in the family keeps the overall error rate close to that of an exchangeable family, since the rule applies the same threshold to every parameter, but it distributes errors unevenly. The threshold is too strict for the more plausible claims, which lose power, and too lenient for the less plausible ones, among which false claims are more frequent. In such cases the family can be divided into more homogeneous subsets, each with its own $\pi_0$, or a conservative common value can be used. Parameters on which no claim is based need not be included in the family.
+A limitation is that applying the same $\bar{\pi}$ to every parameter assumes that they are exchangeable. In many models this is not the case; for example, a known main effect and an interaction term that motivated the study typically differ in prior plausibility. A common $\bar{\pi}$ set at the average proportion of null effects in the family keeps the overall error rate close to that of an exchangeable family, since the rule applies the same threshold to every parameter, but it distributes errors unevenly. The threshold is too strict for the more plausible claims, which lose power, and too lenient for the less plausible ones, among which false claims are more frequent. In such cases the family can be divided into more homogeneous subsets, each with its own $\bar{\pi}$, or a conservative common value can be used. Parameters on which no claim is based need not be included in the family.
 
-As Bayesian methods become increasingly common in psychological research, often in pragmatic workflows with fixed decision thresholds, the implications of multiplicity should be explicitly recognized. Whatever the prior, a fixed threshold on the probability of direction leads to more wrong directional claims as the number of tests grows. The adjustment proposed here offers a simple step toward a more mindful use of such thresholds. The comparison with joint directional statements and simultaneous credible intervals, which the accompanying R package also implements, shows researchers which procedure could fit their aim.
+The derivation of the adjustment requires an estimation prior that is continuous and symmetric about the null value, because only then is $pd/(1 - pd)$ the Bayes factor [@Marsman2017]. This includes informative priors, such as a narrow normal prior centered on the null value, as well as weakly informative and flat ones. An estimation prior that is not symmetric, for example one centered on a value predicted by previous studies, gives the two directions unequal prior probabilities, and extending the adjustment to this case is left to future work. Moreover, the error rates and power reported here were obtained in the normal model with a diffuse prior, and they may differ in other models and with other priors.
+
+As Bayesian methods become increasingly common in psychological research, often with fixed decision thresholds, the implications of multiplicity should be explicitly recognized. The adjustment proposed here asks for one additional number, $\bar{\pi}$, and can be applied to the $pd$ values that researchers already report. We hope that claims based on $pd$ will be reported together with the family to which they belong, the value of $\bar{\pi}$ used, including $\bar{\pi} = .5$ when no adjustment is made, and the $pd$ and $pd_{\text{adj}}$ of every parameter in the family.
 
 # Acknowledgments
 
 We are grateful to Jelle Goeman, Giovanni Parmigiani and Enrico Toffalini for insightful comments and discussion throughout the development of this work. We also thank Laura Sità, Matteo Manente and two anonymous reviewers for helpful feedback on earlier versions of the manuscript. The `multibayes` package code was reviewed and debugged with the assistance of AI tools.
 
-# Open Practices Statement
+# Declarations
 
-The code to reproduce all simulations, figures, and the worked example is available in the *multibayes* repository on GitHub (<https://github.com/mar-cald/multibayes>). The worked example uses openly available data from @Lin2020, distributed with the `afex` R package [@Singmann2016]. No new data were collected, and the study was not preregistered.
+## Funding
 
-# Authors' Contributions
+The authors did not receive support from any organization for the submitted work.
+
+## Conflicts of Interest/Competing Interests
+
+The authors have no competing interests to declare that are relevant to the content of this article.
+
+## Ethics Approval
+
+Not applicable. The study reanalyzes openly available, anonymized data [@Lin2020] and collected no new data.
+
+## Consent to Participate
+
+Not applicable.
+
+## Consent for Publication
+
+Not applicable.
+
+## Availability of Data and Materials
+
+The worked example uses the openly available data of @Lin2020, archived on OSF [@Lin2020data] and distributed with the `afex` R package [@Singmann2016]. The simulated data can be regenerated with the code described below.
+
+## Code Availability
+
+The `multibayes` R package and the code to reproduce all simulations, figures, and the worked example are archived on Zenodo ([Zenodo DOI to be added]) and developed at <https://github.com/mar-cald/multibayes>.
+
+## Authors' Contributions
 
 Author roles were classified using the Contributor Roles Taxonomy (CRediT; <https://credit.niso.org/>) as follows — Conceptualization: M. Calderan and G. Altoè; Methodology: M. Calderan, F. Gambarota, and L. Finos; Software: M. Calderan and F. Gambarota; Writing - Original Draft: M. Calderan; Writing - Review & Editing: F. Gambarota, L. Finos, and G. Altoè; Visualization: M. Calderan; Supervision: L. Finos and G. Altoè. All authors approved the final version of the manuscript and agree to be accountable for the work.
+
+# Open Practices Statement
+
+The code to reproduce all simulations, figures, and the worked example is archived on Zenodo ([Zenodo DOI to be added]), and the analyzed data are available on OSF [@Lin2020data]. The study was not preregistered.
 
 # References {#refs}
 

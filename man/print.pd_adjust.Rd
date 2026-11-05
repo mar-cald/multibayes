@@ -17,7 +17,7 @@
 \code{x}, invisibly.
 }
 \description{
-Prints a header with the number of tests \eqn{m}, \eqn{\pi_0}, the
+Prints a header with the number of tests \eqn{m}, \eqn{\bar{\pi}}, the
 unadjusted threshold \eqn{c} and the adjusted threshold \eqn{c^*} (a
 direction is claimed when \eqn{pd \ge c^*}), followed by the per-test table
 and a short note on \code{pd.adj}.

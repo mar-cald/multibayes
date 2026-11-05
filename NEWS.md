@@ -1,3 +1,13 @@
+# multibayes 0.3.0
+
+## Breaking changes
+
+* The argument `pi0` of `pd.adjust()` is renamed `pi.max`, and so are the
+  corresponding output column and the printed header. The name says what it
+  is, an upper bound on the prior probability of each direction of a
+  parameter, and avoids confusion with the proportion of null effects, which
+  is usually written `pi0`.
+
 # multibayes 0.2.0
 
 ## Breaking changes
