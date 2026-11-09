@@ -2,14 +2,16 @@
 
 # Simulation -------------------------------------------------------------------
 
-## Normal model: pd from the conjugate normal-normal posterior
-bayes_posterior_analytical <- function(x, sigma = 1, tau0 = 1, mu0=0) {
+## Normal model: pd from the conjugate normal-normal posterior and, when
+## ndraws > 0, ndraws draws from the same posterior
+bayes_posterior_analytical <- function(x, sigma = 1, tau0 = 1, mu0 = 0, ndraws = 0) {
   n <- length(x)
   bar_y <- mean(x)
   post_mean <- (bar_y * (n / sigma^2) + mu0 * (1 / tau0^2)) / (n / sigma^2 + 1 / tau0^2)
   post_sd <- sqrt(1 / (n / sigma^2 + 1 / tau0^2))
   pd <- pnorm(abs(post_mean - 0) / post_sd)
-  return(pd)
+  draws <- if (ndraws > 0) rnorm(ndraws, post_mean, post_sd) else NULL
+  list(pd = pd, draws = draws)
 }
 
 ## nsim replications of one cell; each replication stores the raw pd values,
@@ -33,8 +35,10 @@ sim_ind <- function(n, m, r, s, eff, nsim, pi0_true, compare = FALSE) {
     # simulate data
     X <- MASS::mvrnorm(n, effsim, Sigma = S)
 
-    # bayes
-    pd <- apply(X, 2, function(x) bayes_posterior_analytical(x, tau0 = s))
+    # bayes: pd of each test and, for the comparison, 10,000 posterior draws
+    post <- lapply(seq_len(m), function(j)
+      bayes_posterior_analytical(X[, j], tau0 = s, ndraws = if (compare) 1e4 else 0))
+    pd <- sapply(post, `[[`, "pd")
 
     # direction favored by the posterior 
     sgn <- sign(colMeans(X))
@@ -42,10 +46,8 @@ sim_ind <- function(n, m, r, s, eff, nsim, pi0_true, compare = FALSE) {
     out <- list(pd = pd, sgn = sgn, effsim = effsim)
 
     if (compare) {
-      # posterior draws (conjugate normal-normal posterior), one column per test
-      post_mean <- colMeans(X) * n / (n + 1 / s^2)
-      post_sd   <- sqrt(1 / (n + 1 / s^2))
-      draws <- matrix(rnorm(1e4 * m, rep(post_mean, each = 1e4), post_sd), 1e4, m)
+      # posterior draws from bayes_posterior_analytical(), one column per test
+      draws <- sapply(post, `[[`, "draws")
       colnames(draws) <- paste0("H", seq_len(m))
 
       # joint statement: the top-k claims with joint probability >= c = .975,

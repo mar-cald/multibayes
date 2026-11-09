@@ -36,8 +36,10 @@ a priori, so that `pi.max` grows with the number of tests.
 library(multibayes)
 draws <- MASS::mvrnorm(4000, mu = c(1, 0.2, 3), Sigma = diag(3))
 colnames(draws) <- c("b1", "b2", "b3")
-pd.adjust(draws = draws, pi.max = 0.7)   # claim a direction when pd.adj >= c (pd >= c*)
-joint(draws)                             # simultaneous credible intervals
+res <- pd.adjust(draws = draws, pi.max = 0.7)   # claim a direction when pd.adj >= c (pd >= c*)
+res
+plot(res)                                       # posterior probability across the class of priors
+joint(draws)                                    # simultaneous credible intervals
 ```
 
 ## Citation
