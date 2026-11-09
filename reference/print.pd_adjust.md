@@ -1,8 +1,8 @@
 # Print method for `pd_adjust` objects
 
-Prints a header with the number of tests \\m\\, \\\pi_0\\, the
+Prints a header with the number of tests \\m\\, \\\bar{\pi}\\, the
 unadjusted threshold \\c\\ and the adjusted threshold \\c^\*\\ (a
-direction is claimed when \\pd \> c^\*\\), followed by the per-test
+direction is claimed when \\pd \ge c^\*\\), followed by the per-test
 table and a short note on `pd.adj`. Columns that take the same value in
 every row (`null.value`, `direction`) are reported once in the header.
 The full set of columns remains available for programmatic access via

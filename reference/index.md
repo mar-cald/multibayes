@@ -12,6 +12,11 @@
 
   Print method for `pd_adjust` objects
 
+- [`plot(`*`<pd_adjust>`*`)`](https://mar-cald.github.io/multibayes/reference/plot.pd_adjust.md)
+  :
+
+  Plot method for `pd_adjust` objects
+
 ## Joint Posterior
 
 - [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md)

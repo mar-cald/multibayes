@@ -1,16 +1,16 @@
 # Summaries from joint posterior draws
 
-Computes either the **joint directional statement** (the default): for
-each \\k\\, the joint posterior probability that the \\k\\ strongest
-directional claims hold simultaneously, or **simultaneous credible
-intervals** (`interval = TRUE`).
+Computes either **simultaneous credible intervals** (the default), or,
+with `interval = FALSE`, the **joint directional statement**: for each
+\\k\\, the joint posterior probability that the \\k\\ strongest
+directional claims hold simultaneously.
 
 ## Usage
 
 ``` r
 joint(
   draws,
-  interval = FALSE,
+  interval = TRUE,
   prob = 0.95,
   null.value = 0,
   direction = NULL,
@@ -27,13 +27,13 @@ joint(
 
 - interval:
 
-  Logical (default `FALSE`). If `FALSE`, return the joint directional
-  statement; if `TRUE`, return simultaneous credible intervals.
+  Logical (default `TRUE`). If `TRUE`, return simultaneous credible
+  intervals; if `FALSE`, return the joint directional statement.
 
 - prob:
 
-  Numeric scalar in \\(0, 1)\\. Joint coverage probability for the
-  simultaneous intervals (default `0.95`). Used only when
+  Numeric scalar in \\(0, 1)\\. Joint posterior probability that all
+  parameters lie within their intervals (default `0.95`). Used only when
   `interval = TRUE`.
 
 - null.value:
@@ -68,8 +68,8 @@ with a print method), with one row per parameter and columns `lower`,
 
 ## Details
 
-**Joint directional statement** (`interval = FALSE`, the default). Each
-parameter's claimed direction is its dominant posterior side relative to
+**Joint directional statement** (`interval = FALSE`). Each parameter's
+claimed direction is its dominant posterior side relative to
 `null.value` (or the side set by `direction`). Parameters are ordered by
 decreasing *pd*, and the `joint_cum` column reports, for each \\k\\, the
 joint posterior probability that the \\k\\ strongest claims hold
@@ -77,16 +77,16 @@ simultaneously. It is computed directly from the draws by intersecting
 the per-draw directional events, so it reflects the posterior dependence
 among parameters.
 
-**Simultaneous credible intervals** (`interval = TRUE`). Equi-tailed
-intervals calibrated so that **all** parameters lie within their bounds
-simultaneously with probability `prob`, via the quantile-based
-simultaneous credible band. Coverage is set by examining how extreme
-each draw is across all parameters jointly: for every draw the minimum
-(nearer) tail probability across parameters is taken, and the threshold
-is the \\(1 - \texttt{prob})\\-quantile of these minima. A direction can
-be claimed for a parameter when its band excludes the null value. A
-closely related implementation is `sim.cred.band` in the credsubs
-package (Schnell et al., 2020).
+**Simultaneous credible intervals** (`interval = TRUE`, the default).
+Equi-tailed intervals calibrated so that **all** parameters lie within
+their bounds simultaneously with probability `prob`, via the
+quantile-based simultaneous credible band. The intervals are set by
+examining how extreme each draw is across all parameters jointly: for
+every draw the minimum (nearer) tail probability across parameters is
+taken, and the threshold is the \\(1 - \texttt{prob})\\-quantile of
+these minima. A direction can be claimed for a parameter when its band
+excludes the null value. A closely related implementation is
+`sim.cred.band` in the credsubs package (Schnell et al., 2020).
 
 ## References
 
@@ -120,20 +120,20 @@ Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 draws <- MASS::mvrnorm(2000, mu, Sigma)
 colnames(draws) <- c("theta1", "theta2", "theta3")
 
-joint(draws)                    # joint directional statement (default)
+joint(draws)                     # simultaneous credible intervals (default)
+#> Simultaneous credible intervals (joint probability 0.95)
+#> 
+#>          lower     est  upper
+#> theta1 -0.7416  1.4721 3.8524
+#> theta2 -2.3636 -0.0241 2.1471
+#> theta3 -4.3930 -1.9897 0.3948
+joint(draws, interval = FALSE)   # joint directional statement
 #> Joint directional statement
 #>   null value = 0, direction = two.sided
 #>   joint_cum: Pr(the top k claims all hold | y)
 #> 
 #>        median.est     pd joint_cum
-#> theta3    -1.9596 0.9755    0.9755
-#> theta1     1.5206 0.9405    0.9160
-#> theta2     0.0021 0.5005    0.4820
-joint(draws, interval = TRUE)   # simultaneous credible intervals
-#> Simultaneous credible intervals (joint coverage 0.95)
-#> 
-#>          lower     est  upper
-#> theta1 -0.7956  1.5206 3.7265
-#> theta2 -2.4132  0.0021 2.2379
-#> theta3 -4.2133 -1.9596 0.3456
+#> theta3    -1.9897 0.9750    0.9750
+#> theta1     1.4721 0.9360    0.9115
+#> theta2    -0.0241 0.5095    0.4415
 ```

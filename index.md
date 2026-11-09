@@ -17,29 +17,32 @@ remotes::install_github("mar-cald/multibayes")
 | Function | Input | What it returns |
 |----|----|----|
 | [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md) | Posterior draws or *pd* vector | Prior-odds threshold *c\** for the probability of direction (per test) |
-| [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md) | Posterior draws | Joint probability of the strongest directional claims (default) or simultaneous credible intervals (`interval = TRUE`) |
+| [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md) | Posterior draws | Simultaneous credible intervals (default) or the joint probability of the strongest directional claims (`interval = FALSE`) |
 
 [`pd.adjust()`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md)
-asks for a single quantity, `pi0`: an upper bound, set by you, on the
-prior probability of the sign opposite to the claimed one. Because the
-same `pi0` is used for every parameter, it is also an upper bound on the
-expected proportion of parameters in the family that are not on the
-claimed side, null effects included, so a judgment about how many null
+asks for a single quantity, `pi.max`: an upper bound, set by you before
+the data, on the prior probability of each direction of a parameter. A
+claim is made only if it holds under the prior most skeptical of it,
+that is, when the prior odds of its direction are lowered by a factor of
+up to `pi.max/(1 - pi.max)`, which raises the threshold on *pd* from `c`
+(default 0.975) to `c*`. When the same `pi.max` is used for exchangeable
+parameters, it is also an upper bound on the expected proportion of
+parameters in the family that are not on a given side of the null value.
+Since null effects are among them, a judgment about how many null
 effects the family could contain can guide its choice. Alternatively,
 `p0` is the largest prior probability that no claim in the family is
-correct, with `pi0 = p0^(1/m)` for `m` tests that are independent a
-priori, so that `pi0` grows with the number of tests. A claim is made
-only if it holds under every prior that lowers the prior odds of either
-direction by up to `pi0/(1 - pi0)`, which raises the threshold on *pd*
-from `c` (default 0.975) to `c*`.
+correct, with `pi.max = p0^(1/m)` for `m` tests that are independent a
+priori, so that `pi.max` grows with the number of tests.
 
 ``` r
 
 library(multibayes)
 draws <- MASS::mvrnorm(4000, mu = c(1, 0.2, 3), Sigma = diag(3))
 colnames(draws) <- c("b1", "b2", "b3")
-pd.adjust(draws = draws, pi0 = 0.7)   # claim a direction when pd.adj > c (pd > c*)
-joint(draws)                          # joint probability of the top-k claims
+res <- pd.adjust(draws = draws, pi.max = 0.7)   # claim a direction when pd.adj >= c (pd >= c*)
+res
+plot(res)                                       # posterior probability across the class of priors
+joint(draws)                                    # simultaneous credible intervals
 ```
 
 ## Citation
