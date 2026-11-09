@@ -6,7 +6,7 @@
 \usage{
 joint(
   draws,
-  interval = FALSE,
+  interval = TRUE,
   prob = 0.95,
   null.value = 0,
   direction = NULL,
@@ -17,9 +17,9 @@ joint(
 \item{draws}{Numeric matrix or data frame of posterior draws
 (rows = draws, columns = parameters). At least 1000 rows and 2 columns.}
 
-\item{interval}{Logical (default \code{FALSE}). If \code{FALSE}, return the
-joint directional statement; if \code{TRUE}, return simultaneous credible
-intervals.}
+\item{interval}{Logical (default \code{TRUE}). If \code{TRUE}, return
+simultaneous credible intervals; if \code{FALSE}, return the joint
+directional statement.}
 
 \item{prob}{Numeric scalar in \eqn{(0, 1)}. Joint posterior probability that
 all parameters lie within their intervals (default \code{0.95}). Used only when
@@ -49,13 +49,13 @@ For \code{interval = TRUE}, an object of class \code{joint_interval}
 columns \code{lower}, \code{est}, \code{upper}, and \code{prob}.
 }
 \description{
-Computes either the \strong{joint directional statement} (the default): for
+Computes either \strong{simultaneous credible intervals} (the default), or,
+with \code{interval = FALSE}, the \strong{joint directional statement}: for
 each \eqn{k}, the joint posterior probability that the \eqn{k} strongest
-directional claims hold simultaneously, or \strong{simultaneous credible
-intervals} (\code{interval = TRUE}).
+directional claims hold simultaneously.
 }
 \details{
-\strong{Joint directional statement} (\code{interval = FALSE}, the default).
+\strong{Joint directional statement} (\code{interval = FALSE}).
 Each parameter's claimed direction is its dominant posterior side relative to
 \code{null.value} (or the side set by \code{direction}). Parameters are
 ordered by decreasing \emph{pd}, and the \code{joint_cum} column reports, for
@@ -64,7 +64,7 @@ claims hold simultaneously. It is computed directly from the draws by
 intersecting the per-draw directional events, so it reflects the posterior
 dependence among parameters.
 
-\strong{Simultaneous credible intervals} (\code{interval = TRUE}). Equi-tailed
+\strong{Simultaneous credible intervals} (\code{interval = TRUE}, the default). Equi-tailed
 intervals calibrated so that \strong{all} parameters lie within their bounds
 simultaneously with probability \code{prob}, via the quantile-based
 simultaneous credible band. The intervals are set by examining how extreme each
@@ -81,8 +81,8 @@ Sigma <- matrix(c(1, 0.8, 0.5, 0.8, 1, 0.3, 0.5, 0.3, 1), 3, 3)
 draws <- MASS::mvrnorm(2000, mu, Sigma)
 colnames(draws) <- c("theta1", "theta2", "theta3")
 
-joint(draws)                    # joint directional statement (default)
-joint(draws, interval = TRUE)   # simultaneous credible intervals
+joint(draws)                     # simultaneous credible intervals (default)
+joint(draws, interval = FALSE)   # joint directional statement
 }
 \references{
 Box, G. E. P., & Tiao, G. C. (1992). Bayesian inference in statistical

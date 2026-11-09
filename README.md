@@ -16,7 +16,7 @@ remotes::install_github("mar-cald/multibayes")
 | Function | Input | What it returns |
 |---|---|---|
 | `pd.adjust()` | Posterior draws or *pd* vector | Prior-odds threshold *c\** for the probability of direction (per test) |
-| `joint()` | Posterior draws | Joint probability of the strongest directional claims (default) or simultaneous credible intervals (`interval = TRUE`) |
+| `joint()` | Posterior draws | Simultaneous credible intervals (default) or the joint probability of the strongest directional claims (`interval = FALSE`) |
 
 `pd.adjust()` asks for a single quantity, `pi.max`: an upper bound, set by you
 before the data, on the prior probability of each direction of a parameter.
@@ -37,7 +37,7 @@ library(multibayes)
 draws <- MASS::mvrnorm(4000, mu = c(1, 0.2, 3), Sigma = diag(3))
 colnames(draws) <- c("b1", "b2", "b3")
 pd.adjust(draws = draws, pi.max = 0.7)   # claim a direction when pd.adj >= c (pd >= c*)
-joint(draws)                             # joint probability of the top-k claims
+joint(draws)                             # simultaneous credible intervals
 ```
 
 ## Citation

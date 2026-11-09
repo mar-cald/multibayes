@@ -298,3 +298,17 @@ test_that("print.pd_adjust reports c, c* and the constant columns in the header"
   expect_length(colhdr, 1)
   expect_false(grepl("direction|null.value", colhdr))
 })
+
+test_that("plot() returns the range of the posterior probability across the class", {
+  pd <- c(0.70, 0.98, 0.999)
+  out <- pd.adjust(pd = pd, pi.max = 0.8)
+  pdf(NULL); on.exit(dev.off())
+  r <- plot(out)
+  # left end is pd.adj, right end is the probability under the most favorable prior
+  expect_equal(r$lower, out$pd.adj, tolerance = 1e-4)
+  expect_equal(r$upper, out$pd * 0.8 / (out$pd * 0.8 + (1 - out$pd) * 0.2))
+  expect_true(all(r$lower <= r$pd & r$pd <= r$upper))
+  expect_equal(r$claim, out$pd.adj >= attr(out, "threshold"))
+  # pd < pi.max gives a bar that crosses .5
+  expect_true(r$lower[1] < 0.5 && r$upper[1] > 0.5)
+})

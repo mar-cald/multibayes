@@ -25,6 +25,7 @@ RoxygenNote: 7.3.3
 Depends:
     R (>= 4.0.0)
 Imports:
+    graphics,
     stats,
     matrixStats
 Suggests:

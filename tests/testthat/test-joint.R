@@ -8,13 +8,13 @@ test_that("joint() validates its inputs", {
   expect_error(joint(d, interval = TRUE, est.FUN = 42), "must be a function")
 })
 
-# ---- Cumulative joint statement (default) ----------------------------------
+# ---- Cumulative joint statement (interval = FALSE) ----------------------------------
 
-test_that("joint() default returns the cumulative joint statement", {
+test_that("joint(interval = FALSE) returns the cumulative joint statement", {
   set.seed(1)
   d <- MASS::mvrnorm(3000, mu = c(2.5, 1, -1.5, 0.2), Sigma = diag(4))
   colnames(d) <- c("a", "b", "c", "e")
-  out <- joint(d, null.value = 0)
+  out <- joint(d, interval = FALSE, null.value = 0)
 
   expect_s3_class(out, "data.frame")
   expect_equal(names(out), c("median.est", "null.value", "pd", "direction", "joint_cum"))
@@ -32,7 +32,7 @@ test_that("joint() cumulative is the exact intersection (dependence-aware)", {
   draws <- MASS::mvrnorm(20000, mu = c(1, 1, 1, 1), Sigma = Sigma)
   colnames(draws) <- paste0("H", 1:4)
 
-  out    <- joint(draws, null.value = 0)
+  out    <- joint(draws, interval = FALSE, null.value = 0)
   manual <- mean(rowSums(draws > 0) == 4)            # all four on the theta>0 side
   expect_equal(unname(out$joint_cum[4]), round(manual, 4))
   # positive dependence: the joint exceeds the independence product of the pd
@@ -43,10 +43,10 @@ test_that("joint() cumulative honours direction and validates lengths", {
   set.seed(2)
   draws <- MASS::mvrnorm(3000, mu = c(1, -1, 0.5), Sigma = diag(3))
   colnames(draws) <- c("p1", "p2", "p3")
-  out <- joint(draws, direction = c("greater", "less", "two.sided"))
+  out <- joint(draws, interval = FALSE, direction = c("greater", "less", "two.sided"))
   expect_equal(nrow(out), 3L)
-  expect_error(joint(draws, direction = c("greater", "less")), "scalar or a vector")
-  expect_error(joint(draws, null.value = c(0, 0)), "scalar or a vector")
+  expect_error(joint(draws, interval = FALSE, direction = c("greater", "less")), "scalar or a vector")
+  expect_error(joint(draws, interval = FALSE, null.value = c(0, 0)), "scalar or a vector")
 })
 
 # ---- Simultaneous credible intervals (interval = TRUE) ---------------------
@@ -92,8 +92,8 @@ test_that("joint() outputs are classed data frames with print methods", {
   set.seed(3)
   dr <- matrix(rnorm(2000 * 3, c(2, 0.5, -1), 1), ncol = 3, byrow = TRUE)
   colnames(dr) <- c("a", "b", "c")
-  js <- joint(dr)
-  ji <- joint(dr, interval = TRUE)
+  js <- joint(dr, interval = FALSE)
+  ji <- joint(dr)
   expect_s3_class(js, "joint_directional")
   expect_s3_class(ji, "joint_interval")
   expect_s3_class(js, "data.frame")
@@ -104,4 +104,10 @@ test_that("joint() outputs are classed data frames with print methods", {
   capture.output(res_js <- print(js), res_ji <- print(ji))
   expect_identical(res_js, js)
   expect_identical(res_ji, ji)
+})
+
+test_that("joint() defaults to simultaneous intervals", {
+  set.seed(4)
+  dr <- matrix(rnorm(2000 * 3), ncol = 3)
+  expect_s3_class(joint(dr), "joint_interval")
 })

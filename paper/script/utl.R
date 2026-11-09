@@ -16,7 +16,9 @@ bayes_posterior_analytical <- function(x, sigma = 1, tau0 = 1, mu0=0) {
 ## the direction favored by each posterior (sgn) and the true parameters. With
 ## compare = TRUE it also stores the claims of the joint statement and of the
 ## 95% simultaneous band (+1 / -1 = claimed direction, 0 = no claim),
-## computed with multibayes::joint() from 4,000 draws of each posterior.
+## computed with multibayes::joint() from 10,000 draws of each posterior
+## (with fewer draws the band's estimated quantile adds noise and its FWER
+## exceeds the nominal level slightly).
 sim_ind <- function(n, m, r, s, eff, nsim, pi0_true, compare = FALSE) {
   replicate(nsim, {
     # cov
@@ -43,12 +45,12 @@ sim_ind <- function(n, m, r, s, eff, nsim, pi0_true, compare = FALSE) {
       # posterior draws (conjugate normal-normal posterior), one column per test
       post_mean <- colMeans(X) * n / (n + 1 / s^2)
       post_sd   <- sqrt(1 / (n + 1 / s^2))
-      draws <- matrix(rnorm(4000 * m, rep(post_mean, each = 4000), post_sd), 4000, m)
+      draws <- matrix(rnorm(1e4 * m, rep(post_mean, each = 1e4), post_sd), 1e4, m)
       colnames(draws) <- paste0("H", seq_len(m))
 
       # joint statement: the top-k claims with joint probability >= c = .975,
       # so that, as the other two rules, it reduces to pd >= .975 for one parameter
-      jc <- multibayes::joint(draws, null.value = 0)
+      jc <- multibayes::joint(draws, interval = FALSE, null.value = 0)
       k  <- sum(jc$joint_cum >= 0.975)
       jdir <- sign(jc$median.est) * (seq_len(nrow(jc)) <= k)
       out$joint <- jdir[match(colnames(draws), rownames(jc))]

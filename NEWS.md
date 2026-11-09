@@ -7,6 +7,18 @@
   is, an upper bound on the prior probability of each direction of a
   parameter, and avoids confusion with the proportion of null effects, which
   is usually written `pi0`.
+* `joint()` now returns simultaneous credible intervals by default; the joint
+  directional statement requires `interval = FALSE`. In the simulations of the
+  accompanying paper, the joint directional statement kept neither error rate
+  low when many effects were null.
+
+## New features
+
+* `plot()` method for `pd.adjust()` results: for each hypothesis, a bar spans the
+  posterior probability of the favored direction across the class of priors
+  (from `pd.adj` to the value under the prior most favorable to it), with a
+  point at `pd` and a dashed line at the threshold `c`; the two ends of each
+  range are also printed on the right.
 
 # multibayes 0.2.0
 
