@@ -1,8 +1,8 @@
 # multibayes
 
-**multibayes** provides tools for making directional claims about many
-parameters from posterior draws. Direction-agnostic and directional tests are
-supported, and can be mixed freely within a single call.
+**multibayes** is an R package for making directional claims about several
+parameters from a Bayesian model, when the number of tests should be taken
+into account.
 
 ## Installation
 
@@ -11,36 +11,65 @@ supported, and can be mixed freely within a single call.
 remotes::install_github("mar-cald/multibayes")
 ```
 
-## Overview
+## What it does
 
-| Function | Input | What it returns |
+| Function | Input | Output |
 |---|---|---|
-| `pd.adjust()` | Posterior draws or *pd* vector | Prior-odds threshold *c\** for the probability of direction (per test) |
-| `joint()` | Posterior draws | Simultaneous credible intervals (default) or the joint probability of the strongest directional claims (`interval = FALSE`) |
+| `pd.adjust()` | Posterior draws, or a vector of *pd* values | For each parameter, the probability of direction (*pd*) and its value under a more skeptical prior (`pd.adj`) |
+| `joint()` | Posterior draws | Simultaneous credible intervals, or with `interval = FALSE` the joint probability of the strongest directional claims |
 
-`pd.adjust()` asks for a single quantity, `pi.max`: an upper bound, set by you
-before the data, on the prior probability of each direction of a parameter.
-A claim is made only if it holds under the prior most skeptical of it, that is,
-when the prior odds of its direction are lowered by a factor of up to
-`pi.max/(1 - pi.max)`, which raises the threshold on *pd* from `c`
-(default 0.975) to `c*`. When the same `pi.max` is used for exchangeable
-parameters, it is also an upper bound on the expected proportion of parameters
-in the family that are not on a given side of the null value. Since null
-effects are among them, a judgment about how many null effects the family
-could contain can guide its choice.
-Alternatively, `p0` is the largest prior probability that no claim in the
-family is correct, with `pi.max = p0^(1/m)` for `m` tests that are independent
-a priori, so that `pi.max` grows with the number of tests.
+### `pd.adjust()`
+
+A direction is usually claimed when *pd* reaches a threshold such as 0.975.
+With many parameters, this rule makes more and more wrong claims. `pd.adjust()`
+separates two choices.
+
+- `threshold` (`c`, default 0.975) is the posterior probability you require to
+  make a claim. It stays the same whatever the number of tests.
+- `pi.max` is the largest prior probability you allow for either direction of
+  a parameter. With 0.5 nothing changes. A larger value makes the prior more
+  skeptical about each claim.
+
+`pd.adj` is the posterior probability of the favored direction when that
+direction has prior probability `1 - pi.max`. A direction is claimed when
+`pd.adj >= c`, which is the same as `pd >= c*`, a larger value shown in the
+output. The model is not refitted.
+
+To choose `pi.max`, think of how many effects in the family could be null.
+That proportion is a reference value. If up to 70% of the effects could be
+null, at most 30% lie in each direction, so each direction should be allowed a
+prior probability as low as 0.3, which gives `pi.max = 0.7`. A larger value gives fewer false claims at a cost in power.
+The same `pi.max` is used for every test, so you should be equally skeptical
+of a claim about any parameter in the family. The parameters can be on
+different scales. `pd.adj` remains a probability
+about the sign of a parameter. It is not the probability that an effect is
+non-null. Alternatively, `p0` sets the largest
+prior probability that no claim in the family is correct, and `pi.max` is then
+`p0^(1/m)` for `m` tests.
+
+The prior of the fitted model must be continuous and symmetric about the null
+value, as flat priors and symmetric priors centred on it are (normal or
+Student-t priors, for example).
 
 ```r
 library(multibayes)
 draws <- MASS::mvrnorm(4000, mu = c(1, 0.2, 3), Sigma = diag(3))
 colnames(draws) <- c("b1", "b2", "b3")
-res <- pd.adjust(draws = draws, pi.max = 0.7)   # claim a direction when pd.adj >= c (pd >= c*)
-res
-plot(res)                                       # posterior probability across the class of priors
-joint(draws)                                    # simultaneous credible intervals
+
+res <- pd.adjust(draws = draws, pi.max = 0.7)
+res          # pd, pd.adj, and the thresholds
+plot(res)    # range of the posterior probability as the prior changes
 ```
+
+### `joint()`
+
+```r
+joint(draws)                     # simultaneous credible intervals
+joint(draws, interval = FALSE)   # joint probability of the strongest claims
+```
+
+Simultaneous intervals need more draws as the number of parameters grows.
+`joint()` warns when there are too few.
 
 ## Citation
 

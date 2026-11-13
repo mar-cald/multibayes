@@ -2,7 +2,7 @@
 % Please edit documentation in R/pd.adjust.R
 \name{pd.adjust}
 \alias{pd.adjust}
-\title{Prior-odds threshold for the Probability of Direction \emph{pd}}
+\title{Prior-odds adjustment for the probability of direction}
 \usage{
 pd.adjust(
   pd = NULL,
@@ -17,152 +17,125 @@ pd.adjust(
 )
 }
 \arguments{
-\item{pd}{Numeric vector of direction-agnostic \emph{pd} values in
-\eqn{[0.5, 1]}. With \code{pd} input every test is treated as
-direction-agnostic and \code{direction} is ignored; for directional tests,
-supply \code{draws}. Ignored if \code{draws} is supplied.}
+\item{pd}{Numeric vector of \emph{pd} values in \eqn{[0.5, 1]}. Every test
+is then treated as \code{"two.sided"} and \code{direction} is ignored.
+Ignored if \code{draws} is supplied.}
 
-\item{draws}{Optional matrix or data frame of posterior draws (columns = parameters).
-If provided, \emph{pd} values are computed automatically from the draws
-according to \code{direction} and \code{null.value}.}
+\item{draws}{Matrix or data frame of posterior draws, one column per
+parameter. \emph{pd} is computed from the draws according to
+\code{direction} and \code{null.value}.}
 
-\item{p0}{Numeric scalar in \eqn{(0, 1)}. The largest prior probability
-that \strong{no} directional claim in the family is correct
-(\eqn{\Pr(H_0)}). Supply \strong{either} \code{pi.max} \strong{or} \code{p0},
-not both. When \code{p0} is given, \eqn{\bar{\pi}} is derived, for parameters
-independent a priori, as \eqn{\bar{\pi} = \Pr(H_0)^{1/m}}.}
+\item{p0}{Number in \eqn{(0, 1)}. The largest prior probability that no
+claim in the family is correct, \eqn{\Pr(H_0)}, from which
+\eqn{\bar{\pi} = \Pr(H_0)^{1/m}}. Supply either \code{p0} or
+\code{pi.max}, not both.}
 
-\item{pi.max}{Numeric scalar in \eqn{(0, 1)}. An upper bound, set by the
-researcher before the data, on the prior probability of each direction of
-a parameter (either side of \code{null.value}); a claim is made only if it
-holds under the prior most skeptical of it. When the same \code{pi.max} is
-applied to exchangeable parameters, it is also an upper bound on the
-expected proportion of parameters in the family that are not on a given
-side of \code{null.value}. Since null effects are among them, a judgment
-about how many null effects the family could contain can guide its
-choice. Values below 0.5 are set to 0.5, with a warning, so that no
-penalty is applied. Supply \strong{either} \code{pi.max} \strong{or}
-\code{p0}, not both.}
+\item{pi.max}{Number in \eqn{(0, 1)}. The largest prior probability allowed
+for either direction of a parameter, chosen before the data. See Details
+for how to choose it. Values below 0.5 are set to 0.5, with a warning, so
+that no adjustment is made. Supply either \code{pi.max} or \code{p0}, not
+both.}
 
-\item{null.value}{Numeric scalar or vector. The null (reference) value against
-which the posterior is evaluated, specified on the scale of the posterior.
-A single scalar applies the same null to all parameters; a vector of length \code{ncol(draws)}
-assigns a distinct null to each parameter. Ignored when \code{pd} is supplied directly.
-Defaults to \code{0}. The class of priors behind the threshold is defined
-for an estimation prior symmetric about the null value (see Details), which
-holds for flat priors and for priors centred on it.}
+\item{null.value}{Number or vector, the null value of each parameter on the
+scale of the draws. A single number applies to all parameters. Ignored
+when \code{pd} is supplied. Defaults to \code{0}.}
 
-\item{direction}{Character vector of \code{"greater"}, \code{"less"}, or
-\code{"two.sided"} (or \code{NULL}).
-Specifies the testing mode for each hypothesis: \code{"greater"} for a
-positive directional test (\eqn{\Pr(\theta > \theta_\text{null})}),
-\code{"less"} for a negative directional test
-(\eqn{\Pr(\theta < \theta_\text{null})}), and \code{"two.sided"} for
-direction-agnostic testing (maximum over both sides). A scalar is recycled
-to match the number of parameters; a mixed vector allows different modes
-across hypotheses. Defaults to \code{NULL} (direction-agnostic for all
-parameters).}
+\item{direction}{Character vector with elements \code{"two.sided"},
+\code{"greater"}, or \code{"less"}, one per parameter, or a single value
+for all. \code{NULL} (the default) means \code{"two.sided"} for all.}
 
-\item{order}{Logical. If \code{TRUE}, the returned rows are ordered by
-decreasing \code{pd} (strongest directional evidence first). If \code{FALSE}
-(the default), rows are returned in input order, so the output stays aligned
-with the columns of \code{draws} (or the elements of \code{pd}).}
+\item{order}{Logical. If \code{TRUE}, rows are sorted by decreasing
+\code{pd}. If \code{FALSE} (the default), rows keep the order of the
+input.}
 
-\item{threshold}{Numeric scalar in \eqn{(0.5, 1)}. The threshold \eqn{c}
-on \emph{pd} without penalty (default \code{0.975}, a two-sided per-test
-\eqn{\alpha = 0.05}). The function reports the threshold implied by
-\eqn{c} and \code{pi.max},
-\eqn{c^* = c\,\bar{\pi} / ((1-\bar{\pi})(1-c) + c\,\bar{\pi})}.}
+\item{threshold}{Number in \eqn{(0.5, 1)}. The threshold \eqn{c}, the
+posterior probability required to make a claim. Defaults to \code{0.975}.}
 
-\item{alpha}{Optional numeric scalar in \eqn{(0, 1)}. A convenience
-parameterization of \code{threshold} on the error scale: when supplied, the
-two-sided cutoff is set to \eqn{c = 1 - \alpha/2} (so \code{alpha = 0.05}
-gives \code{threshold = 0.975}), \strong{overriding} any \code{threshold}
-value.}
+\item{alpha}{Optional number in \eqn{(0, 1)}. If supplied, the threshold is
+set to \eqn{c = 1 - \alpha/2} and \code{threshold} is ignored.}
 }
 \value{
-An object of class \code{pd_adjust} (a \code{data.frame} with a
-dedicated \code{\link{print.pd_adjust}} method), with one row per
-hypothesis. Columns: \code{pd} (the probability of direction, to be
-compared with \code{threshold.adj}), \code{pd.adj} (the posterior
-probability of the favored direction under the prior in the class most
-skeptical of it, to be compared with \code{threshold}), \code{pi.max},
-\code{m}, and \code{direction}. When
-\code{order = TRUE} the rows are sorted by decreasing \code{pd}. When
-\code{draws} are supplied, the output additionally includes
-\code{median.est} (posterior median per parameter) and \code{null.value}.
-The \code{print} method shows \eqn{m}, \eqn{\bar{\pi}}, the thresholds
-\eqn{c} and \eqn{c^*}, and the columns that are constant across rows
-(\code{null.value}, \code{direction}) in a header, followed by the per-test table; all columns remain
-available for programmatic access.
-The object also carries, as attributes, the threshold \code{threshold}
-(\eqn{c}), the adjusted threshold \code{threshold.adj} (\eqn{c^*}), the
-corresponding two-sided per-test Type I error rates \code{alpha.nominal}
-(\eqn{2(1-c)}) and \code{alpha.eff} (\eqn{2(1-c^*)}); retrieve them with, e.g.,
-\code{attr(x, "threshold.adj")}.
-The threshold \code{threshold.adj} is an exact function of \eqn{c} and
-\eqn{\bar{\pi}}, but the reported per-test \emph{rate} \code{alpha.eff} uses the identity
-\eqn{\alpha = 2(1 - c)}, which holds \strong{only when the null \emph{pd} is approximately uniform on
-\eqn{[0.5, 1]}}.
+An object of class \code{pd_adjust}, a data frame with one row per
+test and the columns \code{pd}, \code{pd.adj}, \code{pi.max}, \code{m}
+(the number of tests), and \code{direction}. With \code{draws}, it also
+has \code{median.est} (the posterior median) and \code{null.value}.
+
+The thresholds are stored as attributes, \code{threshold} (\eqn{c}) and
+\code{threshold.adj} (\eqn{c^*}), together with \code{alpha.nominal}
+(\eqn{2(1-c)}) and \code{alpha.eff} (\eqn{2(1-c^*)}). The last two are
+per-test error rates only if \emph{pd} is uniform on \eqn{[0.5, 1]} for a
+null effect, which holds approximately under diffuse priors.
+
+See \code{\link{print.pd_adjust}} and \code{\link{plot.pd_adjust}}.
 }
 \description{
-Converts an upper bound, set by the researcher, on the prior probability
-of either sign of a parameter into the threshold that \emph{pd}
-must reach before a direction is claimed. The function
-accepts either a vector of pre-computed \emph{pd} values or a matrix of
-posterior draws, from which \emph{pd} values are computed internally. Both
-direction-agnostic and directional tests are supported: the
-\code{direction} argument controls how \emph{pd} is computed per
-hypothesis. The threshold is governed by \eqn{\bar{\pi}} (argument
-\code{pi.max}), an upper bound, set by the researcher before the data, on
-the prior probability of each direction of a parameter (either side of
-\code{null.value}). Equivalently, one may supply \eqn{\Pr(H_0)} (argument
-\code{p0}), the largest prior probability that no claim in the family is
-correct, from which \eqn{\bar{\pi} = \Pr(H_0)^{1/m}} is recovered if the
-parameters are independent a priori. For each hypothesis the function also
-reports \code{pd.adj}, the posterior probability of the favored (or
-predicted) direction under the prior in the class most skeptical of it;
-under the same prior the other side has probability \code{1 - pd.adj}, so
-the two sum to one. A direction is claimed when \code{pd.adj} is at least
-\eqn{c}, which is the same as \eqn{pd \ge c^*}.
+Decides which directional claims to make in a family of tests, from the
+probability of direction (\emph{pd}) of each parameter. Two separate choices
+enter the decision. The threshold \eqn{c} (\code{threshold}) is the posterior
+probability required to make a claim. The bound \eqn{\bar{\pi}}
+(\code{pi.max}) is the largest prior probability allowed for either
+direction of a parameter, and sets how skeptical the prior may be about a
+claim. For each test the function returns \code{pd} and \code{pd.adj}, the
+posterior probability of the favored direction when that direction has
+prior probability \eqn{1 - \bar{\pi}}. A direction is claimed when
+\code{pd.adj} is at least \eqn{c}.
 }
 \details{
-Following Jeffreys (1938) and Westfall et al. (1997), the prior odds of each
-directional claim in the family are penalized. With \code{pi.max} the penalty
-is the same for any number of tests; with \code{p0},
-\eqn{\bar{\pi} = \Pr(H_0)^{1/m}} and the penalty grows with the number of
-tests. Because the
-direction of a claim is chosen by the data, the penalty is applied over a
-class of priors: the estimation prior (the prior of the fitted model) is
-reweighted on the two sides of
-\code{null.value}, so that the prior probability of each direction lies
-between \eqn{1-\bar{\pi}} and \eqn{\bar{\pi}}, and a claim is made only if its
-posterior probability is at least \eqn{c} under every prior in the class that
-reweights the prior of that parameter. This is equivalent to
-\deqn{pd \ge c^*, \qquad c^* = \frac{c\,\bar{\pi}}{(1-c)(1-\bar{\pi}) + c\,\bar{\pi}},}
-and the function reports \eqn{c^*} (\code{threshold.adj}). The smallest
-posterior probability is reached under the prior that gives the favored
-direction probability \eqn{1 - \bar{\pi}}; under that prior the posterior
-probability of the favored direction is
-\deqn{pd_{adj} = \frac{pd\,(1-\bar{\pi})}{pd\,(1-\bar{\pi}) + (1-pd)\,\bar{\pi}},}
-reported as \code{pd.adj}, and \eqn{pd_{adj} \ge c} if and only if
-\eqn{pd \ge c^*}. The posterior used for estimation is not modified. The
-class is defined for an estimation prior that is symmetric about \code{null.value}, as are priors
-centred on it and, as a limit, flat priors.
+\strong{What is computed.} \emph{pd} comes from the fitted model, whose
+prior (the estimation prior) must be continuous and symmetric about
+\code{null.value}. Flat priors and symmetric priors centred on
+\code{null.value}, such as normal or Student-t priors, qualify. Each direction then has prior probability 0.5, and
+\eqn{pd/(1 - pd)} is the Bayes factor of the favored direction against the
+other.
 
-\strong{Direction-agnostic tests} (\code{"two.sided"}): \emph{pd} is
-\eqn{\max\!\big(\Pr(\theta > \theta_\text{null} \mid y),\,
-\Pr(\theta < \theta_\text{null} \mid y)\big)} on \eqn{[0.5, 1]}, and a
-claim is made in the favoured direction when \eqn{pd \ge c^*}.
+With several tests, the prior odds of each claim are lowered (Jeffreys,
+1938; Westfall et al., 1997). The direction of a claim is not known before
+the data, so the function considers every prior obtained by reweighting the
+two sides of the estimation prior so that each direction has prior
+probability between \eqn{1 - \bar{\pi}} and \eqn{\bar{\pi}}. A claim must
+hold under all of these priors, and it is enough to check the one most
+skeptical of the favored direction, under which
+\deqn{pd_{adj} = \frac{pd\,(1-\bar{\pi})}{pd\,(1-\bar{\pi}) + (1-pd)\,\bar{\pi}}.}
+The model is not refitted, and the posterior used for estimation is not
+changed.
 
-\strong{Directional tests} (\code{"greater"} or \code{"less"}): \emph{pd}
-is the posterior mass on the predicted side, on \eqn{[0, 1]}, and the
-predicted direction is claimed when \eqn{pd \ge c^*}.
+\strong{The threshold on pd.} The threshold \eqn{c} is not changed by the
+adjustment. Because \eqn{pd_{adj}} increases with \emph{pd},
+\eqn{pd_{adj} \ge c} holds exactly when \emph{pd} reaches
+\deqn{c^* = \frac{c\,\bar{\pi}}{(1-c)(1-\bar{\pi}) + c\,\bar{\pi}},}
+the value of \emph{pd} required by \eqn{c} and \eqn{\bar{\pi}} together. The
+adjustment is thus equivalent to raising the threshold on \emph{pd} from
+\eqn{c} to \eqn{c^*}, reported as \code{threshold.adj}.
 
-Mixed use of directional and direction-agnostic tests within the same call
-is supported: each element of \code{direction} is handled independently,
-and the same threshold \eqn{c^*} applies to all hypotheses regardless of
-their directionality.
+\strong{Choosing pi.max.} \code{pi.max} says how skeptical you are of a
+directional claim before the data. With \code{pi.max = 0.5} no adjustment is
+made. With \code{pi.max = 0.8}, a claim needs a Bayes factor four times
+larger. The same \code{pi.max} is used for every test, so the parameters
+should be exchangeable in direction, that is, no parameter is judged more
+likely than another to be positive or negative. They can be on different
+scales, because the sign of a parameter does not depend on its unit. The
+proportion of effects in the family that could be null is a reference
+value. If up to 70\\% of the effects could be null, at most 30\\% lie in each
+direction, so each direction should be allowed a prior probability as low
+as 0.3, which gives \code{pi.max = 0.7}. A larger value gives
+fewer false claims at a cost in power. The priors considered are
+continuous, so a null effect has probability zero under all of them, and
+\code{pd.adj} is the posterior probability of a sign. To test whether an
+effect is exactly null, use a prior that puts probability on the null
+value, such as a spike-and-slab prior. A narrower prior in the fitted model
+is no substitute, because a symmetric prior gives each direction prior
+probability 0.5 however narrow it is. Alternatively, \code{p0} gives the largest
+prior probability that no claim in the family is correct. For parameters
+independent a priori, \eqn{\bar{\pi} = \Pr(H_0)^{1/m}}, which grows with the
+number of tests \eqn{m}.
+
+\strong{Direction.} With \code{"two.sided"}, \emph{pd} is the larger of
+\eqn{\Pr(\theta > \theta_\text{null} \mid y)} and
+\eqn{\Pr(\theta < \theta_\text{null} \mid y)}, between 0.5 and 1. With
+\code{"greater"} or \code{"less"}, \emph{pd} is the posterior probability of
+the predicted side, between 0 and 1, and \code{pd.adj} is computed under the
+prior most skeptical of that side. The mode can differ from one test to
+another.
 }
 \examples{
 # From a vector of pd values
@@ -170,7 +143,7 @@ pd_values <- c(H1 = 0.999, H2 = 0.946, H3 = 0.813, H4 = 0.763,
 H5 = 0.891, H6 = 0.987)
 pd.adjust(pd = pd_values, p0 = 0.4)
 
-# Equivalent call specifying pi.max directly
+# The same, giving pi.max directly
 pd.adjust(pd = pd_values, pi.max = 0.4^(1/6))
 
 # Simulate draws
@@ -182,10 +155,10 @@ colnames(draws) <- c("H1", "H2", "H3", "H4", "H5", "H6")
 # From posterior draws
 pd.adjust(draws = draws, pi.max = 0.7, null.value = 0)
 
-# Order the rows by strength of evidence
+# Rows sorted by decreasing pd
 pd.adjust(draws = draws, pi.max = 0.7, null.value = 0, order = TRUE)
 
-# Mix of directional and agnostic tests with parameter-specific nulls
+# Different directions and null values across parameters
 pd.adjust(draws = draws, pi.max = 0.6, null.value = c(0.2, 0, 0.2, 0, 0.5, 0.5),
           direction = c("greater", "two.sided", "greater",
           "two.sided", "greater", "greater"))

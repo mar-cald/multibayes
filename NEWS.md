@@ -2,23 +2,25 @@
 
 ## Breaking changes
 
-* The argument `pi0` of `pd.adjust()` is renamed `pi.max`, and so are the
-  corresponding output column and the printed header. The name says what it
-  is, an upper bound on the prior probability of each direction of a
-  parameter, and avoids confusion with the proportion of null effects, which
-  is usually written `pi0`.
-* `joint()` now returns simultaneous credible intervals by default; the joint
-  directional statement requires `interval = FALSE`. In the simulations of the
-  accompanying paper, the joint directional statement kept neither error rate
-  low when many effects were null.
+* In `pd.adjust()`, the argument `pi0` is now `pi.max`. The output column and
+  the printed header change in the same way. `pi0` usually denotes the
+  proportion of null effects, which is not what this argument is.
+* `joint()` returns simultaneous credible intervals by default. Use
+  `interval = FALSE` for the joint directional statement.
 
 ## New features
 
-* `plot()` method for `pd.adjust()` results: for each hypothesis, a bar spans the
-  posterior probability of the favored direction across the class of priors
-  (from `pd.adj` to the value under the prior most favorable to it), with a
-  point at `pd` and a dashed line at the threshold `c`; the two ends of each
-  range are also printed on the right.
+* `plot()` for `pd.adjust()` results. Each bar shows how the posterior
+  probability of the favored direction changes with the prior, from `pd.adj`
+  upward, with a point at `pd` and a dashed line at `c`.
+
+## Other changes
+
+* `joint()` warns when the simultaneous intervals rest on fewer than about 10
+  draws in each tail. The number of draws needed grows with the number of
+  parameters.
+* Rewritten documentation and README. The note printed under the table of
+  `pd.adjust()` is one line.
 
 # multibayes 0.2.0
 

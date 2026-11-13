@@ -11,13 +11,12 @@ Authors@R: c(
            role = c("aut","ctb"),
            comment = c(ORCID = "0000-0002-6666-1747"))
            )
-Description: Tools for making directional claims about many parameters from
-    posterior draws. A prior-odds threshold for the probability of direction
-    accounts for multiplicity: a claim is made only if it holds under
-    every prior in a class that lowers the prior odds of either direction,
-    which raises the threshold that the probability of direction must reach.
-    Joint posterior probabilities of sets of directional claims and
-    simultaneous credible intervals are also provided.
+Description: Directional claims about several parameters from posterior
+    draws. The probability of direction of each parameter is recomputed under
+    a more skeptical prior, which lowers the prior odds of each claim to
+    account for the number of tests, without refitting the model.
+    Simultaneous credible intervals and joint posterior probabilities of sets
+    of directional claims are also provided.
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

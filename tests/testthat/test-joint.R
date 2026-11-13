@@ -111,3 +111,11 @@ test_that("joint() defaults to simultaneous intervals", {
   dr <- matrix(rnorm(2000 * 3), ncol = 3)
   expect_s3_class(joint(dr), "joint_interval")
 })
+
+test_that("joint() warns when the intervals rest on too few draws", {
+  set.seed(5)
+  few <- matrix(rnorm(1000 * 20), ncol = 20)
+  expect_warning(joint(few), "draws")
+  many <- matrix(rnorm(10000 * 4), ncol = 4)
+  expect_no_warning(joint(many))
+})

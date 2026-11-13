@@ -18,9 +18,7 @@
 }
 \description{
 Prints the table returned by \code{\link{joint}} with \code{interval = FALSE}.
-Columns that take the same value in every row (\code{null.value},
-\code{direction}) are reported once in a header. The full set of columns
-remains available for programmatic access via the usual \code{$} and
-\code{[}.
+Columns with the same value in every row (\code{null.value},
+\code{direction}) are shown once, above the table.
 }
 \keyword{internal}

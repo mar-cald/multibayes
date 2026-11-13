@@ -17,9 +17,7 @@
 \code{x}, invisibly.
 }
 \description{
-Prints the table returned by \code{\link{joint}} with \code{interval = TRUE},
-reporting the joint probability once in a header. The full set of
-columns remains available for programmatic access via the usual \code{$}
-and \code{[}.
+Prints the table returned by \code{\link{joint}} with \code{interval = TRUE}.
+The joint probability is shown once, above the table.
 }
 \keyword{internal}

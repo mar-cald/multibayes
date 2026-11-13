@@ -37,7 +37,7 @@ test_that("pd.adjust() leaves the threshold unchanged when pi.max <= 0.5", {
   pd  <- c(0.9, 0.8, 0.7, 0.6)
   out <- expect_warning(
     pd.adjust(pd = pd, p0 = 0.01),
-    "no penalty is applied"
+    "no adjustment is made"
   )
   expect_equal(attr(out, "threshold.adj"), attr(out, "threshold"))
 })
@@ -65,8 +65,7 @@ test_that("pd.adj is the posterior under the most skeptical prior and matches c*
   # pi.max = .5 leaves pd unchanged
   expect_equal(pd.adjust(pd = pd, pi.max = 0.5)$pd.adj, round(pd, 4))
   txt <- capture.output(print(out))
-  expect_true(any(grepl("pd.adj: Pr(favored direction | y)", txt, fixed = TRUE)))
-  expect_true(any(grepl("Claim a direction when pd.adj >= 0.975", txt, fixed = TRUE)))
+  expect_true(any(grepl("pd.adj: pd when the favored direction", txt, fixed = TRUE)))
 })
 
 test_that("the threshold reproduces the decision under the most skeptical prior of the class", {
@@ -269,7 +268,7 @@ test_that("pd.adjust() no longer accepts the removed joint argument", {
 
 test_that("print.pd_adjust returns invisibly and prints a header", {
   out <- suppressWarnings(pd.adjust(pd = c(0.9, 0.8), p0 = 0.4))
-  expect_output(print(out), "Prior-odds threshold for directional claims")
+  expect_output(print(out), "Prior-odds adjustment for directional claims")
   expect_identical(suppressWarnings(print(out)), out)
 })
 

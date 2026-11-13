@@ -9,34 +9,35 @@
 \arguments{
 \item{x}{A \code{pd_adjust} object returned by \code{\link{pd.adjust}}.}
 
-\item{labels}{Character vector of labels for the hypotheses, in the order of
-the rows of \code{x}. Defaults to the row names.}
+\item{labels}{Labels of the tests, in the order of the rows of \code{x}.
+Defaults to the row names.}
 
-\item{xlim}{Range of the x-axis. Defaults to the range of the bars, extended
-to include \eqn{c}.}
+\item{xlim}{Range of the x-axis. By default it covers all bars and \eqn{c}.}
 
-\item{digits}{Number of digits for the printed ranges. Defaults to 3.}
+\item{digits}{Number of digits of the values printed on the right.
+Defaults to 3.}
 
-\item{...}{Further graphical arguments passed to \code{plot.default}.}
+\item{...}{Further arguments passed to \code{plot.default}.}
 }
 \value{
-Invisibly, a data frame with one row per hypothesis and columns
+Invisibly, a data frame with one row per test and the columns
 \code{lower} (equal to \code{pd.adj}), \code{pd}, \code{upper}, and
 \code{claim}.
 }
 \description{
-For each hypothesis, draws the range of the posterior probability of the
-favored (or predicted) direction across the class of priors behind
-\code{\link{pd.adjust}}. The left end of each bar is \code{pd.adj}, the
-posterior probability under the prior most skeptical of that direction; the
-right end is the posterior probability under the prior most favorable to it,
+Shows, for each test, how the posterior probability of the favored (or
+predicted) direction changes with the prior. Each bar runs from
+\code{pd.adj}, the value when that direction has prior probability
+\eqn{1 - \bar{\pi}}, to the value when it has prior probability
+\eqn{\bar{\pi}}, which is
 \eqn{pd\,\bar{\pi} / (pd\,\bar{\pi} + (1 - pd)(1 - \bar{\pi}))}. The point
-marks \code{pd}, the value under the estimation prior, and the two ends of
-each range are also printed on the right. A direction is claimed when the
-whole bar lies at or above the threshold \eqn{c} (dashed line), that is,
-when \code{pd.adj} \eqn{\ge c}, which is the same as \eqn{pd \ge c^*}. A bar
-that crosses 0.5 means that the priors in the class disagree on which
-direction is more probable.
+marks \code{pd}, and the two ends of each bar are printed on the right.
+}
+\details{
+A direction is claimed when the whole bar lies at or above the threshold
+\eqn{c} (dashed line), that is, when \code{pd.adj} is at least \eqn{c}. A
+bar that crosses 0.5 means that the more probable direction depends on the
+prior.
 }
 \examples{
 set.seed(1)

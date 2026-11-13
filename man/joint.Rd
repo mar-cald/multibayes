@@ -2,7 +2,7 @@
 % Please edit documentation in R/joint.R
 \name{joint}
 \alias{joint}
-\title{Summaries from joint posterior draws}
+\title{Simultaneous credible intervals and joint directional statements}
 \usage{
 joint(
   draws,
@@ -14,66 +14,72 @@ joint(
 )
 }
 \arguments{
-\item{draws}{Numeric matrix or data frame of posterior draws
-(rows = draws, columns = parameters). At least 1000 rows and 2 columns.}
+\item{draws}{Matrix or data frame of posterior draws, one column per
+parameter, with at least 1000 rows and 2 columns.}
 
-\item{interval}{Logical (default \code{TRUE}). If \code{TRUE}, return
-simultaneous credible intervals; if \code{FALSE}, return the joint
-directional statement.}
+\item{interval}{Logical. If \code{TRUE} (the default), simultaneous
+credible intervals are returned. If \code{FALSE}, the joint directional
+statement.}
 
-\item{prob}{Numeric scalar in \eqn{(0, 1)}. Joint posterior probability that
-all parameters lie within their intervals (default \code{0.95}). Used only when
+\item{prob}{Number in \eqn{(0, 1)}. Joint posterior probability of the
+intervals. Defaults to \code{0.95}. Used only when \code{interval = TRUE}.}
+
+\item{null.value}{Number or vector, the null value of each parameter. A
+single number applies to all parameters. Defaults to \code{0}. Used only
+when \code{interval = FALSE}.}
+
+\item{direction}{Character vector with elements \code{"two.sided"},
+\code{"greater"}, or \code{"less"}, one per parameter, or a single value
+for all. \code{NULL} (the default) means \code{"two.sided"} for all, that
+is, the side favored by the posterior. Used only when
+\code{interval = FALSE}.}
+
+\item{est.FUN}{Function that computes a point estimate from the draws of
+one parameter. Defaults to \code{\link[stats]{median}}. Used only when
 \code{interval = TRUE}.}
-
-\item{null.value}{Numeric scalar or vector giving the null reference value(s)
-used to define the claimed direction (a scalar is recycled). Used only when
-\code{interval = FALSE}. Defaults to \code{0}.}
-
-\item{direction}{Character vector of \code{"greater"}, \code{"less"}, or
-\code{"two.sided"} (or \code{NULL}), the testing mode per parameter. A scalar
-is recycled; \code{NULL} (default) uses \code{"two.sided"} (dominant side)
-for all. Used only when \code{interval = FALSE}.}
-
-\item{est.FUN}{Function returning a point estimate from a numeric vector
-(default \code{\link[stats]{median}}). Used only when \code{interval = TRUE}.}
 }
 \value{
-A \code{data.frame}. For \code{interval = FALSE}, an object of
-class \code{joint_directional} (a \code{data.frame} with a print method),
-with one row per
-parameter ordered by decreasing \emph{pd}, with columns \code{median.est},
-\code{null.value}, \code{pd}, \code{direction}, and \code{joint_cum} (the
-joint posterior probability that the \eqn{k} strongest claims all hold).
-For \code{interval = TRUE}, an object of class \code{joint_interval}
-(a \code{data.frame} with a print method), with one row per parameter and
-columns \code{lower}, \code{est}, \code{upper}, and \code{prob}.
+A data frame with one row per parameter and a print method.
+With \code{interval = TRUE}, an object of class \code{joint_interval}
+with the columns \code{lower}, \code{est}, \code{upper}, and \code{prob}.
+With \code{interval = FALSE}, an object of class \code{joint_directional},
+sorted by decreasing \emph{pd}, with the columns \code{median.est},
+\code{null.value}, \code{pd}, \code{direction}, and \code{joint_cum}.
 }
 \description{
-Computes either \strong{simultaneous credible intervals} (the default), or,
-with \code{interval = FALSE}, the \strong{joint directional statement}: for
-each \eqn{k}, the joint posterior probability that the \eqn{k} strongest
-directional claims hold simultaneously.
+Two ways of making directional claims about several parameters from their
+joint posterior. By default, \code{joint()} returns simultaneous credible
+intervals. With \code{interval = FALSE} it returns, for each \eqn{k}, the
+joint posterior probability that the \eqn{k} strongest directional claims
+all hold.
 }
 \details{
-\strong{Joint directional statement} (\code{interval = FALSE}).
-Each parameter's claimed direction is its dominant posterior side relative to
-\code{null.value} (or the side set by \code{direction}). Parameters are
-ordered by decreasing \emph{pd}, and the \code{joint_cum} column reports, for
-each \eqn{k}, the joint posterior probability that the \eqn{k} strongest
-claims hold simultaneously. It is computed directly from the draws by
-intersecting the per-draw directional events, so it reflects the posterior
-dependence among parameters.
+\strong{Simultaneous credible intervals} (\code{interval = TRUE}).
+Equal-tailed intervals such that all parameters lie inside their interval
+at the same time with posterior probability \code{prob}. For every draw, the
+function takes the smallest tail probability across parameters, and the
+intervals are set at the \eqn{(1 - \texttt{prob})}-quantile of these values.
+A direction can be claimed for a parameter when its interval excludes the
+null value.
 
-\strong{Simultaneous credible intervals} (\code{interval = TRUE}, the default). Equi-tailed
-intervals calibrated so that \strong{all} parameters lie within their bounds
-simultaneously with probability \code{prob}, via the quantile-based
-simultaneous credible band. The intervals are set by examining how extreme each
-draw is across all parameters jointly: for every draw the minimum (nearer)
-tail probability across parameters is taken, and the threshold is the
-\eqn{(1 - \texttt{prob})}-quantile of these minima. A direction can be claimed
-for a parameter when its band excludes the null value. A closely related
-implementation is \code{sim.cred.band} in the \pkg{credsubs} package
-(Schnell et al., 2020).
+The ends of the intervals lie further in the tails as the number of
+parameters grows, so more draws are needed. Each end rests on about
+\eqn{S (1 - \texttt{prob}^{1/m}) / 2} draws, where \eqn{S} is the number of
+draws and \eqn{m} the number of parameters. With fewer than 10, the
+intervals are too narrow on average and \code{joint()} gives a warning. With
+\code{prob = 0.95}, this means at least about 1,600 draws for 4 parameters,
+7,800 for 20, and 15,600 for 40. \code{sim.cred.band} in the \pkg{credsubs} package (Schnell et
+al., 2020) is a closely related implementation.
+
+\strong{Joint directional statement} (\code{interval = FALSE}). The
+direction of each parameter is the side of \code{null.value} favored by its
+posterior, or the side given in \code{direction}. Parameters are sorted by
+decreasing \emph{pd}, and \code{joint_cum} gives, for each \eqn{k}, the
+proportion of draws in which the first \eqn{k} directions all hold. It
+therefore accounts for the posterior dependence among parameters. This is a
+probability about the signs of the parameters under the prior of the fitted
+model, with no adjustment of the prior odds. In families with many null
+effects it leads to many false claims.
 }
 \examples{
 mu <- c(1.5, 0, -2)
