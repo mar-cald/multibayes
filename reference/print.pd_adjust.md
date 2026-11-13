@@ -1,12 +1,9 @@
 # Print method for `pd_adjust` objects
 
-Prints a header with the number of tests \\m\\, \\\bar{\pi}\\, the
-unadjusted threshold \\c\\ and the adjusted threshold \\c^\*\\ (a
-direction is claimed when \\pd \ge c^\*\\), followed by the per-test
-table and a short note on `pd.adj`. Columns that take the same value in
-every row (`null.value`, `direction`) are reported once in the header.
-The full set of columns remains available for programmatic access via
-the usual `$` and `[`.
+Prints the number of tests \\m\\, \\\bar{\pi}\\, the threshold \\c\\ and
+the value \\c^\*\\ that *pd* must reach, then one row per test with `pd`
+and `pd.adj`. Columns with the same value in every row (`null.value`,
+`direction`) are shown once, above the table.
 
 ## Usage
 

@@ -2,10 +2,8 @@
 
 Prints the table returned by
 [`joint`](https://mar-cald.github.io/multibayes/reference/joint.md) with
-`interval = FALSE`. Columns that take the same value in every row
-(`null.value`, `direction`) are reported once in a header. The full set
-of columns remains available for programmatic access via the usual `$`
-and `[`.
+`interval = FALSE`. Columns with the same value in every row
+(`null.value`, `direction`) are shown once, above the table.
 
 ## Usage
 

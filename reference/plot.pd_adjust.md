@@ -1,18 +1,12 @@
 # Plot method for `pd_adjust` objects
 
-For each hypothesis, draws the range of the posterior probability of the
-favored (or predicted) direction across the class of priors behind
-[`pd.adjust`](https://mar-cald.github.io/multibayes/reference/pd.adjust.md).
-The left end of each bar is `pd.adj`, the posterior probability under
-the prior most skeptical of that direction; the right end is the
-posterior probability under the prior most favorable to it,
-\\pd\\\bar{\pi} / (pd\\\bar{\pi} + (1 - pd)(1 - \bar{\pi}))\\. The point
-marks `pd`, the value under the estimation prior, and the two ends of
-each range are also printed on the right. A direction is claimed when
-the whole bar lies at or above the threshold \\c\\ (dashed line), that
-is, when `pd.adj` \\\ge c\\, which is the same as \\pd \ge c^\*\\. A bar
-that crosses 0.5 means that the priors in the class disagree on which
-direction is more probable.
+Shows, for each test, how the posterior probability of the favored (or
+predicted) direction changes with the prior. Each bar runs from
+`pd.adj`, the value when that direction has prior probability \\1 -
+\bar{\pi}\\, to the value when it has prior probability \\\bar{\pi}\\,
+which is \\pd\\\bar{\pi} / (pd\\\bar{\pi} + (1 - pd)(1 - \bar{\pi}))\\.
+The point marks `pd`, and the two ends of each bar are printed on the
+right.
 
 ## Usage
 
@@ -30,26 +24,32 @@ plot(x, labels = rownames(x), xlim = NULL, digits = 3, ...)
 
 - labels:
 
-  Character vector of labels for the hypotheses, in the order of the
-  rows of `x`. Defaults to the row names.
+  Labels of the tests, in the order of the rows of `x`. Defaults to the
+  row names.
 
 - xlim:
 
-  Range of the x-axis. Defaults to the range of the bars, extended to
-  include \\c\\.
+  Range of the x-axis. By default it covers all bars and \\c\\.
 
 - digits:
 
-  Number of digits for the printed ranges. Defaults to 3.
+  Number of digits of the values printed on the right. Defaults to 3.
 
 - ...:
 
-  Further graphical arguments passed to `plot.default`.
+  Further arguments passed to `plot.default`.
 
 ## Value
 
-Invisibly, a data frame with one row per hypothesis and columns `lower`
+Invisibly, a data frame with one row per test and the columns `lower`
 (equal to `pd.adj`), `pd`, `upper`, and `claim`.
+
+## Details
+
+A direction is claimed when the whole bar lies at or above the threshold
+\\c\\ (dashed line), that is, when `pd.adj` is at least \\c\\. A bar
+that crosses 0.5 means that the more probable direction depends on the
+prior.
 
 ## Examples
 

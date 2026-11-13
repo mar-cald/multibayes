@@ -2,9 +2,7 @@
 
 Prints the table returned by
 [`joint`](https://mar-cald.github.io/multibayes/reference/joint.md) with
-`interval = TRUE`, reporting the joint probability once in a header. The
-full set of columns remains available for programmatic access via the
-usual `$` and `[`.
+`interval = TRUE`. The joint probability is shown once, above the table.
 
 ## Usage
 

@@ -10,8 +10,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Bayesian Multiplicity Adjustments">
-<meta name="description" content="Tools for making directional claims about many parameters from posterior draws. A prior-odds threshold for the probability of direction accounts for multiplicity: a claim is made only if it holds under every prior in a class that lowers the prior odds of either direction, which raises the threshold that the probability of direction must reach. Joint posterior probabilities of sets of directional claims and simultaneous credible intervals are also provided.">
-<meta property="og:description" content="Tools for making directional claims about many parameters from posterior draws. A prior-odds threshold for the probability of direction accounts for multiplicity: a claim is made only if it holds under every prior in a class that lowers the prior odds of either direction, which raises the threshold that the probability of direction must reach. Joint posterior probabilities of sets of directional claims and simultaneous credible intervals are also provided.">
+<meta name="description" content="Directional claims about several parameters from posterior draws. The probability of direction of each parameter is recomputed under a more skeptical prior, which lowers the prior odds of each claim to account for the number of tests, without refitting the model. Simultaneous credible intervals and joint posterior probabilities of sets of directional claims are also provided.">
+<meta property="og:description" content="Directional claims about several parameters from posterior draws. The probability of direction of each parameter is recomputed under a more skeptical prior, which lowers the prior odds of each claim to account for the number of tests, without refitting the model. Simultaneous credible intervals and joint posterior probabilities of sets of directional claims are also provided.">
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" type="text/javascript"></script>
 </head>
 <body>
@@ -49,7 +49,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="multibayes">multibayes<a class="anchor" aria-label="anchor" href="#multibayes"></a>
 </h1></div>
-<p><strong>multibayes</strong> provides tools for making directional claims about many parameters from posterior draws. Direction-agnostic and directional tests are supported, and can be mixed freely within a single call.</p>
+<p><strong>multibayes</strong> is an R package for making directional claims about several parameters from a Bayesian model, when the number of tests should be taken into account.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -58,7 +58,7 @@
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mar-cald/multibayes"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+<h2 id="what-it-does">What it does<a class="anchor" aria-label="anchor" href="#what-it-does"></a>
 </h2>
 <table class="table">
 <colgroup>
@@ -69,30 +69,53 @@
 <thead><tr>
 <th>Function</th>
 <th>Input</th>
-<th>What it returns</th>
+<th>Output</th>
 </tr></thead>
 <tbody>
 <tr>
 <td><code><a href="reference/pd.adjust.html">pd.adjust()</a></code></td>
-<td>Posterior draws or <em>pd</em> vector</td>
-<td>Prior-odds threshold <em>c*</em> for the probability of direction (per test)</td>
+<td>Posterior draws, or a vector of <em>pd</em> values</td>
+<td>For each parameter, the probability of direction (<em>pd</em>) and its value under a more skeptical prior (<code>pd.adj</code>)</td>
 </tr>
 <tr>
 <td><code><a href="reference/joint.html">joint()</a></code></td>
 <td>Posterior draws</td>
-<td>Simultaneous credible intervals (default) or the joint probability of the strongest directional claims (<code>interval = FALSE</code>)</td>
+<td>Simultaneous credible intervals, or with <code>interval = FALSE</code> the joint probability of the strongest directional claims</td>
 </tr>
 </tbody>
 </table>
-<p><code><a href="reference/pd.adjust.html">pd.adjust()</a></code> asks for a single quantity, <code>pi.max</code>: an upper bound, set by you before the data, on the prior probability of each direction of a parameter. A claim is made only if it holds under the prior most skeptical of it, that is, when the prior odds of its direction are lowered by a factor of up to <code>pi.max/(1 - pi.max)</code>, which raises the threshold on <em>pd</em> from <code>c</code> (default 0.975) to <code>c*</code>. When the same <code>pi.max</code> is used for exchangeable parameters, it is also an upper bound on the expected proportion of parameters in the family that are not on a given side of the null value. Since null effects are among them, a judgment about how many null effects the family could contain can guide its choice. Alternatively, <code>p0</code> is the largest prior probability that no claim in the family is correct, with <code>pi.max = p0^(1/m)</code> for <code>m</code> tests that are independent a priori, so that <code>pi.max</code> grows with the number of tests.</p>
+<div class="section level3">
+<h3 id="pdadjust">
+<code>pd.adjust()</code><a class="anchor" aria-label="anchor" href="#pdadjust"></a>
+</h3>
+<p>A direction is usually claimed when <em>pd</em> reaches a threshold such as 0.975. With many parameters, this rule makes more and more wrong claims. <code><a href="reference/pd.adjust.html">pd.adjust()</a></code> separates two choices.</p>
+<ul>
+<li>
+<code>threshold</code> (<code>c</code>, default 0.975) is the posterior probability you require to make a claim. It stays the same whatever the number of tests.</li>
+<li>
+<code>pi.max</code> is the largest prior probability you allow for either direction of a parameter. With 0.5 nothing changes. A larger value makes the prior more skeptical about each claim.</li>
+</ul>
+<p><code>pd.adj</code> is the posterior probability of the favored direction when that direction has prior probability <code>1 - pi.max</code>. A direction is claimed when <code>pd.adj &gt;= c</code>, which is the same as <code>pd &gt;= c*</code>, a larger value shown in the output. The model is not refitted.</p>
+<p>To choose <code>pi.max</code>, think of how many effects in the family could be null. That proportion is a reference value. If up to 70% of the effects could be null, at most 30% lie in each direction, so each direction should be allowed a prior probability as low as 0.3, which gives <code>pi.max = 0.7</code>. A larger value gives fewer false claims at a cost in power. The same <code>pi.max</code> is used for every test, so you should be equally skeptical of a claim about any parameter in the family. The parameters can be on different scales. <code>pd.adj</code> remains a probability about the sign of a parameter. It is not the probability that an effect is non-null. Alternatively, <code>p0</code> sets the largest prior probability that no claim in the family is correct, and <code>pi.max</code> is then <code>p0^(1/m)</code> for <code>m</code> tests.</p>
+<p>The prior of the fitted model must be continuous and symmetric about the null value, as flat priors and symmetric priors centred on it are (normal or Student-t priors, for example).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mar-cald/multibayes" class="external-link">multibayes</a></span><span class="op">)</span></span>
 <span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MASS/man/mvrnorm.html" class="external-link">mvrnorm</a></span><span class="op">(</span><span class="fl">4000</span>, mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.2</span>, <span class="fl">3</span><span class="op">)</span>, Sigma <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b1"</span>, <span class="st">"b2"</span>, <span class="st">"b3"</span><span class="op">)</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, pi.max <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span>   <span class="co"># claim a direction when pd.adj &gt;= c (pd &gt;= c*)</span></span>
-<span><span class="va">res</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span>                                       <span class="co"># posterior probability across the class of priors</span></span>
-<span><span class="fu"><a href="reference/joint.html">joint</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span>                                    <span class="co"># simultaneous credible intervals</span></span></code></pre></div>
+<span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pd.adjust.html">pd.adjust</a></span><span class="op">(</span>draws <span class="op">=</span> <span class="va">draws</span>, pi.max <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span>
+<span><span class="va">res</span>          <span class="co"># pd, pd.adj, and the thresholds</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span>    <span class="co"># range of the posterior probability as the prior changes</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="joint">
+<code>joint()</code><a class="anchor" aria-label="anchor" href="#joint"></a>
+</h3>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/joint.html">joint</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span>                     <span class="co"># simultaneous credible intervals</span></span>
+<span><span class="fu"><a href="reference/joint.html">joint</a></span><span class="op">(</span><span class="va">draws</span>, interval <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>   <span class="co"># joint probability of the strongest claims</span></span></code></pre></div>
+<p>Simultaneous intervals need more draws as the number of parameters grows. <code><a href="reference/joint.html">joint()</a></code> warns when there are too few.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>

@@ -36,14 +36,20 @@
 <h2 class="pkg-version" data-toc-text="0.3.0" id="multibayes-030">multibayes 0.3.0<a class="anchor" aria-label="anchor" href="#multibayes-030"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-0-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-0"></a></h3>
-<ul><li>The argument <code>pi0</code> of <code><a href="../reference/pd.adjust.html">pd.adjust()</a></code> is renamed <code>pi.max</code>, and so are the corresponding output column and the printed header. The name says what it is, an upper bound on the prior probability of each direction of a parameter, and avoids confusion with the proportion of null effects, which is usually written <code>pi0</code>.</li>
+<ul><li>In <code><a href="../reference/pd.adjust.html">pd.adjust()</a></code>, the argument <code>pi0</code> is now <code>pi.max</code>. The output column and the printed header change in the same way. <code>pi0</code> usually denotes the proportion of null effects, which is not what this argument is.</li>
 <li>
-<code><a href="../reference/joint.html">joint()</a></code> now returns simultaneous credible intervals by default; the joint directional statement requires <code>interval = FALSE</code>. In the simulations of the accompanying paper, the joint directional statement kept neither error rate low when many effects were null.</li>
+<code><a href="../reference/joint.html">joint()</a></code> returns simultaneous credible intervals by default. Use <code>interval = FALSE</code> for the joint directional statement.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
 <ul><li>
-<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method for <code><a href="../reference/pd.adjust.html">pd.adjust()</a></code> results: for each hypothesis, a bar spans the posterior probability of the favored direction across the class of priors (from <code>pd.adj</code> to the value under the prior most favorable to it), with a point at <code>pd</code> and a dashed line at the threshold <code>c</code>; the two ends of each range are also printed on the right.</li>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> for <code><a href="../reference/pd.adjust.html">pd.adjust()</a></code> results. Each bar shows how the posterior probability of the favored direction changes with the prior, from <code>pd.adj</code> upward, with a point at <code>pd</code> and a dashed line at <code>c</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-changes-0-3-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-0-3-0"></a></h3>
+<ul><li>
+<code><a href="../reference/joint.html">joint()</a></code> warns when the simultaneous intervals rest on fewer than about 10 draws in each tail. The number of draws needed grows with the number of parameters.</li>
+<li>Rewritten documentation and README. The note printed under the table of <code><a href="../reference/pd.adjust.html">pd.adjust()</a></code> is one line.</li>
 </ul></div>
 </div>
     <div class="section level2">

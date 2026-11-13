@@ -1,9 +1,10 @@
-# Summaries from joint posterior draws
+# Simultaneous credible intervals and joint directional statements
 
-Computes either **simultaneous credible intervals** (the default), or,
-with `interval = FALSE`, the **joint directional statement**: for each
-\\k\\, the joint posterior probability that the \\k\\ strongest
-directional claims hold simultaneously.
+Two ways of making directional claims about several parameters from
+their joint posterior. By default, `joint()` returns simultaneous
+credible intervals. With `interval = FALSE` it returns, for each \\k\\,
+the joint posterior probability that the \\k\\ strongest directional
+claims all hold.
 
 ## Usage
 
@@ -22,71 +23,75 @@ joint(
 
 - draws:
 
-  Numeric matrix or data frame of posterior draws (rows = draws, columns
-  = parameters). At least 1000 rows and 2 columns.
+  Matrix or data frame of posterior draws, one column per parameter,
+  with at least 1000 rows and 2 columns.
 
 - interval:
 
-  Logical (default `TRUE`). If `TRUE`, return simultaneous credible
-  intervals; if `FALSE`, return the joint directional statement.
+  Logical. If `TRUE` (the default), simultaneous credible intervals are
+  returned. If `FALSE`, the joint directional statement.
 
 - prob:
 
-  Numeric scalar in \\(0, 1)\\. Joint posterior probability that all
-  parameters lie within their intervals (default `0.95`). Used only when
-  `interval = TRUE`.
+  Number in \\(0, 1)\\. Joint posterior probability of the intervals.
+  Defaults to `0.95`. Used only when `interval = TRUE`.
 
 - null.value:
 
-  Numeric scalar or vector giving the null reference value(s) used to
-  define the claimed direction (a scalar is recycled). Used only when
-  `interval = FALSE`. Defaults to `0`.
+  Number or vector, the null value of each parameter. A single number
+  applies to all parameters. Defaults to `0`. Used only when
+  `interval = FALSE`.
 
 - direction:
 
-  Character vector of `"greater"`, `"less"`, or `"two.sided"` (or
-  `NULL`), the testing mode per parameter. A scalar is recycled; `NULL`
-  (default) uses `"two.sided"` (dominant side) for all. Used only when
-  `interval = FALSE`.
+  Character vector with elements `"two.sided"`, `"greater"`, or
+  `"less"`, one per parameter, or a single value for all. `NULL` (the
+  default) means `"two.sided"` for all, that is, the side favored by the
+  posterior. Used only when `interval = FALSE`.
 
 - est.FUN:
 
-  Function returning a point estimate from a numeric vector (default
-  [`median`](https://rdrr.io/r/stats/median.html)). Used only when
+  Function that computes a point estimate from the draws of one
+  parameter. Defaults to
+  [`median`](https://rdrr.io/r/stats/median.html). Used only when
   `interval = TRUE`.
 
 ## Value
 
-A `data.frame`. For `interval = FALSE`, an object of class
-`joint_directional` (a `data.frame` with a print method), with one row
-per parameter ordered by decreasing *pd*, with columns `median.est`,
-`null.value`, `pd`, `direction`, and `joint_cum` (the joint posterior
-probability that the \\k\\ strongest claims all hold). For
-`interval = TRUE`, an object of class `joint_interval` (a `data.frame`
-with a print method), with one row per parameter and columns `lower`,
-`est`, `upper`, and `prob`.
+A data frame with one row per parameter and a print method. With
+`interval = TRUE`, an object of class `joint_interval` with the columns
+`lower`, `est`, `upper`, and `prob`. With `interval = FALSE`, an object
+of class `joint_directional`, sorted by decreasing *pd*, with the
+columns `median.est`, `null.value`, `pd`, `direction`, and `joint_cum`.
 
 ## Details
 
-**Joint directional statement** (`interval = FALSE`). Each parameter's
-claimed direction is its dominant posterior side relative to
-`null.value` (or the side set by `direction`). Parameters are ordered by
-decreasing *pd*, and the `joint_cum` column reports, for each \\k\\, the
-joint posterior probability that the \\k\\ strongest claims hold
-simultaneously. It is computed directly from the draws by intersecting
-the per-draw directional events, so it reflects the posterior dependence
-among parameters.
+**Simultaneous credible intervals** (`interval = TRUE`). Equal-tailed
+intervals such that all parameters lie inside their interval at the same
+time with posterior probability `prob`. For every draw, the function
+takes the smallest tail probability across parameters, and the intervals
+are set at the \\(1 - \texttt{prob})\\-quantile of these values. A
+direction can be claimed for a parameter when its interval excludes the
+null value.
 
-**Simultaneous credible intervals** (`interval = TRUE`, the default).
-Equi-tailed intervals calibrated so that **all** parameters lie within
-their bounds simultaneously with probability `prob`, via the
-quantile-based simultaneous credible band. The intervals are set by
-examining how extreme each draw is across all parameters jointly: for
-every draw the minimum (nearer) tail probability across parameters is
-taken, and the threshold is the \\(1 - \texttt{prob})\\-quantile of
-these minima. A direction can be claimed for a parameter when its band
-excludes the null value. A closely related implementation is
-`sim.cred.band` in the credsubs package (Schnell et al., 2020).
+The ends of the intervals lie further in the tails as the number of
+parameters grows, so more draws are needed. Each end rests on about \\S
+(1 - \texttt{prob}^{1/m}) / 2\\ draws, where \\S\\ is the number of
+draws and \\m\\ the number of parameters. With fewer than 10, the
+intervals are too narrow on average and `joint()` gives a warning. With
+`prob = 0.95`, this means at least about 1,600 draws for 4 parameters,
+7,800 for 20, and 15,600 for 40. `sim.cred.band` in the credsubs package
+(Schnell et al., 2020) is a closely related implementation.
+
+**Joint directional statement** (`interval = FALSE`). The direction of
+each parameter is the side of `null.value` favored by its posterior, or
+the side given in `direction`. Parameters are sorted by decreasing *pd*,
+and `joint_cum` gives, for each \\k\\, the proportion of draws in which
+the first \\k\\ directions all hold. It therefore accounts for the
+posterior dependence among parameters. This is a probability about the
+signs of the parameters under the prior of the fitted model, with no
+adjustment of the prior odds. In families with many null effects it
+leads to many false claims.
 
 ## References
 
