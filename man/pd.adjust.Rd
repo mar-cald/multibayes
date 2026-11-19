@@ -56,9 +56,10 @@ set to \eqn{c = 1 - \alpha/2} and \code{threshold} is ignored.}
 }
 \value{
 An object of class \code{pd_adjust}, a data frame with one row per
-test and the columns \code{pd}, \code{pd.adj}, \code{pi.max}, \code{m}
-(the number of tests), and \code{direction}. With \code{draws}, it also
-has \code{median.est} (the posterior median) and \code{null.value}.
+test and the columns \code{median.est} (the posterior median),
+\code{null.value}, \code{pd}, \code{pd.adj}, \code{pi.max}, \code{m} (the
+number of tests), and \code{direction}. With \code{pd} instead of
+\code{draws}, \code{median.est} and \code{null.value} are \code{NA}.
 
 The thresholds are stored as attributes, \code{threshold} (\eqn{c}) and
 \code{threshold.adj} (\eqn{c^*}), together with \code{alpha.nominal}
@@ -113,21 +114,27 @@ made. With \code{pi.max = 0.8}, a claim needs a Bayes factor four times
 larger. The same \code{pi.max} is used for every test, so the parameters
 should be exchangeable in direction, that is, no parameter is judged more
 likely than another to be positive or negative. They can be on different
-scales, because the sign of a parameter does not depend on its unit. The
+scales, because the sign of a parameter does not depend on its unit. When
+the direction of a parameter is already known, its null value can be set to
+a minimal effect size of interest in that direction (\code{null.value}),
+with the prior of the fitted model centred on it, so that the claim
+concerns whether the effect exceeds that value and the parameters can again
+be exchangeable in direction. The
 proportion of effects in the family that could be null is a reference
 value. If up to 70\\% of the effects could be null, at most 30\\% lie in each
 direction, so each direction should be allowed a prior probability as low
 as 0.3, which gives \code{pi.max = 0.7}. A larger value gives
 fewer false claims at a cost in power. The priors considered are
 continuous, so a null effect has probability zero under all of them, and
-\code{pd.adj} is the posterior probability of a sign. To test whether an
+\code{pd.adj} is the posterior probability of a direction. To test whether an
 effect is exactly null, use a prior that puts probability on the null
 value, such as a spike-and-slab prior. A narrower prior in the fitted model
 is no substitute, because a symmetric prior gives each direction prior
 probability 0.5 however narrow it is. Alternatively, \code{p0} gives the largest
 prior probability that no claim in the family is correct. For parameters
 independent a priori, \eqn{\bar{\pi} = \Pr(H_0)^{1/m}}, which grows with the
-number of tests \eqn{m}.
+number of tests \eqn{m} and suits the aim of avoiding any false claim in the
+family.
 
 \strong{Direction.} With \code{"two.sided"}, \emph{pd} is the larger of
 \eqn{\Pr(\theta > \theta_\text{null} \mid y)} and

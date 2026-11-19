@@ -30,9 +30,9 @@
 #' decreasing \emph{pd}, and \code{joint_cum} gives, for each \eqn{k}, the
 #' proportion of draws in which the first \eqn{k} directions all hold. It
 #' therefore accounts for the posterior dependence among parameters. This is a
-#' probability about the signs of the parameters under the prior of the fitted
-#' model, with no adjustment of the prior odds. In families with many null
-#' effects it leads to many false claims.
+#' probability about the directions of the parameters under the prior of the
+#' fitted model (the estimation prior), with no adjustment of the prior odds.
+#' In families with many null effects it leads to many false claims.
 #'
 #' @param draws Matrix or data frame of posterior draws, one column per
 #'   parameter, with at least 1000 rows and 2 columns.
@@ -71,9 +71,9 @@
 #' Carlo output. \emph{Journal of Computational and Graphical Statistics},
 #' 13(1), 20--35.
 #' 
-#' Gelman, A., Tuerlinckx, F. (2000). Type S error rates for classical 
-#' and Bayesian single and multiple comparison procedures. 
-#' \emph{Computational Statistics} 15, 373–390 (2000). https://doi.org/10.1007/s001800000040
+#' Gelman, A., & Tuerlinckx, F. (2000). Type S error rates for classical
+#' and Bayesian single and multiple comparison procedures.
+#' \emph{Computational Statistics}, 15, 373–390. https://doi.org/10.1007/s001800000040
 #'
 #' Schnell, P. et al. (2020). \pkg{credsubs}: Credible Subsets. R package.
 #' \url{https://CRAN.R-project.org/package=credsubs}.

@@ -1,0 +1,128 @@
+---
+title: "Supplementary Material"
+subtitle: "A Prior-Odds Adjustment for the Probability of Direction in Multiple Testing"
+format:
+  pdf:
+    fontsize: 11pt
+    geometry: margin=2.5cm
+    fig-pos: "H"
+    knitr:
+      opts_chunk:
+        dev: cairo_pdf
+    header-includes:
+      - \usepackage{float}
+      - \renewcommand{\thefigure}{S\arabic{figure}}
+execute:
+  echo: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+# quarto render paper/supplement.qmd
+
+pkg <- c("dplyr", "ggplot2", "scales")
+invisible(lapply(pkg, library, character.only = TRUE))
+
+# cairo_pdf's default symbol font draws plotmath pi like a capital Pi
+knitr::opts_chunk$set(dev.args = list(
+  symbolfamily = grDevices::cairoSymbolFont("Symbol", usePUA = FALSE)))
+
+# plot theme, as in the manuscript
+theme_clean <- function(base_size = 20) {
+  list(
+    theme_minimal(base_size = base_size),
+    theme(
+      axis.line  = element_line(colour = "black", linewidth = .8),
+      axis.ticks = element_line(colour = "black", linewidth = 1),
+      axis.ticks.length = grid::unit(6, "pt"),
+      axis.text = element_text(colour = "black"),
+      axis.text.y = element_text(angle = 90, vjust = 0.5, hjust = 0.5),
+      axis.text.x = element_text(vjust = 0.5, hjust = 0.5),
+      strip.background = element_rect(fill = "grey20", colour = "grey20"),
+      strip.text = element_text(colour = "white")
+    )
+  )
+}
+
+load("script/output/df_pi0.rda")
+load("script/output/df_h0.rda")
+```
+
+This supplement shows the family-wise error rate (FWER) of the prior-odds rule in the simulation study, for independent parameters (Figure S1) and correlated parameters (Figure S2). The design, the performance measures, and the notation are those of the manuscript.
+
+```{r}
+#| label: fig-fwer-ind
+#| fig-cap: "Family-wise error rate (FWER) of the prior-odds rule with independent parameters, as a function of the true proportion of null effects, $\\pi_0$ (x-axis), and the bound $\\bar{\\pi}$ (y-axis), by family size $m$ (rows) and sample size $n$ (columns). The row $\\bar{\\pi} = .5$ is the unadjusted rule; outlined cells mark matched values, $\\bar{\\pi} = \\pi_0$. With a fixed $\\bar{\\pi}$, the per-test threshold does not change with $m$, so the FWER is reduced by larger $\\bar{\\pi}$ but still grows with the family size $m$. The top row of each panel sets $\\bar{\\pi}$ through $\\Pr(H_0) = .5$, so that $\\bar{\\pi} = .5^{1/m}$. Each cell is based on 10,000 data sets."
+#| fig-width: 21
+#| fig-height: 22
+
+# FWER with independent parameters
+# fixed pi.bar = .5, ..., .9, plus a top row with pi.bar set through Pr(H0) = .5
+cols_fwer <- c(sprintf("%.1f", seq(0.5, 0.9, 0.1)), "h0")
+bind_rows(
+  df_pi0 |> filter(structure == "independent") |> mutate(col = sprintf("%.1f", pi0)),
+  df_h0  |> filter(structure == "independent") |> mutate(col = "h0")) |>
+  mutate(
+    col = factor(col, levels = cols_fwer),
+    facet_m = factor(paste0("m = ", m), levels = paste0("m = ", sort(unique(m)))),
+    facet_n = factor(paste0("n = ", n), levels = paste0("n = ", sort(unique(n))))) |>
+  ggplot(aes(x = factor(pi0_true), y = col, fill = FWER)) +
+  geom_tile(color = "white", linewidth = 0.4) +
+  geom_hline(yintercept = 5.5, linewidth = 3) +
+  scale_y_discrete(labels = parse(text = c(sprintf("%.1f", seq(0.5, 0.9, 0.1)), "Pr(H[0])*' = .5'"))) +
+  geom_text(aes(label = round(FWER, 2)), size = 8, color = "black", fontface = "bold") +
+  geom_tile(data = function(d) filter(d, col != "h0", abs(pi0 - pi0_true) < 1e-9), fill = NA, colour = "black", linewidth = 1.9) +
+  facet_grid(facet_m ~ facet_n) +
+  scale_fill_gradientn(
+    colours = c("green4", "#B8E186", "#FFFFBF", "#F4A582", "#B2182B"),
+    values  = scales::rescale(c(0, 0.09, 0.15, 0.30, 0.7), from = c(0, 0.7)),
+    limits  = c(0, 0.7), oob = scales::squish, na.value = "grey90",
+    breaks  = c(0, 0.10, 0.20, 0.40, 0.7),
+    labels  = scales::label_number(accuracy = 0.01), name = "FWER",
+    guide   = guide_colorbar(barheight = unit(8, "cm"), barwidth = unit(1, "cm"),
+                             title.position = "top", title.hjust = 0.5)) +
+  labs(x = expression(italic(pi)[0]), y = expression(bar(italic(pi)))) +
+  theme_clean(28) +
+  theme(legend.position = "right", strip.text = element_text(face = "bold"),
+        axis.text.y = element_text(angle = 0, hjust = 1), axis.title.y = element_text(angle = 0, vjust = 0.5))
+```
+
+```{r}
+#| label: fig-fwer-cor
+#| fig-cap: "Family-wise error rate (FWER) of the prior-odds rule with correlated parameters ($\\rho = .8$). Layout as in Figure S1."
+#| fig-width: 21
+#| fig-height: 22
+
+# FWER with correlated parameters (rho = .8)
+# fixed pi.bar = .5, ..., .9, plus a top row with pi.bar set through Pr(H0) = .5
+cols_fwer <- c(sprintf("%.1f", seq(0.5, 0.9, 0.1)), "h0")
+bind_rows(
+  df_pi0 |> filter(structure == "equi") |> mutate(col = sprintf("%.1f", pi0)),
+  df_h0  |> filter(structure == "equi") |> mutate(col = "h0")) |>
+  mutate(
+    col = factor(col, levels = cols_fwer),
+    facet_m = factor(paste0("m = ", m), levels = paste0("m = ", sort(unique(m)))),
+    facet_n = factor(paste0("n = ", n), levels = paste0("n = ", sort(unique(n))))) |>
+  ggplot(aes(x = factor(pi0_true), y = col, fill = FWER)) +
+  geom_tile(color = "white", linewidth = 0.4) +
+  geom_hline(yintercept = 5.5, linewidth = 3) +
+  scale_y_discrete(labels = parse(text = c(sprintf("%.1f", seq(0.5, 0.9, 0.1)), "Pr(H[0])*' = .5'"))) +
+  geom_text(aes(label = round(FWER, 2)), size = 8, color = "black", fontface = "bold") +
+  geom_tile(data = function(d) filter(d, col != "h0", abs(pi0 - pi0_true) < 1e-9), fill = NA, colour = "black", linewidth = 1.9) +
+  facet_grid(facet_m ~ facet_n) +
+  scale_fill_gradientn(
+    colours = c("green4", "#B8E186", "#FFFFBF", "#F4A582", "#B2182B"),
+    values  = scales::rescale(c(0, 0.09, 0.15, 0.30, 0.7), from = c(0, 0.7)),
+    limits  = c(0, 0.7), oob = scales::squish, na.value = "grey90",
+    breaks  = c(0, 0.10, 0.20, 0.40, 0.7),
+    labels  = scales::label_number(accuracy = 0.01), name = "FWER",
+    guide   = guide_colorbar(barheight = unit(8, "cm"), barwidth = unit(1, "cm"),
+                             title.position = "top", title.hjust = 0.5)) +
+  labs(x = expression(italic(pi)[0]), y = expression(bar(italic(pi)))) +
+  theme_clean(28) +
+  theme(legend.position = "right", strip.text = element_text(face = "bold"),
+        axis.text.y = element_text(angle = 0, hjust = 1), axis.title.y = element_text(angle = 0, vjust = 0.5))
+```

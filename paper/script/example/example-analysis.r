@@ -1,4 +1,5 @@
 # worked example
+# run from the repository root: Rscript paper/script/example/example-analysis.r
 
 # load libraries
 library(afex); library(brms); library(dplyr)
@@ -11,19 +12,20 @@ data_stroop <- stroop1 |>
   dplyr::mutate(id = droplevels(pno)) |>
   # select relevant variables
   dplyr::select(id, condition, congruency, trialnum, acc, rt) |>
-  # previous cong
+  # previous trial within each block (participant x condition),
+  # computed before any trial is removed
+  arrange(id, condition, trialnum) |>
   group_by(id, condition) |>
-  mutate(prev_cong = lag(congruency)) |>
-  ungroup() |>
-  na.omit()
+  mutate(prev_cong = lag(congruency), prev_acc = lag(acc)) |>
+  ungroup()
 
 
 ## Reaction time analysis--------------------------
+# correct trials preceded by a correct trial; this also removes trials without
+# a response (acc = NA), trials after a missing response, and the first trial
+# of each block
 data_rt <- data_stroop |>
-  group_by(id) |>
-  # remove error and post error trials
-  filter(acc == 1 & lag(acc, default = 1) == 1) |>
-  ungroup()
+  filter(acc == 1, prev_acc == 1)
 
 contrasts(data_rt$congruency) <- contr.sum(2)/2
 contrasts(data_rt$prev_cong) <- contr.sum(2)/2

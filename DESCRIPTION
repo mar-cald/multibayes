@@ -13,8 +13,8 @@ Authors@R: c(
            )
 Description: Directional claims about several parameters from posterior
     draws. The probability of direction of each parameter is recomputed under
-    a more skeptical prior, which lowers the prior odds of each claim to
-    account for the number of tests, without refitting the model.
+    a more skeptical prior, which lowers the prior odds of each claim by an
+    amount set by the researcher, without refitting the model.
     Simultaneous credible intervals and joint posterior probabilities of sets
     of directional claims are also provided.
 License: GPL-3

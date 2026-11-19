@@ -2,29 +2,36 @@
 
 # Simulation -------------------------------------------------------------------
 
-## Normal model: pd from the conjugate normal-normal posterior and, when
-## ndraws > 0, ndraws draws from the same posterior
-bayes_posterior_analytical <- function(x, sigma = 1, tau0 = 1, mu0 = 0, ndraws = 0) {
-  n <- length(x)
-  bar_y <- mean(x)
-  post_mean <- (bar_y * (n / sigma^2) + mu0 * (1 / tau0^2)) / (n / sigma^2 + 1 / tau0^2)
-  post_sd <- sqrt(1 / (n / sigma^2 + 1 / tau0^2))
-  pd <- pnorm(abs(post_mean - 0) / post_sd)
-  draws <- if (ndraws > 0) rnorm(ndraws, post_mean, post_sd) else NULL
-  list(pd = pd, draws = draws)
+## covariance of the observations: "independent" (identity) or "equi" (rho
+## between every pair)
+make_sigma <- function(m, structure, rho) {
+  if (structure == "independent") return(diag(m))
+  rho + diag(1 - rho, m)
+}
+
+## Multivariate normal model: n observations from N(theta, Sigma) with Sigma
+## known, prior theta ~ N(0, tau0^2 I). Returns pd and the sign of the
+## posterior mean of each parameter and, when ndraws > 0, joint posterior draws
+bayes_posterior_mv <- function(X, Sigma, tau0, ndraws = 0) {
+  n <- nrow(X)
+  P <- n * solve(Sigma)                             # precision of the data
+  V <- solve(P + diag(1 / tau0^2, ncol(X)))         # posterior covariance
+  mu <- drop(V %*% P %*% colMeans(X))               # posterior mean
+  pd <- pnorm(abs(mu) / sqrt(diag(V)))
+  draws <- if (ndraws > 0) MASS::mvrnorm(ndraws, mu, V) else NULL
+  list(pd = pd, sgn = sign(mu), draws = draws)
 }
 
 ## nsim replications of one cell; each replication stores the raw pd values,
 ## the direction favored by each posterior (sgn) and the true parameters. With
 ## compare = TRUE it also stores the claims of the joint statement and of the
 ## 95% simultaneous band (+1 / -1 = claimed direction, 0 = no claim),
-## computed with multibayes::joint() from 10,000 draws of each posterior
+## computed with multibayes::joint() from 10,000 joint posterior draws
 ## (with fewer draws the band's estimated quantile adds noise and its FWER
 ## exceeds the nominal level slightly).
-sim_ind <- function(n, m, r, s, eff, nsim, pi0_true, compare = FALSE) {
+sim_ind <- function(n, m, s, eff, structure, rho, nsim, pi0_true, compare = FALSE) {
+  S <- make_sigma(m, structure, rho)
   replicate(nsim, {
-    # cov
-    S  = r + diag(1 - r, m)
     # --- null/non-null assignment ---
     n0 <- rbinom(1, size = m, prob = pi0_true)
     is_null <- logical(m)
@@ -35,19 +42,14 @@ sim_ind <- function(n, m, r, s, eff, nsim, pi0_true, compare = FALSE) {
     # simulate data
     X <- MASS::mvrnorm(n, effsim, Sigma = S)
 
-    # bayes: pd of each test and, for the comparison, 10,000 posterior draws
-    post <- lapply(seq_len(m), function(j)
-      bayes_posterior_analytical(X[, j], tau0 = s, ndraws = if (compare) 1e4 else 0))
-    pd <- sapply(post, `[[`, "pd")
+    # bayes: pd and favored direction of each test and, for the comparison,
+    # 10,000 joint posterior draws
+    post <- bayes_posterior_mv(X, S, tau0 = s, ndraws = if (compare) 1e4 else 0)
 
-    # direction favored by the posterior 
-    sgn <- sign(colMeans(X))
-
-    out <- list(pd = pd, sgn = sgn, effsim = effsim)
+    out <- list(pd = post$pd, sgn = post$sgn, effsim = effsim)
 
     if (compare) {
-      # posterior draws from bayes_posterior_analytical(), one column per test
-      draws <- sapply(post, `[[`, "draws")
+      draws <- post$draws
       colnames(draws) <- paste0("H", seq_len(m))
 
       # joint statement: the top-k claims with joint probability >= c = .975,
