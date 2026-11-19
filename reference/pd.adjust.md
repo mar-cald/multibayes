@@ -84,9 +84,9 @@ pd.adjust(
 ## Value
 
 An object of class `pd_adjust`, a data frame with one row per test and
-the columns `pd`, `pd.adj`, `pi.max`, `m` (the number of tests), and
-`direction`. With `draws`, it also has `median.est` (the posterior
-median) and `null.value`.
+the columns `median.est` (the posterior median), `null.value`, `pd`,
+`pd.adj`, `pi.max`, `m` (the number of tests), and `direction`. With
+`pd` instead of `draws`, `median.est` and `null.value` are `NA`.
 
 The thresholds are stored as attributes, `threshold` (\\c\\) and
 `threshold.adj` (\\c^\*\\), together with `alpha.nominal` (\\2(1-c)\\)
@@ -134,19 +134,25 @@ larger. The same `pi.max` is used for every test, so the parameters
 should be exchangeable in direction, that is, no parameter is judged
 more likely than another to be positive or negative. They can be on
 different scales, because the sign of a parameter does not depend on its
-unit. The proportion of effects in the family that could be null is a
-reference value. If up to 70\\ direction, so each direction should be
-allowed a prior probability as low as 0.3, which gives `pi.max = 0.7`. A
-larger value gives fewer false claims at a cost in power. The priors
-considered are continuous, so a null effect has probability zero under
-all of them, and `pd.adj` is the posterior probability of a sign. To
-test whether an effect is exactly null, use a prior that puts
-probability on the null value, such as a spike-and-slab prior. A
-narrower prior in the fitted model is no substitute, because a symmetric
-prior gives each direction prior probability 0.5 however narrow it is.
-Alternatively, `p0` gives the largest prior probability that no claim in
-the family is correct. For parameters independent a priori, \\\bar{\pi}
-= \Pr(H_0)^{1/m}\\, which grows with the number of tests \\m\\.
+unit. When the direction of a parameter is already known, its null value
+can be set to a minimal effect size of interest in that direction
+(`null.value`), with the prior of the fitted model centred on it, so
+that the claim concerns whether the effect exceeds that value and the
+parameters can again be exchangeable in direction. The proportion of
+effects in the family that could be null is a reference value. If up to
+70\\ direction, so each direction should be allowed a prior probability
+as low as 0.3, which gives `pi.max = 0.7`. A larger value gives fewer
+false claims at a cost in power. The priors considered are continuous,
+so a null effect has probability zero under all of them, and `pd.adj` is
+the posterior probability of a direction. To test whether an effect is
+exactly null, use a prior that puts probability on the null value, such
+as a spike-and-slab prior. A narrower prior in the fitted model is no
+substitute, because a symmetric prior gives each direction prior
+probability 0.5 however narrow it is. Alternatively, `p0` gives the
+largest prior probability that no claim in the family is correct. For
+parameters independent a priori, \\\bar{\pi} = \Pr(H_0)^{1/m}\\, which
+grows with the number of tests \\m\\ and suits the aim of avoiding any
+false claim in the family.
 
 **Direction.** With `"two.sided"`, *pd* is the larger of \\\Pr(\theta \>
 \theta\_\text{null} \mid y)\\ and \\\Pr(\theta \< \theta\_\text{null}

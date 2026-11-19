@@ -141,9 +141,10 @@ set to \(c = 1 - \alpha/2\) and <code>threshold</code> is ignored.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>pd_adjust</code>, a data frame with one row per
-test and the columns <code>pd</code>, <code>pd.adj</code>, <code>pi.max</code>, <code>m</code>
-(the number of tests), and <code>direction</code>. With <code>draws</code>, it also
-has <code>median.est</code> (the posterior median) and <code>null.value</code>.</p>
+test and the columns <code>median.est</code> (the posterior median),
+<code>null.value</code>, <code>pd</code>, <code>pd.adj</code>, <code>pi.max</code>, <code>m</code> (the
+number of tests), and <code>direction</code>. With <code>pd</code> instead of
+<code>draws</code>, <code>median.est</code> and <code>null.value</code> are <code>NA</code>.</p>
 <p>The thresholds are stored as attributes, <code>threshold</code> (\(c\)) and
 <code>threshold.adj</code> (\(c^*\)), together with <code>alpha.nominal</code>
 (\(2(1-c)\)) and <code>alpha.eff</code> (\(2(1-c^*)\)). The last two are
@@ -182,21 +183,27 @@ made. With <code>pi.max = 0.8</code>, a claim needs a Bayes factor four times
 larger. The same <code>pi.max</code> is used for every test, so the parameters
 should be exchangeable in direction, that is, no parameter is judged more
 likely than another to be positive or negative. They can be on different
-scales, because the sign of a parameter does not depend on its unit. The
+scales, because the sign of a parameter does not depend on its unit. When
+the direction of a parameter is already known, its null value can be set to
+a minimal effect size of interest in that direction (<code>null.value</code>),
+with the prior of the fitted model centred on it, so that the claim
+concerns whether the effect exceeds that value and the parameters can again
+be exchangeable in direction. The
 proportion of effects in the family that could be null is a reference
 value. If up to 70\<!-- % of the effects could be null, at most 30\\% lie in each -->
 direction, so each direction should be allowed a prior probability as low
 as 0.3, which gives <code>pi.max = 0.7</code>. A larger value gives
 fewer false claims at a cost in power. The priors considered are
 continuous, so a null effect has probability zero under all of them, and
-<code>pd.adj</code> is the posterior probability of a sign. To test whether an
+<code>pd.adj</code> is the posterior probability of a direction. To test whether an
 effect is exactly null, use a prior that puts probability on the null
 value, such as a spike-and-slab prior. A narrower prior in the fitted model
 is no substitute, because a symmetric prior gives each direction prior
 probability 0.5 however narrow it is. Alternatively, <code>p0</code> gives the largest
 prior probability that no claim in the family is correct. For parameters
 independent a priori, \(\bar{\pi} = \Pr(H_0)^{1/m}\), which grows with the
-number of tests \(m\).</p>
+number of tests \(m\) and suits the aim of avoiding any false claim in the
+family.</p>
 <p><strong>Direction.</strong> With <code>"two.sided"</code>, <em>pd</em> is the larger of
 \(\Pr(\theta &gt; \theta_\text{null} \mid y)\) and
 \(\Pr(\theta &lt; \theta_\text{null} \mid y)\), between 0.5 and 1. With

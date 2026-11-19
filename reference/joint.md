@@ -89,9 +89,9 @@ the side given in `direction`. Parameters are sorted by decreasing *pd*,
 and `joint_cum` gives, for each \\k\\, the proportion of draws in which
 the first \\k\\ directions all hold. It therefore accounts for the
 posterior dependence among parameters. This is a probability about the
-signs of the parameters under the prior of the fitted model, with no
-adjustment of the prior odds. In families with many null effects it
-leads to many false claims.
+directions of the parameters under the prior of the fitted model (the
+estimation prior), with no adjustment of the prior odds. In families
+with many null effects it leads to many false claims.
 
 ## References
 
@@ -105,9 +105,9 @@ Held, L. (2004). Simultaneous posterior probability statements from
 Monte Carlo output. *Journal of Computational and Graphical Statistics*,
 13(1), 20–35.
 
-Gelman, A., Tuerlinckx, F. (2000). Type S error rates for classical and
-Bayesian single and multiple comparison procedures. *Computational
-Statistics* 15, 373–390 (2000). https://doi.org/10.1007/s001800000040
+Gelman, A., & Tuerlinckx, F. (2000). Type S error rates for classical
+and Bayesian single and multiple comparison procedures. *Computational
+Statistics*, 15, 373–390. https://doi.org/10.1007/s001800000040
 
 Schnell, P. et al. (2020). credsubs: Credible Subsets. R package.
 <https://CRAN.R-project.org/package=credsubs>.

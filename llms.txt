@@ -45,11 +45,14 @@ should be allowed a prior probability as low as 0.3, which gives
 `pi.max = 0.7`. A larger value gives fewer false claims at a cost in
 power. The same `pi.max` is used for every test, so you should be
 equally skeptical of a claim about any parameter in the family. The
-parameters can be on different scales. `pd.adj` remains a probability
-about the sign of a parameter. It is not the probability that an effect
-is non-null. Alternatively, `p0` sets the largest prior probability that
-no claim in the family is correct, and `pi.max` is then `p0^(1/m)` for
-`m` tests.
+parameters can be on different scales. If the direction of a parameter
+is already known, its null value can be set to a minimal effect size of
+interest in that direction (`null.value` takes one value per parameter),
+with the prior of the fitted model centred on it. `pd.adj` remains a
+probability about the direction of a parameter. Alternatively, `p0` sets
+the largest prior probability that no claim in the family is correct,
+and `pi.max` is then `p0^(1/m)` for `m` tests, which suits the aim of
+avoiding any false claim in the family.
 
 The prior of the fitted model must be continuous and symmetric about the
 null value, as flat priors and symmetric priors centred on it are
@@ -74,8 +77,11 @@ joint(draws)                     # simultaneous credible intervals
 joint(draws, interval = FALSE)   # joint probability of the strongest claims
 ```
 
+The simultaneous intervals suit the aim of avoiding any false claim in
+the family. The joint probability is useful when a set of claims and
+their directions are specified in advance and evaluated together.
 Simultaneous intervals need more draws as the number of parameters
-grows.
+grows, and
 [`joint()`](https://mar-cald.github.io/multibayes/reference/joint.md)
 warns when there are too few.
 
